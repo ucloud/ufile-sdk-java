@@ -1,7 +1,7 @@
 # UCloud Ufile SDK for Java
 
 ## Release Version
-- [Ver 2.0.0-SNAPSHOT](https://github.com/ufilesdk-dev/ufile-javasdk)
+- [Ver 2.0.0-SNAPSHOT](https://github.com/ucloud/ufile-sdk-java)
 - ~~[Ver 1.0.0](https://github.com/ufilesdk-dev/ufile-javasdk)~~ 不建议使用
 
 ## 环境要求
