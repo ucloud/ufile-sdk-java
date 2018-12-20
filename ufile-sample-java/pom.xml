@@ -2,41 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>ufile</artifactId>
-        <groupId>cn.ucloud.ufile</groupId>
-        <version>2.0.0-BETA</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>cn.ucloud.ufile</groupId>
     <artifactId>ufile-sample-java</artifactId>
-    <version>2.0.0-BETA</version>
+    <version>1.0</version>
 
     <dependencies>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate.validator</groupId>
-            <artifactId>hibernate-validator</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.el</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>cn.ucloud.ufile</groupId>
             <artifactId>ufile-client-java</artifactId>
             <version>2.0.0-BETA</version>
         </dependency>
     </dependencies>
+
 </project>

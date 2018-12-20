@@ -3,18 +3,11 @@ package cn.ucloud.ufile.sample.object;
 import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
-import cn.ucloud.ufile.auth.ObjectRemoteAuthorization;
-import cn.ucloud.ufile.auth.UfileAuthorizationException;
-import cn.ucloud.ufile.auth.UfileObjectRemoteAuthorization;
-import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectListBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import okhttp3.Request;
 
 /**
