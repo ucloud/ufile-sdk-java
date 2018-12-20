@@ -19,10 +19,10 @@ public class JLog {
 
     private boolean isSaveLog = false;
 
-    public static final boolean SHOW_TEST = true;
-    public static final boolean SHOW_DEBUG = true;
-    public static final boolean SHOW_VERBOSE = true;
-    public static boolean SHOW_INFO = true;
+    public static final boolean SHOW_TEST = false;
+    public static final boolean SHOW_DEBUG = false;
+    public static final boolean SHOW_VERBOSE = false;
+    public static boolean SHOW_INFO = false;
     public static final boolean SHOW_WARN = true;
     public static boolean SHOW_ERROR = true;
 

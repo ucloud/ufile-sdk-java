@@ -12,7 +12,6 @@
     <modules>
         <module>ufile-core</module>
         <module>ufile-client-java</module>
-        <!--<module>ufile-sample-java</module>-->
     </modules>
 
     <name>ufile-sdk-java</name>
@@ -97,11 +96,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>${plugin.maven.jar.version}</version>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.basedir}/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
             </plugin>
             <!-- JavaDoc -->
             <plugin>
