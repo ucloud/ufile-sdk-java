@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cn.ucloud.ufile</groupId>
+    <artifactId>ufile</artifactId>
+    <packaging>pom</packaging>
+    <version>2.0.0-BETA</version>
+
+    <modules>
+        <module>ufile-core</module>
+        <module>ufile-client-java</module>
+    </modules>
+
+    <name>ufile-sdk-java</name>
+    <url>http://www.ucloud.cn</url>
+    <description>UFile SDK for Java</description>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/ucloud/ucloud-sdk-java</url>
+        <connection>https://github.com/ucloud/ucloud-sdk-java.git</connection>
+        <developerConnection>https://www.ucloud.cn</developerConnection>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>yinjun</name>
+            <email>joshua.yin@ucloud.cn</email>
+            <url>https://github.com/ucloud/ucloud-sdk-java</url>
+        </developer>
+    </developers>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>sonatype-nexus-snapshots</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <plugin.maven.compiler.version>3.8.0</plugin.maven.compiler.version>
+        <plugin.maven.compiler.source>1.8</plugin.maven.compiler.source>
+        <plugin.maven.compiler.target>1.8</plugin.maven.compiler.target>
+        <plugin.maven.source.version>3.0.1</plugin.maven.source.version>
+        <plugin.maven.jar.version>3.1.0</plugin.maven.jar.version>
+        <plugin.maven.javadoc.version>2.10.4</plugin.maven.javadoc.version>
+        <plugin.maven.gpg.version>1.6</plugin.maven.gpg.version>
+        <dependency.okhttp.version>3.11.0</dependency.okhttp.version>
+        <dependency.gson.version>2.8.5</dependency.gson.version>
+        <dependency.hibernate-validator.version>6.0.13.Final</dependency.hibernate-validator.version>
+        <dependency.javax-el.version>3.0.1-b09</dependency.javax-el.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- 编译 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${plugin.maven.compiler.version}</version>
+                <configuration>
+                    <source>${plugin.maven.compiler.source}</source>
+                    <target>${plugin.maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <!--配置生成源码包-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>${plugin.maven.source.version}</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Jar包 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${plugin.maven.jar.version}</version>
+            </plugin>
+            <!-- JavaDoc -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${plugin.maven.javadoc.version}</version>
+                <configuration>
+                    <!--指定编码为UTF-8-->
+                    <javadocVersion>1.8</javadocVersion>
+                    <encoding>UTF-8</encoding>
+                    <charset>UTF-8</charset>
+                    <docencoding>UTF-8</docencoding>
+                    <show>private</show>
+                    <nohelp>true</nohelp>
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- GPG验签 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>${plugin.maven.gpg.version}</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${dependency.gson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${dependency.okhttp.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${dependency.hibernate-validator.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>javax.el</artifactId>
+                <version>${dependency.javax-el.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

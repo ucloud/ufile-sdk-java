@@ -1,0 +1,81 @@
+package cn.ucloud.ufile.auth;
+
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
+import cn.ucloud.ufile.http.request.PostJsonRequestBuilder;
+import cn.ucloud.ufile.util.JLog;
+import com.google.gson.JsonObject;
+import okhttp3.Call;
+
+import java.io.IOException;
+
+/**
+ * Ufile默认的远程签名生成器
+ *
+ * @author: joshua
+ * @E-mail: joshua.yin@ucloud.cn
+ * @date: 2018/11/7 15:31
+ */
+public final class UfileObjectRemoteAuthorization extends ObjectRemoteAuthorization {
+
+    /**
+     * 构造方法
+     *
+     * @param publicKey 用户公钥
+     * @param apiConfig 远程授权接口配置
+     */
+    public UfileObjectRemoteAuthorization(String publicKey, ApiConfig apiConfig) {
+        super(publicKey, apiConfig);
+    }
+
+    @Override
+    public String authorization(ObjectOptAuthParam param) {
+        JsonObject json = new JsonObject();
+        json.addProperty("method", param.getMethod().getName());
+        json.addProperty("bucket", param.getBucket());
+        json.addProperty("key", param.getKeyName());
+        json.addProperty("content_type", param.getContentType());
+        json.addProperty("content_md5", param.getContentMD5());
+        json.addProperty("date", param.getDate());
+        if (param.getOptional() != null)
+            json.addProperty("optional", param.getOptional().toString());
+
+        Call call = new PostJsonRequestBuilder()
+                .baseUrl(apiConfig.getObjectOptAuthServer())
+                .addHeader("Content-Type", "application/json; charset=utf-8")
+                .params(json)
+                .build(httpClient.getOkHttpClient());
+
+        try {
+            return call.execute().body().string();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    @Override
+    public String authorizePrivateUrl(ObjectDownloadAuthParam param) {
+        JsonObject json = new JsonObject();
+        json.addProperty("method", param.getMethod().getName());
+        json.addProperty("bucket", param.getBucket());
+        json.addProperty("key", param.getKeyName());
+        json.addProperty("expires", param.getExpires());
+        if (param.getOptional() != null)
+            json.addProperty("optional", param.getOptional().toString());
+
+        Call call = new PostJsonRequestBuilder()
+                .baseUrl(apiConfig.getObjectDownloadAuthServer())
+                .addHeader("Content-Type", "application/json; charset=utf-8")
+                .params(json)
+                .build(httpClient.getOkHttpClient());
+
+        try {
+            String signautre = call.execute().body().string();
+            JLog.D("TEST", signautre);
+            return signautre;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+}
