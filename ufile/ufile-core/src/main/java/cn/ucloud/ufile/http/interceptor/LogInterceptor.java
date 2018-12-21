@@ -28,7 +28,7 @@ public class LogInterceptor implements Interceptor {
 
         JLog.T(TAG, "[request]:" + request.toString());
         JLog.T(TAG, "[request-headers]:" + request.headers().toString());
-        JLog.T(TAG, "[request-body]:" + readRequestBody(request));
+//        JLog.T(TAG, "[request-body]:" + readRequestBody(request));
 
         /* 记录请求耗时 */
         long startNs = System.nanoTime();

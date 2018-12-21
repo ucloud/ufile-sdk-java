@@ -11,26 +11,32 @@ import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
 import okhttp3.Request;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018-12-11 14:32
  */
 public class PutObjectSample {
     private static final String TAG = "PutObjectSample";
-    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
-        InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
-        String mimeType = "mimeType";
-        String keyName = "which";
-        String bucketName = "bucketName";
-        putStream(is, mimeType, keyName, bucketName);
+//        InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
+        File file = new File("/Users/joshua/Downloads/testDir/WechatIMG897.png");
+        String mimeType = "image/png";
+        String keyName = "WechatIMG897.png";
+        String bucketName = "new-bucket";
+        InputStream is = null;
+        JLog.SHOW_DEBUG = true;
+        JLog.SHOW_TEST = true;
+        try {
+            is = new FileInputStream(file);
+            putStream(is, mimeType, keyName, bucketName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void putFile(File file, String mimeType, String nameAs, String toBucket) {
