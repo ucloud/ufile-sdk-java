@@ -1,5 +1,7 @@
 # UCloud Ufile SDK for Java
 
+[![](https://img.shields.io/github/release/ucloud/ufile-sdk-java.svg)](https://github.com/ucloud/ufile-sdk-java)
+
 ## Release Version
 - [Ver 2.0.0](https://github.com/ucloud/ufile-sdk-java)
 - ~~[Ver 1.0.0](https://github.com/ufilesdk-dev/ufile-javasdk)~~ 不建议使用
