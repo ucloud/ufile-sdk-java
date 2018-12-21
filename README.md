@@ -11,7 +11,16 @@
 
 ## 安装
 - Maven
-    暂未提交Maven仓库
+
+    您可以通过在pom.xml中添加以下依赖项，来配置您的Maven项目
+
+    ``` xml
+    <dependency>
+        <groupId>cn.ucloud.ufile</groupId>
+        <artifactId>ufile-client-java</artifactId>
+        <version>2.0.0</version>
+    </dependency>
+    ```
 
 - JCenter
     暂未提交JCenter仓库

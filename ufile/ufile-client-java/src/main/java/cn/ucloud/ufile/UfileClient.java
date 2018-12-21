@@ -5,7 +5,6 @@ import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.api.bucket.BucketApiBuilder;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.api.object.ObjectApiBuilder;
-import cn.ucloud.ufile.auth.ObjectRemoteAuthorization;
 import cn.ucloud.ufile.http.HttpClient;
 
 /**
