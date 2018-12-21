@@ -14,6 +14,6 @@ public class Constants {
             "private key");
 
     public static final UfileObjectLocalAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
-            "TOKEN_7a484b2f-c4ca-471c-a9bc-8663f39580b9",
-            "9c26bd2b-4c68-41a1-ad9a-a633d47bb821");
+            "public key",
+            "private key");
 }

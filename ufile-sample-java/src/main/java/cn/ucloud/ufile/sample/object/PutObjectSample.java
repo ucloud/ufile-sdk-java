@@ -5,7 +5,6 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.bean.PutObjectResultBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileFileException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
@@ -20,23 +19,14 @@ import java.io.*;
  */
 public class PutObjectSample {
     private static final String TAG = "PutObjectSample";
-    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("bucket region", "ufileos.com");
 
     public static void main(String[] args) {
-//        InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
-        File file = new File("/Users/joshua/Downloads/testDir/WechatIMG897.png");
-        String mimeType = "image/png";
-        String keyName = "WechatIMG897.png";
-        String bucketName = "new-bucket";
-        InputStream is = null;
-        JLog.SHOW_DEBUG = true;
-        JLog.SHOW_TEST = true;
-        try {
-            is = new FileInputStream(file);
-            putStream(is, mimeType, keyName, bucketName);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
+        String mimeType = "mimeType";
+        String keyName = "keyName";
+        String bucketName = "bucketName";
+        putStream(is, mimeType, keyName, bucketName);
     }
 
     public static void putFile(File file, String mimeType, String nameAs, String toBucket) {
