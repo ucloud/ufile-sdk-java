@@ -81,8 +81,11 @@ public abstract class UploadRequestBody<T> extends RequestBody {
 
         @Override
         public void run() {
-            if (uploadListener != null)
-                uploadListener.onProgress(bytesWritten.get(), totalSize);
+            if (uploadListener != null) {
+                synchronized (bytesWritten) {
+                    uploadListener.onProgress(bytesWritten.get(), totalSize);
+                }
+            }
         }
     }
 

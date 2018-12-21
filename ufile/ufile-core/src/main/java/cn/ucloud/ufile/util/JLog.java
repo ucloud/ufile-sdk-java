@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/9 14:20
@@ -20,10 +19,10 @@ public class JLog {
     private boolean isSaveLog = false;
 
     public static final boolean SHOW_TEST = false;
-    public static final boolean SHOW_DEBUG = false;
-    public static final boolean SHOW_VERBOSE = false;
+    public static boolean SHOW_DEBUG = false;
+    public static boolean SHOW_VERBOSE = false;
     public static boolean SHOW_INFO = false;
-    public static final boolean SHOW_WARN = true;
+    public static boolean SHOW_WARN = true;
     public static boolean SHOW_ERROR = true;
 
     private static final String LOG_POSITION_FORMAT = "[(%s:%s)#%s]: ";
