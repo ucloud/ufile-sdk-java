@@ -117,6 +117,7 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     private Timer progressTimer;
+    private ProgressTask progressTask;
 
     private class ProgressTask extends TimerTask {
         private long totalSize = 0l;
@@ -127,8 +128,11 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
 
         @Override
         public void run() {
-            if (onProgressListener != null)
-                onProgressListener.onProgress(bytesWritten.get(), totalSize);
+            if (onProgressListener != null) {
+                synchronized (bytesWritten) {
+                    onProgressListener.onProgress(bytesWritten.get(), totalSize);
+                }
+            }
         }
     }
 
@@ -153,7 +157,8 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
                     // progressIntervalType是按时间周期回调，则自动做 0 ~ progressInterval 的合法化赋值，progressInterval置0，即实时回调读写进度
                     progressConfig.interval = Math.max(0, progressConfig.interval);
                     progressTimer = new Timer();
-                    progressTimer.scheduleAtFixedRate(new ProgressTask(contentLength), progressConfig.interval, progressConfig.interval);
+                    progressTask = new ProgressTask(contentLength);
+                    progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
                     break;
                 }
                 case PROGRESS_INTERVAL_PERCENT: {
@@ -210,17 +215,19 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
                     long written = bytesWritten.addAndGet(len);
                     long cache = bytesWrittenCache.addAndGet(len);
                     synchronized (bytesWritten) {
-                        if (written < contentLength && cache < progressConfig.interval)
-                            continue;
-
-                        if (progressConfig.type != ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
-                            bytesWrittenCache.set(0);
-                            onProgressListener.onProgress(written, contentLength);
-                        } else {
+                        if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
                             if (written >= contentLength) {
-                                progressTimer.cancel();
+                                if (progressTask != null)
+                                    progressTask.cancel();
+                                if (progressTimer != null)
+                                    progressTimer.cancel();
                                 onProgressListener.onProgress(written, contentLength);
                             }
+                        } else {
+                            if (written < contentLength && cache < progressConfig.interval)
+                                continue;
+                            bytesWrittenCache.set(0);
+                            onProgressListener.onProgress(written, contentLength);
                         }
                     }
                 }

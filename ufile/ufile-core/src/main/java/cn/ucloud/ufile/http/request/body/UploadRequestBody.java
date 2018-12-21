@@ -2,6 +2,7 @@ package cn.ucloud.ufile.http.request.body;
 
 import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.ProgressConfig;
+import cn.ucloud.ufile.util.FileUtil;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okio.BufferedSink;
@@ -68,6 +69,7 @@ public abstract class UploadRequestBody<T> extends RequestBody {
      * 进度计时器，用户用户根据时间间隔回调进度
      */
     protected Timer progressTimer;
+    protected ProgressTask progressTask;
 
     /**
      * 进度TimerTask，用户用户根据时间间隔回调进度
@@ -154,7 +156,8 @@ public abstract class UploadRequestBody<T> extends RequestBody {
                     // progressIntervalType是按时间周期回调，则自动做 0 ~ progressInterval 的合法化赋值，progressInterval置0，即实时回调读写进度
                     progressConfig.interval = Math.max(0, progressConfig.interval);
                     progressTimer = new Timer();
-                    progressTimer.scheduleAtFixedRate(new ProgressTask(contentLength), progressConfig.interval, progressConfig.interval);
+                    progressTask = new ProgressTask(contentLength);
+                    progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
                     break;
                 }
                 case PROGRESS_INTERVAL_PERCENT: {
@@ -181,23 +184,24 @@ public abstract class UploadRequestBody<T> extends RequestBody {
                 long written = bytesWritten.addAndGet(read);
                 long cache = bytesWrittenCache.addAndGet(read);
                 synchronized (bytesWritten) {
-                    if (written < contentLength && cache < progressConfig.interval)
-                        continue;
-
-                    if (progressConfig.type != ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
-                        bytesWrittenCache.set(0);
-                        uploadListener.onProgress(written, contentLength);
-                    } else {
+                    if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
                         if (written >= contentLength) {
-                            progressTimer.cancel();
+                            if (progressTask != null)
+                                progressTask.cancel();
+                            if (progressTimer != null)
+                                progressTimer.cancel();
                             uploadListener.onProgress(written, contentLength);
                         }
+                    } else {
+                        if (written < contentLength && cache < progressConfig.interval)
+                            continue;
+                        bytesWrittenCache.set(0);
+                        uploadListener.onProgress(written, contentLength);
                     }
                 }
             }
         } finally {
-            if (source != null)
-                source.close();
+            FileUtil.close(source);
         }
     }
 }
