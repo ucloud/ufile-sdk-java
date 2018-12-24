@@ -45,7 +45,7 @@ public abstract class UploadRequestBody<T> extends RequestBody {
     /**
      * 进度回调监听
      */
-    protected OnProgressListener uploadListener;
+    protected OnProgressListener onProgressListener;
     /**
      * 进度回调设置
      */
@@ -83,9 +83,9 @@ public abstract class UploadRequestBody<T> extends RequestBody {
 
         @Override
         public void run() {
-            if (uploadListener != null) {
+            if (onProgressListener != null) {
                 synchronized (bytesWritten) {
-                    uploadListener.onProgress(bytesWritten.get(), totalSize);
+                    onProgressListener.onProgress(bytesWritten.get(), totalSize);
                 }
             }
         }
@@ -96,12 +96,12 @@ public abstract class UploadRequestBody<T> extends RequestBody {
      *
      * @param content        上传的内容
      * @param contentType    上传内容的MIME类型(Content-Type)
-     * @param uploadListener 进度回调监听
+     * @param onProgressListener 进度回调监听
      */
-    public UploadRequestBody(T content, MediaType contentType, OnProgressListener uploadListener) {
+    public UploadRequestBody(T content, MediaType contentType, OnProgressListener onProgressListener) {
         this.content = content;
         this.contentType = contentType;
-        this.uploadListener = uploadListener;
+        this.onProgressListener = onProgressListener;
         this.progressConfig = ProgressConfig.callbackDefault();
     }
 
@@ -117,8 +117,8 @@ public abstract class UploadRequestBody<T> extends RequestBody {
         return this;
     }
 
-    public UploadRequestBody setUploadListener(OnProgressListener uploadListener) {
-        this.uploadListener = uploadListener;
+    public UploadRequestBody setOnProgressListener(OnProgressListener onProgressListener) {
+        this.onProgressListener = onProgressListener;
         return this;
     }
 
@@ -150,7 +150,7 @@ public abstract class UploadRequestBody<T> extends RequestBody {
         bytesWritten = new AtomicLong(0l);
         bytesWrittenCache = new AtomicLong(0l);
 
-        if (uploadListener != null)
+        if (onProgressListener != null)
             switch (progressConfig.type) {
                 case PROGRESS_INTERVAL_TIME: {
                     // progressIntervalType是按时间周期回调，则自动做 0 ~ progressInterval 的合法化赋值，progressInterval置0，即实时回调读写进度
@@ -178,29 +178,32 @@ public abstract class UploadRequestBody<T> extends RequestBody {
         try {
             while ((read = source.read(sink.buffer(), bufferSize)) > 0) {
                 sink.flush();
-                if (uploadListener == null)
+                if (onProgressListener == null)
                     continue;
 
                 long written = bytesWritten.addAndGet(read);
                 long cache = bytesWrittenCache.addAndGet(read);
-                synchronized (bytesWritten) {
-                    if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
-                        if (written >= contentLength) {
-                            if (progressTask != null)
-                                progressTask.cancel();
-                            if (progressTimer != null)
-                                progressTimer.cancel();
-                            uploadListener.onProgress(written, contentLength);
-                        }
-                    } else {
-                        if (written < contentLength && cache < progressConfig.interval)
-                            continue;
-                        bytesWrittenCache.set(0);
-                        uploadListener.onProgress(written, contentLength);
-                    }
-                }
+
+                if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME)
+                    continue;
+
+                if (written < contentLength && cache < progressConfig.interval)
+                    continue;
+
+                bytesWrittenCache.set(0);
+                onProgressListener.onProgress(written, contentLength);
             }
         } finally {
+            if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
+                if (progressTask != null)
+                    progressTask.cancel();
+                if (progressTimer != null)
+                    progressTimer.cancel();
+
+                synchronized (bytesWritten) {
+                    onProgressListener.onProgress(bytesWritten.get(), contentLength);
+                }
+            }
             FileUtil.close(source);
         }
     }
