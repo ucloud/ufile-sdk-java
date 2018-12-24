@@ -95,6 +95,7 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
     }
 
     private Timer progressTimer;
+    private ProgressTask progressTask;
 
     private class ProgressTask extends TimerTask {
         private long totalSize = 0l;
@@ -105,8 +106,11 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
 
         @Override
         public void run() {
-            if (onProgressListener != null)
-                onProgressListener.onProgress(bytesWritten.get(), totalSize);
+            if (onProgressListener != null) {
+                synchronized (bytesWritten) {
+                    onProgressListener.onProgress(bytesWritten.get(), totalSize);
+                }
+            }
         }
     }
 
@@ -127,7 +131,8 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
                         // progressIntervalType是按时间周期回调，则自动做 0 ~ progressInterval 的合法化赋值，progressInterval置0，即实时回调读写进度
                         progressConfig.interval = Math.max(0, progressConfig.interval);
                         progressTimer = new Timer();
-                        progressTimer.scheduleAtFixedRate(new ProgressTask(contentLength), progressConfig.interval, progressConfig.interval);
+                        progressTask = new ProgressTask(contentLength);
+                        progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
                         break;
                     }
                     case PROGRESS_INTERVAL_PERCENT: {
@@ -152,26 +157,32 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
                 while ((len = is.read(buffer)) > 0) {
                     outputStream.write(buffer, 0, len);
 
-                    if (onProgressListener != null) {
-                        long written = bytesWritten.addAndGet(len);
-                        long cache = bytesWrittenCache.addAndGet(len);
-                        synchronized (bytesWritten) {
-                            if (written < contentLength && cache < progressConfig.interval)
-                                continue;
+                    if (onProgressListener == null)
+                        continue;
 
-                            if (progressConfig.type != ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
-                                bytesWrittenCache.set(0);
-                                onProgressListener.onProgress(written, contentLength);
-                            } else {
-                                if (written >= contentLength) {
-                                    progressTimer.cancel();
-                                    onProgressListener.onProgress(written, contentLength);
-                                }
-                            }
-                        }
-                    }
+                    long written = bytesWritten.addAndGet(len);
+                    long cache = bytesWrittenCache.addAndGet(len);
+
+                    if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME)
+                        continue;
+
+                    if (written < contentLength && cache < progressConfig.interval)
+                        continue;
+
+                    bytesWrittenCache.set(0);
+                    onProgressListener.onProgress(written, contentLength);
                 }
             } finally {
+                if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
+                    if (progressTask != null)
+                        progressTask.cancel();
+                    if (progressTimer != null)
+                        progressTimer.cancel();
+
+                    synchronized (bytesWritten) {
+                        onProgressListener.onProgress(bytesWritten.get(), contentLength);
+                    }
+                }
                 FileUtil.close(outputStream, is);
             }
         }
