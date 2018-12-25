@@ -311,6 +311,18 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
     private OnProgressListener onProgressListener;
 
+    /**
+     * 配置进度监听器
+     * 该配置可供execute()同步接口回调进度使用，若使用executeAsync({@link BaseHttpCallback})，则后配置的会覆盖新配置的
+     *
+     * @param onProgressListener 进度监听器
+     * @return {@link DownloadFileApi}
+     */
+    public DownloadFileApi setOnProgressListener(OnProgressListener onProgressListener) {
+        this.onProgressListener = onProgressListener;
+        return this;
+    }
+
     @Override
     public DownloadFileBean execute() throws UfileException {
         prepareData();
@@ -456,9 +468,10 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 if (progressTimer != null)
                     progressTimer.cancel();
 
-                synchronized (bytesWritten) {
-                    onProgressListener.onProgress(bytesWritten.get(), total);
-                }
+                if (onProgressListener != null)
+                    synchronized (bytesWritten) {
+                        onProgressListener.onProgress(bytesWritten.get(), total);
+                    }
             }
             FileUtil.close(raf, is);
         }
