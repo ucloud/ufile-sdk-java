@@ -133,13 +133,13 @@ UfileClient.object(OBJECT_AUTHORIZER, config)
          .nameAs("save as keyName")
          .toBucket("upload to which bucket")
          /**
-          * 是否上传校验MD5
+          * 是否上传校验MD5, Default = true
           */
-//       .withVerifyMd5(false)
+     //  .withVerifyMd5(false)
          /**
-          * 指定progress callback的间隔
+          * 指定progress callback的间隔, Default = 每秒回调
           */
-//       .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+     //  .withProgressConfig(ProgressConfig.callbackWithPercent(10))
          /**
           * 配置进度监听
           */
@@ -162,11 +162,11 @@ UfileClient.object(OBJECT_AUTHORIZER, config)
          .nameAs("save as keyName")
          .toBucket("upload to which bucket")
          /**
-          * 是否上传校验MD5
+          * 是否上传校验MD5, Default = true
           */
     //   .withVerifyMd5(false)
          /**
-          * 指定progress callback的间隔
+          *指定progress callback的间隔, Default = 每秒回调
           */
     //   .withProgressConfig(ProgressConfig.callbackWithPercent(10))
          .executeAsync(new UfileCallback<PutObjectResultBean>() {
