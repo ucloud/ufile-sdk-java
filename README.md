@@ -101,7 +101,7 @@ ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
  * 注意'http://www.your_domain.com'指向的是某个特定的bucket+region+域名后缀，
  * eg：http://www.your_domain.com -> www.your_bucket.bucket_region.ufileos.com
  */
-// ObjectConfig config = new ObjectConfig("http://www.your_domain.com");
+ObjectConfig config = new ObjectConfig("http://www.your_domain.com");
 
 /**
  * ObjectConfig同时支持从本地文件来导入
@@ -110,13 +110,11 @@ ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
  *     或
  *     {"CustomDomain":""}
  */
- /*
-    try {
-        ObjectConfig.loadProfile(new File("your config profile path"));
-    } catch (UfileFileException e) {
-        e.printStackTrace();
-    }
-*/
+ try {
+     ObjectConfig.loadProfile(new File("your config profile path"));
+ } catch (UfileFileException e) {
+     e.printStackTrace();
+ }
 
 UfileClient.object(OBJECT_AUTHORIZER, config)
     .APIs           // 对象存储相关API
@@ -160,19 +158,19 @@ UfileClient.object(OBJECT_AUTHORIZER, config)
     File file = new File("your file path");
     
     UfileClient.object(OBJECT_AUTHORIZER, config)
-            .putObject(file, "mimeType")
-            .nameAs("save as keyName")
-            .toBucket("upload to which bucket")
-            /**
-             * 是否上传校验MD5
-             */
-    //       .withVerifyMd5(false)
-            /**
-             * 指定progress callback的间隔
-             */
-    //       .withProgressConfig(ProgressConfig.callbackWithPercent(10))
-            .executeAsync(new UfileCallback<PutObjectResultBean>() {
-                @Override
+         .putObject(file, "mimeType")
+         .nameAs("save as keyName")
+         .toBucket("upload to which bucket")
+         /**
+          * 是否上传校验MD5
+          */
+    //   .withVerifyMd5(false)
+         /**
+          * 指定progress callback的间隔
+          */
+    //   .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+         .executeAsync(new UfileCallback<PutObjectResultBean>() {
+             @Override
                 public void onProgress(long bytesWritten, long contentLength) {
                     
                 }
@@ -186,7 +184,7 @@ UfileClient.object(OBJECT_AUTHORIZER, config)
                 public void onError(Request request, ApiError error, UfileErrorBean response) {
                     
                 }
-            });
+         });
     ```
 
 ## License
