@@ -16,7 +16,7 @@ public class Constants {
     /**
      * 本地Bucket相关API的签名器
      */
-    public static final UfileBucketLocalAuthorization BUCKET_AUTHORIZER = new UfileBucketLocalAuthorization(
+    public static final BucketAuthorization BUCKET_AUTHORIZER = new UfileBucketLocalAuthorization(
             您的公钥,
             您的私钥);
 
