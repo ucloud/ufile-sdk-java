@@ -193,7 +193,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
 
     private void backupStream() {
         cacheOutputStream = new ByteArrayOutputStream();
-        byte[] buff = new byte[64 * 1024];
+        byte[] buff = new byte[128 << 10];
         int len = 0;
         try {
             while ((len = inputStream.read(buff)) > 0) {

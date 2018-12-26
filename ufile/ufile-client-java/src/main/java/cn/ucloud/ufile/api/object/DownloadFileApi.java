@@ -5,6 +5,7 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.ObjectProfile;
+import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
@@ -323,24 +324,6 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         return this;
     }
 
-    @Override
-    public DownloadFileBean execute() throws UfileException {
-        prepareData();
-
-        try {
-            List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
-
-            return new DownloadFileBean()
-                    .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
-                    .setFile(finalFile)
-                    .setContentLength(finalFile.length());
-        } catch (IOException e) {
-            throw new UfileIOException("Calculate ETag error!", e);
-        } catch (InterruptedException e) {
-            throw new UfileException("Invoke part occur error!", e);
-        }
-    }
-
     private Timer progressTimer;
     private ProgressTask progressTask;
 
@@ -362,7 +345,32 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     @Override
-    public void executeAsync(BaseHttpCallback callback) {
+    public DownloadFileBean execute() throws UfileException {
+        prepareData();
+
+        try {
+            if (onProgressListener != null
+                    && progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
+                progressTimer = new Timer();
+                progressTask = new ProgressTask(totalSize);
+                progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
+            }
+
+            List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
+
+            return new DownloadFileBean()
+                    .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
+                    .setFile(finalFile)
+                    .setContentLength(finalFile.length());
+        } catch (IOException e) {
+            throw new UfileIOException("Calculate ETag error!", e);
+        } catch (InterruptedException e) {
+            throw new UfileException("Invoke part occur error!", e);
+        }
+    }
+
+    @Override
+    public void executeAsync(BaseHttpCallback<DownloadFileBean, UfileErrorBean> callback) {
         onProgressListener = callback;
         httpCallback = callback;
 

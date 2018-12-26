@@ -14,5 +14,5 @@ public class UfileConstants {
     /**
      * 默认buffer大小（128KB）
      */
-    public static final int DEFAULT_BUFFER_SIZE = 128 << 10;
+    public static final int DEFAULT_BUFFER_SIZE = 256 << 10;
 }
