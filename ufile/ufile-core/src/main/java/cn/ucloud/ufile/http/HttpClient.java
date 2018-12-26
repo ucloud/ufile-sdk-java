@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class HttpClient {
     protected String TAG = getClass().getSimpleName();
-    public static final long DEFAULT_CONNECT_TIMEOUT = 5 * 1000;
-    public static final long DEFAULT_WRITE_TIMEOUT = 15 * 1000;
-    public static final long DEFAULT_READ_TIMEOUT = 15 * 1000;
+    public static final long DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
+    public static final long DEFAULT_WRITE_TIMEOUT = 30 * 1000;
+    public static final long DEFAULT_READ_TIMEOUT = 30 * 1000;
 
     /**
      * 原始OkHttpClient，全局保持唯一一个，从而保证性能开销

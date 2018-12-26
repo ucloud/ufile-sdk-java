@@ -5,6 +5,7 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.ObjectProfile;
+import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
@@ -311,22 +312,16 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
     private OnProgressListener onProgressListener;
 
-    @Override
-    public DownloadFileBean execute() throws UfileException {
-        prepareData();
-
-        try {
-            List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
-
-            return new DownloadFileBean()
-                    .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
-                    .setFile(finalFile)
-                    .setContentLength(finalFile.length());
-        } catch (IOException e) {
-            throw new UfileIOException("Calculate ETag error!", e);
-        } catch (InterruptedException e) {
-            throw new UfileException("Invoke part occur error!", e);
-        }
+    /**
+     * 配置进度监听器
+     * 该配置可供execute()同步接口回调进度使用，若使用executeAsync({@link BaseHttpCallback})，则后配置的会覆盖新配置的
+     *
+     * @param onProgressListener 进度监听器
+     * @return {@link DownloadFileApi}
+     */
+    public DownloadFileApi setOnProgressListener(OnProgressListener onProgressListener) {
+        this.onProgressListener = onProgressListener;
+        return this;
     }
 
     private Timer progressTimer;
@@ -350,7 +345,32 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     @Override
-    public void executeAsync(BaseHttpCallback callback) {
+    public DownloadFileBean execute() throws UfileException {
+        prepareData();
+
+        try {
+            if (onProgressListener != null
+                    && progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
+                progressTimer = new Timer();
+                progressTask = new ProgressTask(totalSize);
+                progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
+            }
+
+            List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
+
+            return new DownloadFileBean()
+                    .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
+                    .setFile(finalFile)
+                    .setContentLength(finalFile.length());
+        } catch (IOException e) {
+            throw new UfileIOException("Calculate ETag error!", e);
+        } catch (InterruptedException e) {
+            throw new UfileException("Invoke part occur error!", e);
+        }
+    }
+
+    @Override
+    public void executeAsync(BaseHttpCallback<DownloadFileBean, UfileErrorBean> callback) {
         onProgressListener = callback;
         httpCallback = callback;
 
@@ -456,9 +476,10 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 if (progressTimer != null)
                     progressTimer.cancel();
 
-                synchronized (bytesWritten) {
-                    onProgressListener.onProgress(bytesWritten.get(), total);
-                }
+                if (onProgressListener != null)
+                    synchronized (bytesWritten) {
+                        onProgressListener.onProgress(bytesWritten.get(), total);
+                    }
             }
             FileUtil.close(raf, is);
         }

@@ -17,7 +17,7 @@
     <dependency>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile-client-java</artifactId>
-        <version>2.0.1</version>
+        <version>2.0.2</version>
     </dependency>
     ```
 
@@ -38,7 +38,7 @@
 ### Bucket相关操作
 ``` java
 // Bucket相关API的授权器
-UfileBucketLocalAuthorization BUCKET_AUTHORIZER = new UfileBucketLocalAuthorization(
+BucketAuthorization BUCKET_AUTHORIZER = new UfileBucketLocalAuthorization(
             "Your PublicKey", "Your PrivateKey");
             
 UfileClient.bucket(BUCKET_AUTHORIZER)
@@ -49,38 +49,51 @@ UfileClient.bucket(BUCKET_AUTHORIZER)
 
 - 同步
 
-``` java
-try {
-    BucketResponse res = UfileClient.bucket(BUCKET_AUTHORIZER)
-        .createBucket(bucketName, region, bucketType)
-        .execute();
-} catch (UfileException e) {
-    e.printStackTrace();
-}
-```
+    ``` java
+    try {
+        BucketResponse res = UfileClient.bucket(BUCKET_AUTHORIZER)
+            .createBucket(bucketName, region, bucketType)
+            .execute();
+    } catch (UfileException e) {
+        e.printStackTrace();
+    }
+    ```
+    
 - 异步
 
-``` java
-UfileClient.bucket(BUCKET_AUTHORIZER)
-    .createBucket(bucketName, region, bucketType)
-    .executeAsync(new UfileCallback<BucketResponse>() {
-        @Override
-        public void onResponse(BucketResponse response) {
-            
-        }
-    
-        @Override
-        public void onError(Request request, ApiError error, UfileErrorBean response) {
-            
-        }
-});
-```
+    ``` java
+    UfileClient.bucket(BUCKET_AUTHORIZER)
+        .createBucket(bucketName, region, bucketType)
+        .executeAsync(new UfileCallback<BucketResponse>() {
+            @Override
+            public void onResponse(BucketResponse response) {
+                
+            }
+        
+            @Override
+            public void onError(Request request, ApiError error, UfileErrorBean response) {
+                
+            }
+    });
+    ```
 
 ### 对象相关操作
 ``` java
 // 对象相关API的授权器
-UfileObjectLocalAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
+ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
             "Your PublicKey", "Your PrivateKey");
+            
+/**
+ * 您也可以创建远程对象相关API的授权器，远程授权器将签名私钥放于签名服务器上，更为安全
+ * 远程签名服务端示例代码在 (https://github.com/ucloud/ufile-sdk-auth-server)
+ * 您也可以自行继承ObjectRemoteAuthorization来重写远程签名逻辑
+ */
+ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectRemoteAuthorization(
+            您的公钥,
+            new ObjectRemoteAuthorization.ApiConfig(
+                    "http://your_domain/applyAuth",
+                    "http://your_domain/applyPrivateUrlAuth"
+            ));
 // 对象操作需要ObjectConfig来配置您的地区和域名后缀
 ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
@@ -88,7 +101,7 @@ ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
  * 注意'http://www.your_domain.com'指向的是某个特定的bucket+region+域名后缀，
  * eg：http://www.your_domain.com -> www.your_bucket.bucket_region.ufileos.com
  */
-// ObjectConfig config = new ObjectConfig("http://www.your_domain.com");
+ObjectConfig config = new ObjectConfig("http://www.your_domain.com");
 
 /**
  * ObjectConfig同时支持从本地文件来导入
@@ -97,13 +110,11 @@ ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
  *     或
  *     {"CustomDomain":""}
  */
- /*
-    try {
-        ObjectConfig.loadProfile(new File("your config profile path"));
-    } catch (UfileFileException e) {
-        e.printStackTrace();
-    }
-*/
+ try {
+     ObjectConfig.loadProfile(new File("your config profile path"));
+ } catch (UfileFileException e) {
+     e.printStackTrace();
+ }
 
 UfileClient.object(OBJECT_AUTHORIZER, config)
     .APIs           // 对象存储相关API
@@ -112,41 +123,69 @@ UfileClient.object(OBJECT_AUTHORIZER, config)
 
 ##### 上传文件
 
-``` java
-File file = new File("your file path");
-String mimeType = "mimeType";
-String keyName = "save as keyName";
-String bucketName = "upload to which bucket";
+- 同步
 
-UfileClient.object(OBJECT_AUTHORIZER, config)
-        .putObject(file, mimeType)
-        .nameAs(keyName)
-        .toBucket(bucketName)
-        /**
-         * 是否上传校验MD5
-         */
-//       .withVerifyMd5(false)
-        /**
-         * 指定progress callback的间隔
-         */
-//       .withProgressConfig(ProgressConfig.callbackWithPercent(10))
-        .executeAsync(new UfileCallback<PutObjectResultBean>() {
-            @Override
-            public void onProgress(long bytesWritten, long contentLength) {
-                
-            }
+    ``` java
+    File file = new File("your file path");
 
-            @Override
-            public void onResponse(PutObjectResultBean response) {
-                
-            }
+    PutObjectResultBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+         .putObject(file, "mimeType")
+         .nameAs("save as keyName")
+         .toBucket("upload to which bucket")
+         /**
+          * 是否上传校验MD5, Default = true
+          */
+     //  .withVerifyMd5(false)
+         /**
+          * 指定progress callback的间隔, Default = 每秒回调
+          */
+     //  .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+         /**
+          * 配置进度监听
+          */
+         .setOnProgressListener(new OnProgressListener() {
+              @Override
+              public void onProgress(long bytesWritten, long contentLength) {
+                  
+              }
+         })
+         .execute();
+    ```
 
-            @Override
-            public void onError(Request request, ApiError error, UfileErrorBean response) {
-                
-            }
-        });
-```
+- 异步
+
+    ``` java
+    File file = new File("your file path");
+    
+    UfileClient.object(OBJECT_AUTHORIZER, config)
+         .putObject(file, "mimeType")
+         .nameAs("save as keyName")
+         .toBucket("upload to which bucket")
+         /**
+          * 是否上传校验MD5, Default = true
+          */
+    //   .withVerifyMd5(false)
+         /**
+          *指定progress callback的间隔, Default = 每秒回调
+          */
+    //   .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+         .executeAsync(new UfileCallback<PutObjectResultBean>() {
+             @Override
+                public void onProgress(long bytesWritten, long contentLength) {
+                    
+                }
+    
+                @Override
+                public void onResponse(PutObjectResultBean response) {
+                    
+                }
+    
+                @Override
+                public void onError(Request request, ApiError error, UfileErrorBean response) {
+                    
+                }
+         });
+    ```
 
 ## License
 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.html)

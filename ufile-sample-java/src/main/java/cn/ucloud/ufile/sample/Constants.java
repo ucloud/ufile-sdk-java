@@ -1,7 +1,7 @@
 package cn.ucloud.ufile.sample;
 
-import cn.ucloud.ufile.auth.UfileBucketLocalAuthorization;
-import cn.ucloud.ufile.auth.UfileObjectLocalAuthorization;
+import cn.ucloud.ufile.auth.*;
+import cn.ucloud.ufile.util.JLog;
 
 /**
  * @author: joshua
@@ -9,11 +9,31 @@ import cn.ucloud.ufile.auth.UfileObjectLocalAuthorization;
  * @date: 2018-12-11 16:13
  */
 public class Constants {
-    public static final UfileBucketLocalAuthorization BUCKET_AUTHORIZER = new UfileBucketLocalAuthorization(
-            "public key",
-            "private key");
+    static {
+        JLog.SHOW_DEBUG = true;
+    }
 
-    public static final UfileObjectLocalAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
-            "public key",
-            "private key");
+    /**
+     * 本地Bucket相关API的签名器
+     */
+    public static final BucketAuthorization BUCKET_AUTHORIZER = new UfileBucketLocalAuthorization(
+            您的公钥,
+            您的私钥);
+
+    /**
+     * 本地Object相关API的签名器
+     */
+    public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
+            您的公钥,
+            您的私钥);
+
+    /**
+     * 远程Object相关API的签名器
+     */
+//    public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectRemoteAuthorization(
+//            您的公钥,
+//            new ObjectRemoteAuthorization.ApiConfig(
+//                    "http://your_domain/applyAuth",
+//                    "http://your_domain/applyPrivateUrlAuth"
+//            ));
 }

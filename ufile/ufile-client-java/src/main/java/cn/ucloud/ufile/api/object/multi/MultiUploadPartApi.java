@@ -1,6 +1,5 @@
 package cn.ucloud.ufile.api.object.multi;
 
-import cn.ucloud.ufile.api.object.GenerateObjectPrivateUrlApi;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
@@ -176,6 +175,18 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
      * 进度回调接口
      */
     private OnProgressListener onProgressListener;
+
+    /**
+     * 配置进度监听器
+     * 该配置可供execute()同步接口回调进度使用，若使用executeAsync({@link BaseHttpCallback})，则后配置的会覆盖新配置的
+     *
+     * @param onProgressListener 进度监听器
+     * @return {@link MultiUploadPartApi}
+     */
+    public MultiUploadPartApi setOnProgressListener(OnProgressListener onProgressListener) {
+        this.onProgressListener = onProgressListener;
+        return this;
+    }
 
     @Override
     public void executeAsync(BaseHttpCallback callback) {

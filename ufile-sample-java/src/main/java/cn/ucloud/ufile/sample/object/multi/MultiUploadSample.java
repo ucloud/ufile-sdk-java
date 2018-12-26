@@ -7,6 +7,8 @@ import cn.ucloud.ufile.api.object.multi.MultiUploadInfo;
 import cn.ucloud.ufile.bean.MultiUploadResponse;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.http.OnProgressListener;
+import cn.ucloud.ufile.http.ProgressConfig;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.util.JLog;
@@ -18,7 +20,6 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018-12-11 14:32
@@ -107,6 +108,19 @@ public class MultiUploadSample {
         public MultiUploadPartState call() throws Exception {
             return UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .multiUploadPart(state, data, index)
+                    /**
+                     * 指定progress callback的间隔
+                     */
+//                    .withProgressConfig(ProgressConfig.callbackWithPercent(50))
+                    /**
+                     * 配置进度监听
+                     */
+                    .setOnProgressListener(new OnProgressListener() {
+                        @Override
+                        public void onProgress(long bytesWritten, long contentLength) {
+                            JLog.D(TAG, String.format("[index] = %d\t[progress] = %d%% - [%d/%d]", index, (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
+                        }
+                    })
                     .execute();
         }
     }

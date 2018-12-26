@@ -1,6 +1,5 @@
 package cn.ucloud.ufile.auth;
 
-import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.http.request.PostJsonRequestBuilder;
 import cn.ucloud.ufile.util.JLog;
 import com.google.gson.JsonObject;
@@ -16,6 +15,7 @@ import java.io.IOException;
  * @date: 2018/11/7 15:31
  */
 public final class UfileObjectRemoteAuthorization extends ObjectRemoteAuthorization {
+    private final String TAG = getClass().getSimpleName();
 
     /**
      * 构造方法
@@ -46,7 +46,9 @@ public final class UfileObjectRemoteAuthorization extends ObjectRemoteAuthorizat
                 .build(httpClient.getOkHttpClient());
 
         try {
-            return call.execute().body().string();
+            String signautre = call.execute().body().string();
+            JLog.D(TAG, signautre);
+            return signautre;
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -71,7 +73,7 @@ public final class UfileObjectRemoteAuthorization extends ObjectRemoteAuthorizat
 
         try {
             String signautre = call.execute().body().string();
-            JLog.D("TEST", signautre);
+            JLog.D(TAG, signautre);
             return signautre;
         } catch (IOException e) {
             e.printStackTrace();

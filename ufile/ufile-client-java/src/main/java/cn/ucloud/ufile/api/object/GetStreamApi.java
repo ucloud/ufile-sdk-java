@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @date: 2018/11/12 19:07
  */
 public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
-    private OnProgressListener onProgressListener;
     private OutputStream outputStream;
 
     private ProgressConfig progressConfig;
@@ -86,6 +85,20 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         call = new GetRequestBuilder()
                 .baseUrl(host)
                 .build(httpClient.getOkHttpClient());
+    }
+
+    private OnProgressListener onProgressListener;
+
+    /**
+     * 配置进度监听器
+     * 该配置可供execute()同步接口回调进度使用，若使用executeAsync({@link BaseHttpCallback})，则后配置的会覆盖新配置的
+     *
+     * @param onProgressListener 进度监听器
+     * @return {@link GetStreamApi}
+     */
+    public GetStreamApi setOnProgressListener(OnProgressListener onProgressListener) {
+        this.onProgressListener = onProgressListener;
+        return this;
     }
 
     @Override
@@ -179,9 +192,10 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
                     if (progressTimer != null)
                         progressTimer.cancel();
 
-                    synchronized (bytesWritten) {
-                        onProgressListener.onProgress(bytesWritten.get(), contentLength);
-                    }
+                    if (onProgressListener != null)
+                        synchronized (bytesWritten) {
+                            onProgressListener.onProgress(bytesWritten.get(), contentLength);
+                        }
                 }
                 FileUtil.close(outputStream, is);
             }

@@ -21,7 +21,7 @@ public class JLog {
     public static boolean SHOW_TEST = false;
     public static boolean SHOW_DEBUG = false;
     public static boolean SHOW_VERBOSE = false;
-    public static boolean SHOW_INFO = false;
+    public static boolean SHOW_INFO = true;
     public static boolean SHOW_WARN = true;
     public static boolean SHOW_ERROR = true;
 

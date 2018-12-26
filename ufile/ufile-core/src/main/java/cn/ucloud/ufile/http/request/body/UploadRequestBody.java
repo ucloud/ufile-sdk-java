@@ -94,8 +94,8 @@ public abstract class UploadRequestBody<T> extends RequestBody {
     /**
      * 构造方法
      *
-     * @param content        上传的内容
-     * @param contentType    上传内容的MIME类型(Content-Type)
+     * @param content            上传的内容
+     * @param contentType        上传内容的MIME类型(Content-Type)
      * @param onProgressListener 进度回调监听
      */
     public UploadRequestBody(T content, MediaType contentType, OnProgressListener onProgressListener) {
@@ -200,9 +200,10 @@ public abstract class UploadRequestBody<T> extends RequestBody {
                 if (progressTimer != null)
                     progressTimer.cancel();
 
-                synchronized (bytesWritten) {
-                    onProgressListener.onProgress(bytesWritten.get(), contentLength);
-                }
+                if (onProgressListener != null)
+                    synchronized (bytesWritten) {
+                        onProgressListener.onProgress(bytesWritten.get(), contentLength);
+                    }
             }
             FileUtil.close(source);
         }

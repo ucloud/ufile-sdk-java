@@ -193,7 +193,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
 
     private void backupStream() {
         cacheOutputStream = new ByteArrayOutputStream();
-        byte[] buff = new byte[64 * 1024];
+        byte[] buff = new byte[128 << 10];
         int len = 0;
         try {
             while ((len = inputStream.read(buff)) > 0) {
@@ -209,6 +209,18 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     private OnProgressListener onProgressListener;
+
+    /**
+     * 配置进度监听器
+     * 该配置可供execute()同步接口回调进度使用，若使用executeAsync({@link BaseHttpCallback})，则后配置的会覆盖新配置的
+     *
+     * @param onProgressListener 进度监听器
+     * @return {@link PutStreamApi}
+     */
+    public PutStreamApi setOnProgressListener(OnProgressListener onProgressListener) {
+        this.onProgressListener = onProgressListener;
+        return this;
+    }
 
     @Override
     public void executeAsync(BaseHttpCallback<PutObjectResultBean, UfileErrorBean> callback) {
