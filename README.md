@@ -129,27 +129,27 @@ UfileClient.object(OBJECT_AUTHORIZER, config)
     File file = new File("your file path");
 
     PutObjectResultBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-            .putObject(file, "mimeType")
-            .nameAs("save as keyName")
-            .toBucket("upload to which bucket")
-            /**
-             * 是否上传校验MD5
-             */
-//          .withVerifyMd5(false)
-            /**
-             * 指定progress callback的间隔
-             */
-//          .withProgressConfig(ProgressConfig.callbackWithPercent(10))
-            /**
-             * 配置进度监听
-             */
-            .setOnProgressListener(new OnProgressListener() {
-                    @Override
-                    public void onProgress(long bytesWritten, long contentLength) {
-                    
-                    }
-                })
-            .execute();
+         .putObject(file, "mimeType")
+         .nameAs("save as keyName")
+         .toBucket("upload to which bucket")
+         /**
+          * 是否上传校验MD5
+          */
+//       .withVerifyMd5(false)
+         /**
+          * 指定progress callback的间隔
+          */
+//       .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+         /**
+          * 配置进度监听
+          */
+         .setOnProgressListener(new OnProgressListener() {
+              @Override
+              public void onProgress(long bytesWritten, long contentLength) {
+                  
+              }
+         })
+         .execute();
     ```
 
 - 异步
