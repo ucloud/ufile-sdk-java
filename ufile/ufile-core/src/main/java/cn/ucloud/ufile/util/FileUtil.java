@@ -1,6 +1,5 @@
 package cn.ucloud.ufile.util;
 
-import cn.ucloud.ufile.UfileConstants;
 
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 public class FileUtil {
     private static final String TAG = "FileUtil";
 
-    public static final int IO_BUFFER_SIZE = UfileConstants.DEFAULT_BUFFER_SIZE;
+    public static final int IO_BUFFER_SIZE = 256 << 10;
 
     public static File searchFile(File file, final String fileName, final boolean isDstIsFile) {
         if (file == null || !file.exists() || fileName == null || fileName.length() == 0)

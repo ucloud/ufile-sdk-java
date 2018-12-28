@@ -110,7 +110,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
         ObjectProfile result = new ObjectProfile();
         int code = response.code();
 
-        if (code == 200) {
+        if (code == RESP_CODE_SUCCESS) {
             result.setContentLength(Long.parseLong(response.header("Content-Length", "0")));
             result.setContentType(response.header("Content-Type", ""));
             result.seteTag(response.header("ETag", "").replace("\"", ""));
