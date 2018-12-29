@@ -20,7 +20,7 @@ public class ApiError {
         /**
          * HTTP错误，Response Code为非正常值
          */
-        ERROR_HTTP_ERROR,
+        ERROR_SERVER_ERROR,
         /**
          * Http response为空
          */

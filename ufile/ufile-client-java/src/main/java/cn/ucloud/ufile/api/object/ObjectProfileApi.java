@@ -130,14 +130,14 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
         UfileErrorBean errorBean = new UfileErrorBean();
         errorBean.setxSessionId(response.header("X-SessionId"));
         int code = response.code();
-        errorBean.setRetCode(code);
+        errorBean.setResponseCode(code);
         switch (code) {
             case 404: {
-                errorBean.setErrMsg(String.format("Response-Code : %d, the which is inexistent in the bucket", code));
+                errorBean.setErrMsg(String.format("The object '%s' is not existed in the bucket '%s'", keyName, bucketName));
                 break;
             }
             default: {
-                errorBean.setErrMsg(String.format("Response-Code : %d", code));
+                errorBean.setErrMsg(String.format("Http error: Response-Code = %d", code));
                 break;
             }
         }

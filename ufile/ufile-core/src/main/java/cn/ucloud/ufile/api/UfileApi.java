@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.api;
 
+import cn.ucloud.ufile.exception.UfileServerException;
 import com.google.gson.Gson;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileException;
@@ -92,7 +93,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
                 throw new UfileHttpException("Response is null");
 
             if (response.code() != RESP_CODE_SUCCESS)
-                throw new UfileHttpException(parseErrorResponse(response).toString());
+                throw new UfileServerException(parseErrorResponse(response));
 
             return parseHttpResponse(response);
         } catch (Throwable throwable) {
@@ -138,9 +139,11 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
                     e = parseErrorResponse(response);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
+                } finally {
+                    httpCallback.onError(call.request(),
+                            new ApiError(ApiError.ErrorType.ERROR_SERVER_ERROR, "Response-Code = " + response.code())
+                                    .setResponseCode(response.code()), e);
                 }
-                httpCallback.onError(call.request(),
-                        new ApiError(ApiError.ErrorType.ERROR_HTTP_ERROR, "Response-Code = " + response.code()), e);
             }
             return;
         }
@@ -150,7 +153,8 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             if (res == null) {
                 if (httpCallback != null)
                     httpCallback.onError(call.request(),
-                            new ApiError(ApiError.ErrorType.ERROR_RESPONSE_SPARSE_FAILED, "The result of parseHttpResponse is null"), null);
+                            new ApiError(ApiError.ErrorType.ERROR_RESPONSE_SPARSE_FAILED, "The result of parseHttpResponse is null")
+                                    .setResponseCode(response.code()), null);
 
                 return;
             }
@@ -161,7 +165,8 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             throwable.printStackTrace();
             if (httpCallback != null)
                 httpCallback.onError(call.request(),
-                        new ApiError(ApiError.ErrorType.ERROR_RESPONSE_SPARSE_FAILED, throwable), null);
+                        new ApiError(ApiError.ErrorType.ERROR_RESPONSE_SPARSE_FAILED, throwable)
+                                .setResponseCode(response.code()), null);
         }
     }
 
@@ -194,6 +199,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
         response.body().close();
         content = (content == null || content.length() == 0) ? "{}" : content;
         UfileErrorBean errorBean = new Gson().fromJson(content, UfileErrorBean.class);
+        errorBean.setResponseCode(response.code());
         errorBean.setxSessionId(response.header("X-SessionId"));
         return errorBean;
     }

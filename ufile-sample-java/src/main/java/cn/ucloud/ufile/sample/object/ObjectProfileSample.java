@@ -5,13 +5,13 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.bean.ObjectProfile;
 import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.exception.UfileException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
 import okhttp3.Request;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018-12-11 14:32
@@ -24,6 +24,21 @@ public class ObjectProfileSample {
         String keyName = "which";
         String bucketName = "bucketName";
 
+        try {
+            objectProfile(keyName, bucketName);
+        } catch (UfileException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void objectProfile(String keyName, String bucketName) throws UfileException {
+        ObjectProfile objectProfile = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                .objectProfile(keyName, bucketName)
+                .execute();
+        JLog.D(TAG, String.format("[res] = %s", (objectProfile == null ? "null" : objectProfile.toString())));
+    }
+
+    public static void objectProfileAsync(String keyName, String bucketName) {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .objectProfile(keyName, bucketName)
                 .executeAsync(new UfileCallback<ObjectProfile>() {
