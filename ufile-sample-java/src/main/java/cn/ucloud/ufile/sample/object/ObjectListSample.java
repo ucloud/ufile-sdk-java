@@ -5,6 +5,7 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.bean.ObjectListBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.exception.UfileException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
@@ -17,11 +18,34 @@ import okhttp3.Request;
  */
 public class ObjectListSample {
     private static final String TAG = "ObjectListSample";
-    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
-    public static void main(String[] args) {
-        String bucketName = "bucketName";
+    public static void main(String[] args) throws UfileException {
+        String bucketName = "";
 
+        execute(bucketName);
+    }
+
+    public static void execute(String bucketName) throws UfileException {
+        ObjectListBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                .objectList(bucketName)
+                /**
+                 * 过滤前缀
+                 */
+//                .withPrefix("")
+                /**
+                 * 分页标记
+                 */
+//                .withMarker("")
+                /**
+                 * 分页数据上限，Default = 20
+                 */
+//                .dataLimit(10)
+                .execute();
+        JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+    }
+
+    public static void executeAsync(String bucketName) {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .objectList(bucketName)
                 /**

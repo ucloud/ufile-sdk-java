@@ -12,7 +12,6 @@ import cn.ucloud.ufile.util.JLog;
 import okhttp3.Request;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018-12-11 14:32
@@ -21,7 +20,7 @@ public class UpdateBucketSample {
     private static final String TAG = "UpdateBucketSample";
 
     public static void main(String[] args) {
-        String bucketName = "bucketName";
+        String bucketName = "";
         BucketType bucketType = BucketType.PRIVATE;
 
         execute(bucketName, bucketType);

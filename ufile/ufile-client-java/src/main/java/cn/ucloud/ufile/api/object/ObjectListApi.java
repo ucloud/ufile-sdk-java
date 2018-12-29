@@ -2,18 +2,17 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectListBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
-import cn.ucloud.ufile.util.ParameterValidator;
 import com.google.gson.JsonElement;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,7 +45,6 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
      * Required
      * Bucket空间名称
      */
-    @NotEmpty(message = "BucketName is required to set through method 'atBucket'")
     private String bucketName;
 
     /**
@@ -116,32 +114,39 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        try {
-            ParameterValidator.validator(this);
-            List<Parameter<String>> query = new ArrayList<>();
-            if (prefix != null)
-                query.add(new Parameter<>("prefix", prefix));
-            if (marker != null)
-                query.add(new Parameter<>("marker", marker));
-            if (limit != null)
-                query.add(new Parameter<>("limit", String.valueOf(limit.intValue())));
+    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
+        List<Parameter<String>> query = new ArrayList<>();
+        if (prefix != null)
+            query.add(new Parameter<>("prefix", prefix));
+        if (marker != null)
+            query.add(new Parameter<>("marker", marker));
+        if (limit != null)
+            query.add(new Parameter<>("limit", String.valueOf(limit.intValue())));
 
-            String contentType = "application/json; charset=utf-8";
-            String date = dateFormat.format(new Date(System.currentTimeMillis()));
+        String contentType = "application/json; charset=utf-8";
+        String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
-            String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.GET, bucketName, "",
-                    contentType, "", date).setOptional(authOptionalData));
+        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.GET, bucketName, "",
+                contentType, "", date).setOptional(authOptionalData));
 
-            GetRequestBuilder builder = new GetRequestBuilder();
-            call = builder.baseUrl(generateFinalHost(bucketName, "") + "?list&" + builder.generateUrlQuery(query))
-                    .addHeader("Content-Type", contentType)
-                    .addHeader("Accpet", "*/*")
-                    .addHeader("Date", date)
-                    .addHeader("authorization", authorization)
-                    .build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage(), e);
-        }
+        GetRequestBuilder builder = new GetRequestBuilder();
+        call = builder.baseUrl(generateFinalHost(bucketName, "") + "?list&" + builder.generateUrlQuery(query))
+                .addHeader("Content-Type", contentType)
+                .addHeader("Accpet", "*/*")
+                .addHeader("Date", date)
+                .addHeader("authorization", authorization)
+                .build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
+
+        if (limit != null && limit.intValue() < 1)
+            throw new UfileParamException(
+                    "The required param 'limit' must be > 0");
     }
 }

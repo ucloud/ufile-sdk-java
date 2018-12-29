@@ -29,10 +29,10 @@ public class MultiUploadSample {
     private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
     public static void main(String[] args) {
-        File file = new File("file path");
-        String keyName = file.getName();
-        String mimeType = "file mimeType";
-        String bucketName = "bucketName";
+        File file = new File("");
+        String keyName = "";
+        String mimeType = "";
+        String bucketName = "";
 
         try {
             MultiUploadInfo state = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)

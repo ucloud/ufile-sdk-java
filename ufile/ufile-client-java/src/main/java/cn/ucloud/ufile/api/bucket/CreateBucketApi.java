@@ -3,9 +3,9 @@ package cn.ucloud.ufile.api.bucket;
 import cn.ucloud.ufile.annotation.UcloudParam;
 import cn.ucloud.ufile.auth.BucketAuthorizer;
 import cn.ucloud.ufile.bean.BucketResponse;
+import cn.ucloud.ufile.exception.UfileParamException;
+import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
-
-import javax.validation.constraints.NotEmpty;
 
 /**
  * API-创建Bucket
@@ -19,7 +19,6 @@ public class CreateBucketApi extends UfileBucketApi<BucketResponse> {
      * Required
      * 要创建的Bucket名称
      */
-    @NotEmpty(message = "BucketName is required")
     @UcloudParam("BucketName")
     private String bucketName;
 
@@ -27,7 +26,6 @@ public class CreateBucketApi extends UfileBucketApi<BucketResponse> {
      * Required
      * 要创建的Bucket类型
      */
-    @NotEmpty(message = "Type is required")
     @UcloudParam("Type")
     private String type;
 
@@ -35,7 +33,6 @@ public class CreateBucketApi extends UfileBucketApi<BucketResponse> {
      * Required
      * 要创建Bucket的所在地区
      */
-    @NotEmpty(message = "Region is required")
     @UcloudParam("Region")
     private String region;
 
@@ -74,7 +71,9 @@ public class CreateBucketApi extends UfileBucketApi<BucketResponse> {
      * @return {@link CreateBucketApi}
      */
     public CreateBucketApi withType(BucketType type) {
-        this.type = type.getBucketType();
+        if (type != null)
+            this.type = type.getBucketType();
+
         return this;
     }
 
@@ -100,4 +99,19 @@ public class CreateBucketApi extends UfileBucketApi<BucketResponse> {
         return this;
     }
 
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        super.parameterValidat();
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
+
+        if (type == null || type.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'type' can not be null or empty");
+
+        if (region == null || region.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'region' can not be null or empty");
+    }
 }

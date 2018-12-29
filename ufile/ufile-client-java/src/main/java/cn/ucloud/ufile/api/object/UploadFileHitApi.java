@@ -3,18 +3,16 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
-import cn.ucloud.ufile.exception.UfileException;
 import cn.ucloud.ufile.exception.UfileIOException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostJsonRequestBuilder;
 import cn.ucloud.ufile.util.*;
 import com.google.gson.JsonElement;
-import sun.security.validator.ValidatorException;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,19 +31,16 @@ public class UploadFileHitApi extends UfileObjectApi<BaseResponseBean> {
      * Required
      * 云端对象名称
      */
-    @NotEmpty(message = "KeyName is required to set through method 'nameAs'")
     protected String keyName;
     /**
      * Required
      * 要上传的文件
      */
-    @NotNull(message = "File is required")
     private File file;
     /**
      * Required
      * Bucket空间名称
      */
-    @NotEmpty(message = "BucketName is required to set through method 'toBucket'")
     protected String bucketName;
 
     /**
@@ -104,33 +99,44 @@ public class UploadFileHitApi extends UfileObjectApi<BaseResponseBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
+    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException, UfileIOException {
+        parameterValidat();
+
+        String date = dateFormat.format(new Date(System.currentTimeMillis()));
+        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, bucketName, keyName,
+                "", "", date).setOptional(authOptionalData));
+
+        PostJsonRequestBuilder builder = new PostJsonRequestBuilder();
+
+        String url = generateFinalHost(bucketName, "uploadhit");
+        List<Parameter<String>> query = new ArrayList<>();
         try {
-            ParameterValidator.validator(this);
-
-            String date = dateFormat.format(new Date(System.currentTimeMillis()));
-            String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, bucketName, keyName,
-                    "", "", date).setOptional(authOptionalData));
-
-            PostJsonRequestBuilder builder = new PostJsonRequestBuilder();
-
-            String url = generateFinalHost(bucketName, "uploadhit");
-            List<Parameter<String>> query = new ArrayList<>();
-            try {
-                query.add(new Parameter<>("Hash", Etag.etag(file, UfileConstants.MULTIPART_SIZE).geteTag()));
-            } catch (IOException e) {
-                throw new UfileIOException("Calculate ETag failed!", e);
-            }
-            query.add(new Parameter<>("FileName", keyName));
-            query.add(new Parameter<>("FileSize", String.valueOf(file.length())));
-
-            call = builder.baseUrl(builder.generateGetUrl(url, query))
-                    .addHeader("Accpet", "*/*")
-                    .addHeader("Date", date)
-                    .addHeader("authorization", authorization)
-                    .build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
+            query.add(new Parameter<>("Hash", Etag.etag(file, UfileConstants.MULTIPART_SIZE).geteTag()));
+        } catch (IOException e) {
+            throw new UfileIOException("Calculate ETag failed!", e);
         }
+        query.add(new Parameter<>("FileName", keyName));
+        query.add(new Parameter<>("FileSize", String.valueOf(file.length())));
+
+        call = builder.baseUrl(builder.generateGetUrl(url, query))
+                .addHeader("Accpet", "*/*")
+                .addHeader("Date", date)
+                .addHeader("authorization", authorization)
+                .build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (file == null)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'file' can not be null");
+
+        if (keyName == null || keyName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'keyName' can not be null or empty");
+
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
     }
 }

@@ -16,11 +16,11 @@ import okhttp3.Request;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018-12-11 14:32
  */
-public class DeteleBucketSample {
-    private static final String TAG = "DeteleBucketSample";
+public class DeleteBucketSample {
+    private static final String TAG = "DeleteBucketSample";
 
     public static void main(String[] args) {
-        String bucketName = "bucketName";
+        String bucketName = "";
 
         execute(bucketName);
     }

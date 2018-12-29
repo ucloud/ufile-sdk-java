@@ -21,24 +21,24 @@ public class ObjectProfileSample {
     private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
     public static void main(String[] args) {
-        String keyName = "which";
-        String bucketName = "bucketName";
+        String keyName = "";
+        String bucketName = "";
 
         try {
-            objectProfile(keyName, bucketName);
+            execute(keyName, bucketName);
         } catch (UfileException e) {
             e.printStackTrace();
         }
     }
 
-    public static void objectProfile(String keyName, String bucketName) throws UfileException {
+    public static void execute(String keyName, String bucketName) throws UfileException {
         ObjectProfile objectProfile = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .objectProfile(keyName, bucketName)
                 .execute();
         JLog.D(TAG, String.format("[res] = %s", (objectProfile == null ? "null" : objectProfile.toString())));
     }
 
-    public static void objectProfileAsync(String keyName, String bucketName) {
+    public static void executeAsync(String keyName, String bucketName) {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .objectProfile(keyName, bucketName)
                 .executeAsync(new UfileCallback<ObjectProfile>() {

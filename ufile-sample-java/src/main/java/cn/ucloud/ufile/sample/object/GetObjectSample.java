@@ -32,12 +32,13 @@ public class GetObjectSample {
     private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
     public static void main(String[] args) {
-        String keyName = "which";
-        String bucketName = "bucketName";
+        String keyName = "";
+        String bucketName = "";
+        //  5 * 60秒 --> 5分钟后过期
         int expiresDuration = 5 * 60;
 
-        String localDir = "local save dir";
-        String saveName = "local save name";
+        String localDir = "";
+        String saveName = "";
         try {
             String url = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .getDownloadUrlFromPrivateBucket(keyName, bucketName, expiresDuration)
@@ -46,6 +47,31 @@ public class GetObjectSample {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void getFile(String url, String localDir, String saveName) throws UfileException {
+        DownloadFileBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                .getFile(url)
+                .saveAt(localDir, saveName)
+                /**
+                 * 是否覆盖本地已有文件, Default = true;
+                 */
+//                .withCoverage(false)
+                /**
+                 * 指定progress callback的间隔
+                 */
+//                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                /**
+                 * 配置进度监听
+                 */
+                .setOnProgressListener(new OnProgressListener() {
+                    @Override
+                    public void onProgress(long bytesWritten, long contentLength) {
+                        JLog.D(TAG, String.format("[progress] = %d%% - [%d/%d]", (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
+                    }
+                })
+                .execute();
+        JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
     }
 
     public static void getFileAsync(String url, String localDir, String saveName) {
@@ -80,14 +106,21 @@ public class GetObjectSample {
                 });
     }
 
-    public static void getFile(String url, String localDir, String saveName) throws UfileException {
-        DownloadFileBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                .getFile(url)
-                .saveAt(localDir, saveName)
+    public static void getStream(String url, String localDir, String saveName) throws FileNotFoundException, UfileException {
+        OutputStream os = null;
+        os = new FileOutputStream(new File(localDir, saveName));
+
+        DownloadStreamBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                .getStream(url)
                 /**
-                 * 是否覆盖本地已有文件, Default = true;
+                 * 重定向流
+                 *
+                 * 默认不重定向流，下载的流会以InputStream的形式在Response中回调，并且不会回调下载进度 onProgress;
+                 *
+                 * 如果配置了重定向的输出流，则Response {@link DownloadStreamBean}的 InputStream = null,
+                 * 因为流已被重定向导流到OutputStream，并且会回调进度 onProgress。
                  */
-//                .withCoverage(false)
+                .redirectStream(os)
                 /**
                  * 指定progress callback的间隔
                  */
@@ -146,37 +179,5 @@ public class GetObjectSample {
                                 (response == null ? "null" : response.toString())));
                     }
                 });
-    }
-
-    public static void getStream(String url, String localDir, String saveName) throws FileNotFoundException, UfileException {
-        OutputStream os = null;
-        os = new FileOutputStream(new File(localDir, saveName));
-
-        DownloadStreamBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                .getStream(url)
-                /**
-                 * 重定向流
-                 *
-                 * 默认不重定向流，下载的流会以InputStream的形式在Response中回调，并且不会回调下载进度 onProgress;
-                 *
-                 * 如果配置了重定向的输出流，则Response {@link DownloadStreamBean}的 InputStream = null,
-                 * 因为流已被重定向导流到OutputStream，并且会回调进度 onProgress。
-                 */
-                .redirectStream(os)
-                /**
-                 * 指定progress callback的间隔
-                 */
-//                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
-                /**
-                 * 配置进度监听
-                 */
-                .setOnProgressListener(new OnProgressListener() {
-                    @Override
-                    public void onProgress(long bytesWritten, long contentLength) {
-                        JLog.D(TAG, String.format("[progress] = %d%% - [%d/%d]", (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
-                    }
-                })
-                .execute();
-        JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
     }
 }

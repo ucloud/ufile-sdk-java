@@ -8,7 +8,7 @@ package cn.ucloud.ufile.exception;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/13 16:25
  */
-public class UfileRequiredParamNotFoundException extends UfileException {
+public class UfileRequiredParamNotFoundException extends UfileParamException {
     public UfileRequiredParamNotFoundException(String message) {
         super(message);
     }

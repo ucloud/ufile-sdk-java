@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.api;
 
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import com.google.gson.Gson;
 import cn.ucloud.ufile.bean.UfileErrorBean;
@@ -77,6 +78,8 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      * @throws UfileException Ufile业务异常
      */
     protected abstract void prepareData() throws UfileException;
+
+    protected abstract void parameterValidat() throws UfileParamException;
 
     /**
      * 执行API - 同步(阻塞)

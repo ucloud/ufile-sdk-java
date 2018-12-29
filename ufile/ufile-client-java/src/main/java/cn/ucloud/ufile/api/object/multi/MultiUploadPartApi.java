@@ -3,7 +3,9 @@ package cn.ucloud.ufile.api.object.multi;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
@@ -14,10 +16,7 @@ import cn.ucloud.ufile.util.*;
 import com.google.gson.JsonElement;
 import okhttp3.MediaType;
 import okhttp3.Response;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
 import java.io.ByteArrayInputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -36,19 +35,16 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
      * Required
      * 分片上传初始化状态
      */
-    @NotNull(message = "Info is required to set through method 'which'")
     private MultiUploadInfo info;
     /**
      * Required
      * 需要上传的分片数据
      */
-    @NotNull(message = "Buffer is required")
     private byte[] buffer;
     /**
      * Required
      * 该分片的序号
      */
-    @PositiveOrZero(message = "PartIndex must > 0")
     private int partIndex;
     /**
      * 是否需要上传MD5校验码
@@ -130,45 +126,56 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        try {
-            ParameterValidator.validator(this);
-            List<Parameter<String>> query = new ArrayList<>();
-            query.add(new Parameter<>("uploadId", info.getUploadId()));
-            query.add(new Parameter<>("partNumber", String.valueOf(partIndex)));
+    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
+        List<Parameter<String>> query = new ArrayList<>();
+        query.add(new Parameter<>("uploadId", info.getUploadId()));
+        query.add(new Parameter<>("partNumber", String.valueOf(partIndex)));
 
-            String contentType = MediaType.parse(info.getMimeType()).toString();
-            String contentMD5 = "";
-            String date = dateFormat.format(new Date(System.currentTimeMillis()));
+        String contentType = MediaType.parse(info.getMimeType()).toString();
+        String contentMD5 = "";
+        String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
-            PutStreamRequestBuilder builder = new PutStreamRequestBuilder(onProgressListener);
-            builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
-                    .addHeader("Content-Type", contentType)
-                    .addHeader("Accpet", "*/*")
-                    .addHeader("Content-Length", String.valueOf(buffer.length))
-                    .addHeader("Date", date)
-                    .mediaType(MediaType.parse(info.getMimeType()));
+        PutStreamRequestBuilder builder = new PutStreamRequestBuilder(onProgressListener);
+        builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
+                .addHeader("Content-Type", contentType)
+                .addHeader("Accpet", "*/*")
+                .addHeader("Content-Length", String.valueOf(buffer.length))
+                .addHeader("Date", date)
+                .mediaType(MediaType.parse(info.getMimeType()));
 
-            if (isVerifyMd5) {
-                try {
-                    contentMD5 = HexFormatter.formatByteArray2HexString(Encoder.md5(buffer), false);
-                    builder.addHeader("Content-MD5", contentMD5);
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
+        if (isVerifyMd5) {
+            try {
+                contentMD5 = HexFormatter.formatByteArray2HexString(Encoder.md5(buffer), false);
+                builder.addHeader("Content-MD5", contentMD5);
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
             }
-
-            String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, info.getBucket(), info.getKeyName(),
-                    contentType, contentMD5, date).setOptional(authOptionalData));
-            builder.addHeader("authorization", authorization);
-
-            builder.params(new ByteArrayInputStream(buffer));
-            builder.setProgressConfig(progressConfig);
-
-            call = builder.build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
         }
+
+        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, info.getBucket(), info.getKeyName(),
+                contentType, contentMD5, date).setOptional(authOptionalData));
+        builder.addHeader("authorization", authorization);
+
+        builder.params(new ByteArrayInputStream(buffer));
+        builder.setProgressConfig(progressConfig);
+
+        call = builder.build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (info == null)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'info' can not be null");
+
+        if (buffer == null || buffer.length == 0)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'buffer' can not be null or empty");
+
+        if (partIndex <= 0)
+            throw new UfileParamException(
+                    "The required param 'partIndex' must > 0");
     }
 
     /**

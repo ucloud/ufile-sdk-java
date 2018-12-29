@@ -1,21 +1,20 @@
 package cn.ucloud.ufile.api.object.multi;
 
-import cn.ucloud.ufile.api.object.GenerateObjectPrivateUrlApi;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.DeleteRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
-import cn.ucloud.ufile.util.ParameterValidator;
 import com.google.gson.JsonElement;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +31,6 @@ public class AbortMultiUploadApi extends UfileObjectApi<BaseResponseBean> {
      * Required
      * 分片上传初始化状态
      */
-    @NotNull(message = "Info is required to set through method 'which'")
     private MultiUploadInfo info;
 
     /**
@@ -69,29 +67,32 @@ public class AbortMultiUploadApi extends UfileObjectApi<BaseResponseBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        try {
-            ParameterValidator.validator(this);
+    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
 
-            String contentType = "application/json; charset=utf-8";
-            String date = dateFormat.format(new Date(System.currentTimeMillis()));
+        String contentType = "application/json; charset=utf-8";
+        String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
-            String authorization = authorizer.authorization((ObjectOptAuthParam)
-                    new ObjectOptAuthParam(HttpMethod.DELETE, info.getBucket(), info.getKeyName(),
-                    contentType, "", date).setOptional(authOptionalData));
+        String authorization = authorizer.authorization((ObjectOptAuthParam)
+                new ObjectOptAuthParam(HttpMethod.DELETE, info.getBucket(), info.getKeyName(),
+                        contentType, "", date).setOptional(authOptionalData));
 
-            DeleteRequestBuilder builder = new DeleteRequestBuilder();
-            List<Parameter<String>> query = new ArrayList<>();
-            query.add(new Parameter<>("uploadId", info.getUploadId()));
+        DeleteRequestBuilder builder = new DeleteRequestBuilder();
+        List<Parameter<String>> query = new ArrayList<>();
+        query.add(new Parameter<>("uploadId", info.getUploadId()));
 
-            call = builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
-                    .addHeader("Content-Type", contentType)
-                    .addHeader("Accpet", "*/*")
-                    .addHeader("Date", date)
-                    .addHeader("authorization", authorization)
-                    .build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
-        }
+        call = builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
+                .addHeader("Content-Type", contentType)
+                .addHeader("Accpet", "*/*")
+                .addHeader("Date", date)
+                .addHeader("authorization", authorization)
+                .build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (info == null)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'info' can not be null");
     }
 }

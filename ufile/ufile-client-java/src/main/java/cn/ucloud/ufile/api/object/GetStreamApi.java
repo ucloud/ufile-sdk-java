@@ -3,7 +3,7 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.bean.DownloadStreamBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
@@ -76,15 +76,20 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        if (host == null || host.length() == 0)
-            throw new UfileRequiredParamNotFoundException("Param 'host' is null!");
-
+    protected void prepareData() throws UfileParamException {
+        parameterValidat();
         bytesWritten = new AtomicLong(0);
         bytesWrittenCache = new AtomicLong(0);
         call = new GetRequestBuilder()
                 .baseUrl(host)
                 .build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (host == null || host.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'url' can not be null or empty");
     }
 
     private OnProgressListener onProgressListener;

@@ -3,7 +3,7 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
@@ -11,12 +11,9 @@ import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.ProgressConfig;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
 import cn.ucloud.ufile.util.FileUtil;
-import cn.ucloud.ufile.util.ParameterValidator;
 import cn.ucloud.ufile.UfileConstants;
 import okhttp3.Response;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
 import java.io.*;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -34,13 +31,11 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
      * Required
      * 下载文件保存的本地目录路径
      */
-    @NotEmpty(message = "Param 'localPath' is required")
     private String localPath;
     /**
      * Required
      * 下载文件保存的本地文件名
      */
-    @NotEmpty(message = "Param 'saveName' is required")
     private String saveName;
 
     /**
@@ -100,20 +95,28 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        if (host == null || host.length() == 0)
-            throw new UfileRequiredParamNotFoundException("Param 'host' is null!");
+    protected void prepareData() throws UfileParamException {
+        parameterValidat();
+        bytesWritten = new AtomicLong(0);
+        bytesWrittenCache = new AtomicLong(0);
+        call = new GetRequestBuilder()
+                .baseUrl(host)
+                .build(httpClient.getOkHttpClient());
+    }
 
-        try {
-            ParameterValidator.validator(this);
-            bytesWritten = new AtomicLong(0);
-            bytesWrittenCache = new AtomicLong(0);
-            call = new GetRequestBuilder()
-                    .baseUrl(host)
-                    .build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e);
-        }
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (host == null || host.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'url' can not be null or empty");
+
+        if (localPath == null || localPath.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'localPath' can not be null or empty");
+
+        if (saveName == null || saveName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'saveName' can not be null or empty");
     }
 
     private Timer progressTimer;

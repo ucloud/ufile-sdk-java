@@ -24,10 +24,10 @@ public class DownloadFileSample {
     private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
     public static void main(String[] args) {
-        String keyName = "which";
-        String bucketName = "bucketName";
-        String localDir = "local save dir";
-        String saveName = "local save name";
+        String keyName = "";
+        String bucketName = "";
+        String localDir = "";
+        String saveName = "";
         try {
             downloadFile(keyName, bucketName, localDir, saveName);
         } catch (UfileException e) {

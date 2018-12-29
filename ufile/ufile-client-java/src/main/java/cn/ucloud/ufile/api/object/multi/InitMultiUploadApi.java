@@ -1,21 +1,19 @@
 package cn.ucloud.ufile.api.object.multi;
 
-import cn.ucloud.ufile.api.object.GenerateObjectPrivateUrlApi;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostJsonRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
-import cn.ucloud.ufile.util.ParameterValidator;
 import com.google.gson.JsonElement;
 import okhttp3.MediaType;
 import okhttp3.Response;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
 import java.util.Date;
 
 /**
@@ -30,21 +28,25 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
      * Required
      * 上传云端后的文件名
      */
-    @NotEmpty(message = "KeyName is required to set through method 'nameAs'")
     protected String keyName;
 
     /**
      * Required
      * 上传对象的mimeType
      */
-    @NotEmpty(message = "MimeType is required to set through method 'withMimeType'")
     protected String mimeType;
+
+    /**
+     * Required
+     * 根据MimeType解析成okhttp可用的mediaType，解析失败则代表mimeType无效
+     */
+    protected MediaType mediaType;
+
 
     /**
      * Required
      * 要上传的目标Bucket
      */
-    @NotEmpty(message = "BucketName is required to set through method 'toBucket'")
     protected String bucketName;
 
     /**
@@ -77,6 +79,7 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
      */
     public InitMultiUploadApi withMimeType(String mimeType) {
         this.mimeType = mimeType;
+        this.mediaType = MediaType.parse(mimeType);
         return this;
     }
 
@@ -103,25 +106,40 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        try {
-            ParameterValidator.validator(this);
+    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
 
-            String contentType = MediaType.parse(mimeType).toString();
-            String date = dateFormat.format(new Date(System.currentTimeMillis()));
-            String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, bucketName, keyName,
-                    contentType, "", date).setOptional(authOptionalData));
+        String contentType = mediaType.toString();
+        String date = dateFormat.format(new Date(System.currentTimeMillis()));
+        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, bucketName, keyName,
+                contentType, "", date).setOptional(authOptionalData));
 
-            PostJsonRequestBuilder builder = new PostJsonRequestBuilder();
-            call = builder.baseUrl(generateFinalHost(bucketName, keyName) + "?uploads")
-                    .addHeader("Content-Type", contentType)
-                    .addHeader("Accpet", "*/*")
-                    .addHeader("Date", date)
-                    .addHeader("authorization", authorization)
-                    .build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
-        }
+        PostJsonRequestBuilder builder = new PostJsonRequestBuilder();
+        call = builder.baseUrl(generateFinalHost(bucketName, keyName) + "?uploads")
+                .addHeader("Content-Type", contentType)
+                .addHeader("Accpet", "*/*")
+                .addHeader("Date", date)
+                .addHeader("authorization", authorization)
+                .build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (keyName == null || keyName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'keyName' can not be null or empty");
+
+        if (mimeType == null || mimeType.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'mimeType' can not be null or empty");
+
+        if (mediaType == null)
+            throw new UfileParamException(
+                    "The required param 'mimeType' is invalid");
+
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
     }
 
     @Override

@@ -21,8 +21,8 @@ public class CreateBucketSample {
     private static final String TAG = "CreateBucketSample";
 
     public static void main(String[] args) {
-        String bucketName = "bucketName";
-        String region = "region";
+        String bucketName = "";
+        String region = "";
         BucketType bucketType = BucketType.PRIVATE;
 
         execute(bucketName, region, bucketType);

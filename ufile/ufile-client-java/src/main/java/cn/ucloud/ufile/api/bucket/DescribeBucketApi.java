@@ -3,6 +3,8 @@ package cn.ucloud.ufile.api.bucket;
 import cn.ucloud.ufile.annotation.UcloudParam;
 import cn.ucloud.ufile.auth.BucketAuthorizer;
 import cn.ucloud.ufile.bean.BucketDescribeResponse;
+import cn.ucloud.ufile.exception.UfileParamException;
+import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
 
 /**
@@ -86,4 +88,8 @@ public class DescribeBucketApi extends UfileBucketApi<BucketDescribeResponse> {
         return this;
     }
 
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        super.parameterValidat();
+    }
 }
