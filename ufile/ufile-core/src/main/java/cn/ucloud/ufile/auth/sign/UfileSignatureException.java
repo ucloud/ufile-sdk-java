@@ -1,6 +1,6 @@
 package cn.ucloud.ufile.auth.sign;
 
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 
 /**
  * 签名异常
@@ -9,7 +9,7 @@ import cn.ucloud.ufile.exception.UfileException;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/7 18:10
  */
-public class UfileSignatureException extends UfileException {
+public class UfileSignatureException extends UfileClientException {
     public UfileSignatureException(String message) {
         super(message);
     }

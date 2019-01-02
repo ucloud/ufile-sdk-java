@@ -3,10 +3,12 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.ObjectProfile;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
@@ -20,10 +22,7 @@ import cn.ucloud.ufile.util.*;
 import com.google.gson.JsonElement;
 import okhttp3.Call;
 import okhttp3.Response;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,20 +46,17 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      * Required
      * 下载文件保存的本地目录路径
      */
-    @NotEmpty(message = "Param 'localPath' is required")
     private String localPath;
     /**
      * Required
      * 下载文件保存的本地文件名
      */
-    @NotEmpty(message = "Param 'saveName' is required")
     private String saveName;
 
     /**
      * Required
      * 要下载的云端文件描述，通过ObjectProfile API获得
      */
-    @NotNull(message = "Profile is required")
     private ObjectProfile profile;
 
     /**
@@ -218,96 +214,104 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        if (host == null || host.length() == 0)
-            throw new UfileRequiredParamNotFoundException("Param 'host' is null!");
+    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
 
-        try {
-            ParameterValidator.validator(this);
+        File dir = new File(localPath);
+        if (!dir.exists() || (dir.exists() && !dir.isDirectory()))
+            dir.mkdirs();
 
-            File dir = new File(localPath);
-            if (!dir.exists() || (dir.exists() && !dir.isDirectory()))
-                dir.mkdirs();
+        String absPath = localPath + (localPath.endsWith(File.separator) ? "" : File.separator) + saveName;
 
-            String absPath = localPath + (localPath.endsWith(File.separator) ? "" : File.separator) + saveName;
-
-            File file = new File(absPath);
-            if (file.exists() && file.isFile())
-                if (isCover) {
-                    FileUtil.deleteFileCleanly(file);
-                    file = new File(absPath);
-                } else {
-                    int i = 1;
-                    boolean isExist = true;
-                    while (isExist) {
-                        String tmpPath = absPath + String.format("-%d", i++);
-                        file = new File(tmpPath);
-                        if (!file.exists() || file.isDirectory()) {
-                            isExist = false;
-                            absPath = tmpPath;
-                        }
+        File file = new File(absPath);
+        if (file.exists() && file.isFile())
+            if (isCover) {
+                FileUtil.deleteFileCleanly(file);
+                file = new File(absPath);
+            } else {
+                int i = 1;
+                boolean isExist = true;
+                while (isExist) {
+                    String tmpPath = absPath + String.format("-%d", i++);
+                    file = new File(tmpPath);
+                    if (!file.exists() || file.isDirectory()) {
+                        isExist = false;
+                        absPath = tmpPath;
                     }
                 }
-
-            finalFile = file;
-
-            if (offset == null || size == null) {
-                totalSize = profile.getContentLength();
-            } else {
-                if (offset.longValue() < 0l)
-                    throw new UfileParamException("Invalid range param 'offset', offset must be >= 0");
-                if (size.longValue() < 0l)
-                    throw new UfileParamException("Invalid range param 'size', size must be >= 0");
-                if (size.longValue() <= offset.longValue())
-                    throw new UfileParamException("Invalid range, size must be > offset");
-
-                totalSize = size.longValue() - offset.longValue();
             }
 
-            host = new GenerateObjectPrivateUrlApi(authorizer, host, profile.getKeyName(), profile.getBucket(), expiresDuration)
-                    .withAuthOptionalData(authOptionalData)
-                    .createUrl();
+        finalFile = file;
 
-            partCount = (int) Math.ceil(totalSize * 1.d / UfileConstants.MULTIPART_SIZE);
+        if (offset == null || size == null) {
+            totalSize = profile.getContentLength();
+        } else {
+            if (offset.longValue() < 0l)
+                throw new UfileParamException("Invalid range param 'offset', offset must be >= 0");
+            if (size.longValue() < 0l)
+                throw new UfileParamException("Invalid range param 'size', size must be >= 0");
+            if (size.longValue() <= offset.longValue())
+                throw new UfileParamException("Invalid range, size must be > offset");
 
-            switch (progressConfig.type) {
-                case PROGRESS_INTERVAL_TIME: {
-                    // progressIntervalType是按时间周期回调，则自动做 0 ~ progressInterval 的合法化赋值，progressInterval置0，即实时回调读写进度
-                    progressConfig.interval = Math.max(0, progressConfig.interval);
-                    break;
-                }
-                case PROGRESS_INTERVAL_PERCENT: {
-                    // progressIntervalType是按百分比回调，则若progressInterval<0 | >100，progressInterval置0，即实时回调读写进度
-                    if (progressConfig.interval < 0 || progressConfig.interval > 100)
-                        progressConfig.interval = 0l;
-                    else
-                        progressConfig.interval = (long) (progressConfig.interval / 100.f * totalSize);
-                    break;
-                }
-                case PROGRESS_INTERVAL_BUFFER: {
-                    // progressIntervalType是按读写的buffer size回调，则自动做 0 ~ totalSize-1 的合法化赋值，progressInterval置0，即实时回调读写进度
-                    progressConfig.interval = Math.max(0, Math.min(totalSize - 1, progressConfig.interval));
-                    break;
-                }
-            }
-
-            bytesWritten = new AtomicLong(0);
-            bytesWrittenCache = new AtomicLong(0);
-
-            callList = new ArrayList<>();
-            for (int i = 0; i < partCount; i++) {
-                int start = i * UfileConstants.MULTIPART_SIZE;
-                int end = ((int) Math.min(totalSize, (start + UfileConstants.MULTIPART_SIZE))) - 1;
-                GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
-                        .baseUrl(host)
-                        .addHeader("Range", String.format("bytes=%d-%d", start, end));
-                callList.add(new DownloadCallable(builder.build(httpClient.getOkHttpClient()), i));
-            }
-
-            mFixedThreadPool = Executors.newFixedThreadPool(threadCount);
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e);
+            totalSize = size.longValue() - offset.longValue();
         }
+
+        host = new GenerateObjectPrivateUrlApi(authorizer, host, profile.getKeyName(), profile.getBucket(), expiresDuration)
+                .withAuthOptionalData(authOptionalData)
+                .createUrl();
+
+        partCount = (int) Math.ceil(totalSize * 1.d / UfileConstants.MULTIPART_SIZE);
+
+        switch (progressConfig.type) {
+            case PROGRESS_INTERVAL_TIME: {
+                // progressIntervalType是按时间周期回调，则自动做 0 ~ progressInterval 的合法化赋值，progressInterval置0，即实时回调读写进度
+                progressConfig.interval = Math.max(0, progressConfig.interval);
+                break;
+            }
+            case PROGRESS_INTERVAL_PERCENT: {
+                // progressIntervalType是按百分比回调，则若progressInterval<0 | >100，progressInterval置0，即实时回调读写进度
+                if (progressConfig.interval < 0 || progressConfig.interval > 100)
+                    progressConfig.interval = 0l;
+                else
+                    progressConfig.interval = (long) (progressConfig.interval / 100.f * totalSize);
+                break;
+            }
+            case PROGRESS_INTERVAL_BUFFER: {
+                // progressIntervalType是按读写的buffer size回调，则自动做 0 ~ totalSize-1 的合法化赋值，progressInterval置0，即实时回调读写进度
+                progressConfig.interval = Math.max(0, Math.min(totalSize - 1, progressConfig.interval));
+                break;
+            }
+        }
+
+        bytesWritten = new AtomicLong(0);
+        bytesWrittenCache = new AtomicLong(0);
+
+        callList = new ArrayList<>();
+        for (int i = 0; i < partCount; i++) {
+            int start = i * UfileConstants.MULTIPART_SIZE;
+            int end = ((int) Math.min(totalSize, (start + UfileConstants.MULTIPART_SIZE))) - 1;
+            GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
+                    .baseUrl(host)
+                    .addHeader("Range", String.format("bytes=%d-%d", start, end));
+            callList.add(new DownloadCallable(builder.build(httpClient.getOkHttpClient()), i));
+        }
+
+        mFixedThreadPool = Executors.newFixedThreadPool(threadCount);
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (localPath == null || localPath.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'localPath' can not be null or empty");
+
+        if (saveName == null || saveName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'saveName' can not be null or empty");
+
+        if (profile == null)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'profile' can not be null");
     }
 
     private OnProgressListener onProgressListener;
@@ -345,7 +349,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     @Override
-    public DownloadFileBean execute() throws UfileException {
+    public DownloadFileBean execute() throws UfileClientException {
         prepareData();
 
         try {
@@ -365,7 +369,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         } catch (IOException e) {
             throw new UfileIOException("Calculate ETag error!", e);
         } catch (InterruptedException e) {
-            throw new UfileException("Invoke part occur error!", e);
+            throw new UfileClientException("Invoke part occur error!", e);
         }
     }
 
@@ -397,7 +401,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                             new ApiError(ApiError.ErrorType.ERROR_NORMAL_ERROR, new UfileIOException("Calculate ETag error!", e)), null);
                 }
             }
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
             if (httpCallback != null)
                 httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_PARAMS_ILLEGAL, e), null);
         } catch (InterruptedException e) {
@@ -427,13 +431,13 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
                 return parseHttpResponse(response);
             } catch (Throwable t) {
-                throw new UfileException(t);
+                throw new UfileClientException(t);
             }
         }
     }
 
     @Override
-    public DownloadFileBean parseHttpResponse(Response response) throws IOException, NumberFormatException {
+    public DownloadFileBean parseHttpResponse(Response response) throws UfileIOException, NumberFormatException {
         DownloadFileBean result = new DownloadFileBean();
         result.setContentLength(response.body().contentLength());
         String range = response.header("Content-Range", "");
@@ -444,11 +448,12 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         long total = Long.parseLong(rangeArr[1].trim());
         JLog.T(TAG, "[Content-Range]:" + range + " [start]:" + start + " [total]:" + total);
 
-        RandomAccessFile raf = new RandomAccessFile(finalFile, "rwd");
-        raf.seek(start);
-
         InputStream is = response.body().byteStream();
+        RandomAccessFile raf = null;
         try {
+            raf = new RandomAccessFile(finalFile, "rwd");
+            raf.seek(start);
+
             byte[] buffer = new byte[UfileConstants.DEFAULT_BUFFER_SIZE];
             int len = 0;
             while ((len = is.read(buffer)) > 0) {
@@ -469,6 +474,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 bytesWrittenCache.set(0);
                 onProgressListener.onProgress(written, total);
             }
+        } catch (IOException e) {
+            throw new UfileIOException("Occur IOException while IO stream");
         } finally {
             if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
                 if (progressTask != null)

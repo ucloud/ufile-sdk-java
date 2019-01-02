@@ -12,6 +12,11 @@ import com.google.gson.annotations.SerializedName;
  */
 public class UfileErrorBean {
     /**
+     * Http response code
+     */
+    @SerializedName("ResponseCode")
+    protected int responseCode;
+    /**
      * 返回状态码, 正常返回 0
      */
     @SerializedName("RetCode")
@@ -26,6 +31,14 @@ public class UfileErrorBean {
      */
     @SerializedName("X-SessionId")
     private String xSessionId;
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(int responseCode) {
+        this.responseCode = responseCode;
+    }
 
     public int getRetCode() {
         return retCode;

@@ -6,12 +6,14 @@ import cn.ucloud.ufile.api.object.multi.MultiUploadPartState;
 import cn.ucloud.ufile.api.object.multi.MultiUploadInfo;
 import cn.ucloud.ufile.bean.MultiUploadResponse;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.ProgressConfig;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.util.JLog;
+import cn.ucloud.ufile.util.MimeTypeUtil;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -26,27 +28,29 @@ import java.util.concurrent.*;
  */
 public class MultiUploadSample {
     private static final String TAG = "MultiUploadSample";
-    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
-        File file = new File("file path");
-        String keyName = file.getName();
-        String mimeType = "file mimeType";
-        String bucketName = "bucketName";
-
         try {
+            File file = new File("");
+            String keyName = file.getName();
+            // MimeTypeUtil可能支持的type类型不全，用户可以按需自行填写
+            String mimeType = MimeTypeUtil.getMimeType(file);
+            String bucketName = "";
             MultiUploadInfo state = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .initMultiUpload(keyName, mimeType, bucketName)
                     .execute();
 
             JLog.D(TAG, String.format("[init state] = %s", (state == null ? "null" : state.toString())));
             multiUpload(file, state);
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
             e.printStackTrace();
         }
     }
 
-    public static void multiUpload(File file, MultiUploadInfo state) {
+    public static void multiUpload(File file, MultiUploadInfo state) throws UfileServerException, UfileClientException {
         byte[] buffer = new byte[state.getBlkSize()];
         InputStream is = null;
         try {
@@ -79,14 +83,14 @@ public class MultiUploadSample {
                         .abortMultiUpload(state)
                         .execute();
                 JLog.D(TAG, "abort->" + abortRes.toString());
+            } catch (UfileServerException e) {
+                e.printStackTrace();
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (UfileException e) {
             e.printStackTrace();
         } finally {
             FileUtil.close(is);

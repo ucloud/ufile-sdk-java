@@ -2,20 +2,22 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectProfile;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileHttpException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.HeadRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
-import cn.ucloud.ufile.util.ParameterValidator;
 import com.google.gson.JsonElement;
 import okhttp3.Response;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
+import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -30,13 +32,11 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
      * Required
      * 云端对象名称
      */
-    @NotEmpty(message = "KeyName is required")
     private String keyName;
     /**
      * Required
      * Bucket空间名称
      */
-    @NotEmpty(message = "BucketName is required")
     private String bucketName;
 
     /**
@@ -84,33 +84,40 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        try {
-            ParameterValidator.validator(this);
+    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
 
-            String contentType = "application/json; charset=utf-8";
-            String date = dateFormat.format(new Date(System.currentTimeMillis()));
-            String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.HEAD, bucketName, keyName,
-                    contentType, "", date).setOptional(authOptionalData));
+        String contentType = "application/json; charset=utf-8";
+        String date = dateFormat.format(new Date(System.currentTimeMillis()));
+        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.HEAD, bucketName, keyName,
+                contentType, "", date).setOptional(authOptionalData));
 
-            call = new HeadRequestBuilder()
-                    .baseUrl(generateFinalHost(bucketName, keyName))
-                    .addHeader("Content-Type", contentType)
-                    .addHeader("Accpet", "*/*")
-                    .addHeader("Date", date)
-                    .addHeader("authorization", authorization)
-                    .build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
-        }
+        call = new HeadRequestBuilder()
+                .baseUrl(generateFinalHost(bucketName, keyName))
+                .addHeader("Content-Type", contentType)
+                .addHeader("Accpet", "*/*")
+                .addHeader("Date", date)
+                .addHeader("authorization", authorization)
+                .build(httpClient.getOkHttpClient());
     }
 
     @Override
-    public ObjectProfile parseHttpResponse(Response response) throws Exception {
+    protected void parameterValidat() throws UfileParamException {
+        if (keyName == null || keyName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'keyName' can not be null or empty");
+
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
+    }
+
+    @Override
+    public ObjectProfile parseHttpResponse(Response response) throws UfileServerException {
         ObjectProfile result = new ObjectProfile();
         int code = response.code();
 
-        if (code == 200) {
+        if (code == RESP_CODE_SUCCESS) {
             result.setContentLength(Long.parseLong(response.header("Content-Length", "0")));
             result.setContentType(response.header("Content-Type", ""));
             result.seteTag(response.header("ETag", "").replace("\"", ""));
@@ -121,7 +128,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
 
             return result;
         } else {
-            throw new UfileHttpException(parseErrorResponse(response).toString());
+            throw new UfileServerException(parseErrorResponse(response));
         }
     }
 
@@ -130,14 +137,14 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
         UfileErrorBean errorBean = new UfileErrorBean();
         errorBean.setxSessionId(response.header("X-SessionId"));
         int code = response.code();
-        errorBean.setRetCode(code);
+        errorBean.setResponseCode(code);
         switch (code) {
             case 404: {
-                errorBean.setErrMsg(String.format("Response-Code : %d, the which is inexistent in the bucket", code));
+                errorBean.setErrMsg(String.format("The object '%s' is not existed in the bucket '%s'", keyName, bucketName));
                 break;
             }
             default: {
-                errorBean.setErrMsg(String.format("Response-Code : %d", code));
+                errorBean.setErrMsg(String.format("Http Error: Response-Code is %d", code));
                 break;
             }
         }

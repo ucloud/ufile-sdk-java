@@ -4,7 +4,8 @@ import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.bean.BucketResponse;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
@@ -16,11 +17,11 @@ import okhttp3.Request;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018-12-11 14:32
  */
-public class DeteleBucketSample {
-    private static final String TAG = "DeteleBucketSample";
+public class DeleteBucketSample {
+    private static final String TAG = "DeleteBucketSample";
 
     public static void main(String[] args) {
-        String bucketName = "bucketName";
+        String bucketName = "";
 
         execute(bucketName);
     }
@@ -31,7 +32,9 @@ public class DeteleBucketSample {
                     .deleteBucket(bucketName)
                     .execute();
             JLog.D(TAG, String.format("[res] = %s", (res == null ? "null" : res.toString())));
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
             e.printStackTrace();
         }
     }

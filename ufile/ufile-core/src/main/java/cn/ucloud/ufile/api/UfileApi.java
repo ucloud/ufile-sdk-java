@@ -1,8 +1,11 @@
 package cn.ucloud.ufile.api;
 
+import cn.ucloud.ufile.exception.UfileIOException;
+import cn.ucloud.ufile.exception.UfileParamException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import com.google.gson.Gson;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.http.UfileHttpException;
 import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
@@ -73,17 +76,19 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     /**
      * API请求前数据准备
      *
-     * @throws UfileException Ufile业务异常
+     * @throws UfileClientException Ufile业务异常
      */
-    protected abstract void prepareData() throws UfileException;
+    protected abstract void prepareData() throws UfileClientException;
+
+    protected abstract void parameterValidat() throws UfileParamException;
 
     /**
      * 执行API - 同步(阻塞)
      *
      * @return 泛型的Response返回值
-     * @throws UfileException Ufile业务异常
+     * @throws UfileClientException Ufile业务异常
      */
-    public T execute() throws UfileException {
+    public T execute() throws UfileClientException, UfileServerException {
         prepareData();
 
         try {
@@ -92,11 +97,11 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
                 throw new UfileHttpException("Response is null");
 
             if (response.code() != RESP_CODE_SUCCESS)
-                throw new UfileHttpException(parseErrorResponse(response).toString());
+                throw new UfileServerException(parseErrorResponse(response));
 
             return parseHttpResponse(response);
-        } catch (Throwable throwable) {
-            throw new UfileHttpException(throwable);
+        } catch (IOException e) {
+            throw new UfileIOException("Occur IOException while parsing response data");
         }
     }
 
@@ -111,7 +116,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
         try {
             prepareData();
             call.enqueue(this);
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
             if (callback != null)
                 httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_PARAMS_ILLEGAL, e), null);
         }
@@ -138,9 +143,11 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
                     e = parseErrorResponse(response);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
+                } finally {
+                    httpCallback.onError(call.request(),
+                            new ApiError(ApiError.ErrorType.ERROR_SERVER_ERROR, "Response-Code = " + response.code())
+                                    .setResponseCode(response.code()), e);
                 }
-                httpCallback.onError(call.request(),
-                        new ApiError(ApiError.ErrorType.ERROR_HTTP_ERROR, "Response-Code = " + response.code()), e);
             }
             return;
         }
@@ -150,7 +157,8 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             if (res == null) {
                 if (httpCallback != null)
                     httpCallback.onError(call.request(),
-                            new ApiError(ApiError.ErrorType.ERROR_RESPONSE_SPARSE_FAILED, "The result of parseHttpResponse is null"), null);
+                            new ApiError(ApiError.ErrorType.ERROR_RESPONSE_SPARSE_FAILED, "The result of parseHttpResponse is null")
+                                    .setResponseCode(response.code()), null);
 
                 return;
             }
@@ -161,7 +169,8 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             throwable.printStackTrace();
             if (httpCallback != null)
                 httpCallback.onError(call.request(),
-                        new ApiError(ApiError.ErrorType.ERROR_RESPONSE_SPARSE_FAILED, throwable), null);
+                        new ApiError(ApiError.ErrorType.ERROR_RESPONSE_SPARSE_FAILED, throwable)
+                                .setResponseCode(response.code()), null);
         }
     }
 
@@ -173,12 +182,16 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      * @throws Exception 异常
      */
     @Override
-    public T parseHttpResponse(Response response) throws Exception {
-        Type type = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        String content = response.body().string();
-        response.body().close();
-        content = (content == null || content.length() == 0) ? "{}" : content;
-        return new Gson().fromJson(content, type);
+    public T parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
+        try {
+            Type type = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+            String content = response.body().string();
+            response.body().close();
+            content = (content == null || content.length() == 0) ? "{}" : content;
+            return new Gson().fromJson(content, type);
+        } catch (IOException e) {
+            throw new UfileIOException("Occur IOException while parsing response data");
+        }
     }
 
     /**
@@ -189,12 +202,17 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      * @throws Exception 异常
      */
     @Override
-    public UfileErrorBean parseErrorResponse(Response response) throws Exception {
-        String content = response.body().string();
-        response.body().close();
-        content = (content == null || content.length() == 0) ? "{}" : content;
-        UfileErrorBean errorBean = new Gson().fromJson(content, UfileErrorBean.class);
-        errorBean.setxSessionId(response.header("X-SessionId"));
-        return errorBean;
+    public UfileErrorBean parseErrorResponse(Response response) throws UfileClientException {
+        try {
+            String content = response.body().string();
+            response.body().close();
+            content = (content == null || content.length() == 0) ? "{}" : content;
+            UfileErrorBean errorBean = new Gson().fromJson(content, UfileErrorBean.class);
+            errorBean.setResponseCode(response.code());
+            errorBean.setxSessionId(response.header("X-SessionId"));
+            return errorBean;
+        } catch (IOException e) {
+            throw new UfileIOException("Occur IOException while parsing error data");
+        }
     }
 }

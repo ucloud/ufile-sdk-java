@@ -2,11 +2,11 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.PutObjectResultBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
-import cn.ucloud.ufile.exception.UfileIOException;
-import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.*;
 import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.OnProgressListener;
@@ -16,10 +16,7 @@ import cn.ucloud.ufile.util.*;
 import com.google.gson.JsonElement;
 import okhttp3.MediaType;
 import okhttp3.Response;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -36,25 +33,27 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
      * Required
      * 云端对象名称
      */
-    @NotEmpty(message = "KeyName is required to set through method 'nameAs'")
     protected String keyName;
     /**
      * Required
      * 要上传的流
      */
-    @NotNull(message = "InputStream is required")
     protected InputStream inputStream;
     /**
      * Required
      * 要上传的流mimeType
      */
-    @NotEmpty(message = "MimeType is required")
     protected String mimeType;
+    /**
+     * Required
+     * 根据MimeType解析成okhttp可用的mediaType，解析失败则代表mimeType无效
+     */
+    protected MediaType mediaType;
+
     /**
      * Required
      * Bucket空间名称
      */
-    @NotEmpty(message = "BucketName is required to set through method 'toBucket'")
     protected String bucketName;
     /**
      * 是否需要上传MD5校验码
@@ -98,6 +97,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
     public PutStreamApi from(InputStream inputStream, String mimeType) {
         this.inputStream = inputStream;
         this.mimeType = mimeType;
+        this.mediaType = MediaType.parse(mimeType);
         return this;
     }
 
@@ -146,11 +146,11 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
+    protected void prepareData() throws UfileParamException, UfileIOException, UfileAuthorizationException, UfileSignatureException {
         try {
-            ParameterValidator.validator(this);
+            parameterValidat();
 
-            String contentType = MediaType.parse(mimeType).toString();
+            String contentType = mediaType.toString();
             String contentMD5 = "";
             String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
@@ -159,7 +159,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
                     .addHeader("Content-Type", contentType)
                     .addHeader("Accpet", "*/*")
                     .addHeader("Date", date)
-                    .mediaType(MediaType.parse(mimeType));
+                    .mediaType(mediaType);
 
             builder.addHeader("Content-Length", String.valueOf(inputStream.available()));
 
@@ -184,11 +184,32 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
             FileUtil.close(cacheOutputStream);
 
             call = builder.build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
         } catch (IOException e) {
             throw new UfileIOException(e.getMessage());
         }
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (inputStream == null)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'inputStream' can not be null");
+
+        if (keyName == null || keyName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'keyName' can not be null or empty");
+
+        if (mimeType == null || mimeType.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'mimeType' can not be null or empty");
+
+        if (mediaType == null)
+            throw new UfileParamException(
+                    "The required param 'mimeType' is invalid");
+
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
     }
 
     private void backupStream() {
@@ -229,7 +250,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     @Override
-    public PutObjectResultBean parseHttpResponse(Response response) throws Exception {
+    public PutObjectResultBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
         PutObjectResultBean result = super.parseHttpResponse(response);
         if (result != null && result.getRetCode() == 0)
             result.seteTag(response.header("ETag").replace("\"", ""));

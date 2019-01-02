@@ -5,14 +5,14 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.bucket.BucketType;
 import cn.ucloud.ufile.bean.BucketResponse;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
 import okhttp3.Request;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018-12-11 14:32
@@ -21,8 +21,8 @@ public class CreateBucketSample {
     private static final String TAG = "CreateBucketSample";
 
     public static void main(String[] args) {
-        String bucketName = "bucketName";
-        String region = "region";
+        String bucketName = "";
+        String region = "";
         BucketType bucketType = BucketType.PRIVATE;
 
         execute(bucketName, region, bucketType);
@@ -34,7 +34,9 @@ public class CreateBucketSample {
                     .createBucket(bucketName, region, bucketType)
                     .execute();
             JLog.D(TAG, String.format("[res] = %s", (res == null ? "null" : res.toString())));
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
             e.printStackTrace();
         }
     }

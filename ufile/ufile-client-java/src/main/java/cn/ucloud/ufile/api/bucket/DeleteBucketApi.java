@@ -3,9 +3,9 @@ package cn.ucloud.ufile.api.bucket;
 import cn.ucloud.ufile.annotation.UcloudParam;
 import cn.ucloud.ufile.auth.BucketAuthorizer;
 import cn.ucloud.ufile.bean.BucketResponse;
+import cn.ucloud.ufile.exception.UfileParamException;
+import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
-
-import javax.validation.constraints.NotEmpty;
 
 /**
  * API-删除Bucket
@@ -19,7 +19,6 @@ public class DeleteBucketApi extends UfileBucketApi<BucketResponse> {
      * Required
      * 要删除的Bucket名称
      */
-    @NotEmpty(message = "BucketName is required")
     @UcloudParam("BucketName")
     private String bucketName;
 
@@ -62,4 +61,11 @@ public class DeleteBucketApi extends UfileBucketApi<BucketResponse> {
         return this;
     }
 
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        super.parameterValidat();
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
+    }
 }

@@ -2,11 +2,11 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.PutObjectResultBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileFileException;
-import cn.ucloud.ufile.exception.UfileException;
-import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.*;
 import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.OnProgressListener;
@@ -16,10 +16,7 @@ import cn.ucloud.ufile.util.*;
 import com.google.gson.JsonElement;
 import okhttp3.MediaType;
 import okhttp3.Response;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -36,25 +33,26 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
      * Required
      * 云端对象名称
      */
-    @NotEmpty(message = "KeyName is required to set through method 'nameAs'")
     protected String keyName;
     /**
      * Required
      * 要上传的文件
      */
-    @NotNull(message = "File is required")
     private File file;
     /**
      * Required
      * 要上传的文件mimeType
      */
-    @NotEmpty(message = "MimeType is required")
     protected String mimeType;
+    /**
+     * Required
+     * 根据MimeType解析成okhttp可用的mediaType，解析失败则代表mimeType无效
+     */
+    protected MediaType mediaType;
     /**
      * Required
      * Bucket空间名称
      */
-    @NotEmpty(message = "BucketName is required to set through method 'toBucket'")
     protected String bucketName;
     /**
      * 是否需要上传MD5校验码
@@ -93,12 +91,13 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
      * 设置要上传的文件和类型
      *
      * @param file     需上传的文件
-     * @param mimeType 需上传文件的MIME类型
+     * @param mimeType 需上传文件的MIME类型，可以通过MimeTypeUtil.getMimeType(File)来获取，也可用户自定义输入
      * @return {@link PutFileApi}
      */
     public PutFileApi from(File file, String mimeType) {
         this.file = file;
         this.mimeType = mimeType;
+        this.mediaType = MediaType.parse(mimeType);
         return this;
     }
 
@@ -147,50 +146,69 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
-        try {
-            ParameterValidator.validator(this);
-            if (!file.exists())
-                throw new UfileFileException("Profile file is inexistent!");
+    protected void prepareData() throws UfileParamException, UfileFileException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
+        if (!file.exists())
+            throw new UfileFileException("Profile file is inexistent!");
 
-            if (!file.isFile())
-                throw new UfileFileException("Profile is not a file!");
+        if (!file.isFile())
+            throw new UfileFileException("Profile is not a file!");
 
-            if (!file.canRead())
-                throw new UfileFileException("Profile file is not readable!");
+        if (!file.canRead())
+            throw new UfileFileException("Profile file is not readable!");
 
-            String contentType = MediaType.parse(mimeType).toString();
-            String contentMD5 = "";
-            String date = dateFormat.format(new Date(System.currentTimeMillis()));
+        String contentType = mediaType.toString();
+        String contentMD5 = "";
+        String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
-            PutFileRequestBuilder builder = (PutFileRequestBuilder) new PutFileRequestBuilder(onProgressListener)
-                    .baseUrl(generateFinalHost(bucketName, keyName))
-                    .addHeader("Content-Type", contentType)
-                    .addHeader("Accpet", "*/*")
-                    .addHeader("Content-Length", String.valueOf(file.length()))
-                    .addHeader("Date", date)
-                    .mediaType(MediaType.parse(mimeType));
+        PutFileRequestBuilder builder = (PutFileRequestBuilder) new PutFileRequestBuilder(onProgressListener)
+                .baseUrl(generateFinalHost(bucketName, keyName))
+                .addHeader("Content-Type", contentType)
+                .addHeader("Accpet", "*/*")
+                .addHeader("Content-Length", String.valueOf(file.length()))
+                .addHeader("Date", date)
+                .mediaType(mediaType);
 
-            if (isVerifyMd5) {
-                try {
-                    contentMD5 = HexFormatter.formatByteArray2HexString(Encoder.md5(file), false);
-                    builder.addHeader("Content-MD5", contentMD5);
-                } catch (IOException | NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
+        if (isVerifyMd5) {
+            try {
+                contentMD5 = HexFormatter.formatByteArray2HexString(Encoder.md5(file), false);
+                builder.addHeader("Content-MD5", contentMD5);
+            } catch (IOException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
             }
-
-            String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, bucketName, keyName,
-                    contentType, contentMD5, date).setOptional(authOptionalData));
-            builder.addHeader("authorization", authorization);
-
-            builder.params(file);
-            builder.setProgressConfig(progressConfig);
-
-            call = builder.build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
         }
+
+        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, bucketName, keyName,
+                contentType, contentMD5, date).setOptional(authOptionalData));
+        builder.addHeader("authorization", authorization);
+
+        builder.params(file);
+        builder.setProgressConfig(progressConfig);
+
+        call = builder.build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (file == null)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'file' can not be null");
+
+        if (keyName == null || keyName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'keyName' can not be null or empty");
+
+        if (mimeType == null || mimeType.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'mimeType' can not be null or empty");
+
+        if (mediaType == null)
+            throw new UfileParamException(
+                    "The required param 'mimeType' is invalid");
+
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
     }
 
     private OnProgressListener onProgressListener;
@@ -214,7 +232,7 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     @Override
-    public PutObjectResultBean parseHttpResponse(Response response) throws Exception {
+    public PutObjectResultBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
         PutObjectResultBean result = super.parseHttpResponse(response);
         if (result != null && result.getRetCode() == 0)
             result.seteTag(response.header("ETag").replace("\"", ""));

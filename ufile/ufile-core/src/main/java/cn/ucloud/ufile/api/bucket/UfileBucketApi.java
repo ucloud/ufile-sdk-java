@@ -3,17 +3,15 @@ package cn.ucloud.ufile.api.bucket;
 import cn.ucloud.ufile.annotation.UcloudParam;
 import cn.ucloud.ufile.auth.BucketAuthorizer;
 import cn.ucloud.ufile.api.UfileApi;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
 import cn.ucloud.ufile.util.Parameter;
 import cn.ucloud.ufile.util.ParameterMaker;
-import cn.ucloud.ufile.util.ParameterValidator;
 import okhttp3.MediaType;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -35,7 +33,6 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
     /**
      * Bucket API 请求动作描述
      */
-    @NotEmpty(message = "Action is required")
     @UcloudParam("Action")
     protected String action;
     /**
@@ -57,9 +54,9 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
+    protected void prepareData() throws UfileClientException {
         try {
-            ParameterValidator.validator(this);
+            parameterValidat();
 
             List<Parameter<String>> query = ParameterMaker.makeParameter(this);
             query.add(new Parameter("PublicKey", authorizer.getPublicKey()));
@@ -73,13 +70,17 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
                     .params(query)
                     .mediaType(MediaType.parse("application/json; charset=utf-8"))
                     .build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage(), e);
         } catch (IllegalAccessException e) {
-            throw new UfileException(e.getMessage(), e);
+            throw new UfileClientException(e.getMessage(), e);
         } catch (InvocationTargetException e) {
-            throw new UfileException(e.getMessage(), e);
+            throw new UfileClientException(e.getMessage(), e);
         }
     }
 
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (action == null || action.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'action' can not be null or empty");
+    }
 }

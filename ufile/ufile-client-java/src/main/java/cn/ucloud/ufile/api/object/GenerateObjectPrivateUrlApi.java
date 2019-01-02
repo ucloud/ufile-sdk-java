@@ -3,17 +3,14 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.auth.ObjectDownloadAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
-import cn.ucloud.ufile.util.ParameterValidator;
 import com.google.gson.JsonElement;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.PositiveOrZero;
 
 /**
  * API-生成私有下载URL
@@ -30,19 +27,16 @@ public class GenerateObjectPrivateUrlApi {
      * Required
      * 云端对象名称
      */
-    @NotEmpty(message = "KeyName is required")
     private String keyName;
     /**
      * Required
      * Bucket空间名称
      */
-    @NotEmpty(message = "BucketName is required")
     private String bucketName;
     /**
      * Required
      * 私有下载路径的有效时间，即：生成的下载URL会在 创建时刻的时间戳 + expiresDuration毫秒 后的时刻过期
      */
-    @PositiveOrZero(message = "ExpiresDuration must be positive")
     private long expiresDuration;
 
     /**
@@ -59,10 +53,7 @@ public class GenerateObjectPrivateUrlApi {
      * @param bucketName      bucket名称
      * @param expiresDuration 私有下载路径的有效时间，即：生成的下载URL会在 创建时刻的时间戳 + expiresDuration毫秒 后的时刻过期
      */
-    protected GenerateObjectPrivateUrlApi(ObjectAuthorizer authorizer, String host,
-                                          @NotEmpty(message = "KeyName is required") String keyName,
-                                          @NotEmpty(message = "BucketName is required") String bucketName,
-                                          @PositiveOrZero(message = "ExpiresDuration must be positive") int expiresDuration) {
+    protected GenerateObjectPrivateUrlApi(ObjectAuthorizer authorizer, String host, String keyName, String bucketName, int expiresDuration) {
         this.authorizer = authorizer;
         this.host = host;
         this.keyName = keyName;
@@ -90,25 +81,21 @@ public class GenerateObjectPrivateUrlApi {
      * @throws UfileAuthorizationException         授权异常时抛出
      * @throws UfileSignatureException             签名异常时抛出
      */
-    public String createUrl() throws UfileRequiredParamNotFoundException, UfileAuthorizationException, UfileSignatureException {
-        try {
-            ParameterValidator.validator(this);
-            long expiresTime = System.currentTimeMillis() / 1000 + expiresDuration;
+    public String createUrl() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
+        long expiresTime = System.currentTimeMillis() / 1000 + expiresDuration;
 
-            String signature = authorizer.authorizePrivateUrl(
-                    (ObjectDownloadAuthParam) new ObjectDownloadAuthParam(HttpMethod.GET, bucketName, keyName, expiresTime)
-                            .setOptional(authOptionalData));
+        String signature = authorizer.authorizePrivateUrl(
+                (ObjectDownloadAuthParam) new ObjectDownloadAuthParam(HttpMethod.GET, bucketName, keyName, expiresTime)
+                        .setOptional(authOptionalData));
 
-            GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
-                    .baseUrl(generateFinalHost(bucketName, keyName));
+        GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
+                .baseUrl(generateFinalHost(bucketName, keyName));
 
-            return builder.addParam(new Parameter("UCloudPublicKey", authorizer.getPublicKey()))
-                    .addParam(new Parameter("Signature", signature))
-                    .addParam(new Parameter("Expires", String.valueOf(expiresTime)))
-                    .generateGetUrl(builder.getBaseUrl(), builder.getParams());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
-        }
+        return builder.addParam(new Parameter("UCloudPublicKey", authorizer.getPublicKey()))
+                .addParam(new Parameter("Signature", signature))
+                .addParam(new Parameter("Expires", String.valueOf(expiresTime)))
+                .generateGetUrl(builder.getBaseUrl(), builder.getParams());
     }
 
     private String generateFinalHost(String bucketName, String keyName) {
@@ -119,5 +106,19 @@ public class GenerateObjectPrivateUrlApi {
             return String.format("%s/%s", host, keyName);
 
         return String.format("http://%s.%s/%s", bucketName, host, keyName);
+    }
+
+    protected void parameterValidat() throws UfileParamException {
+        if (keyName == null || keyName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'keyName' can not be null or empty");
+
+        if (bucketName == null || bucketName.isEmpty())
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'bucketName' can not be null or empty");
+
+        if (expiresDuration <= 0)
+            throw new UfileParamException(
+                    "The required param 'expiresDuration' must > 0");
     }
 }

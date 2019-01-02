@@ -5,6 +5,8 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
@@ -24,14 +26,29 @@ public class UploadHitSample {
     private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
     public static void main(String[] args) {
-        File file = new File("your file path");
+        File file = new File("");
         InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
-        String keyName = "which";
-        String bucketName = "bucketName";
+        String keyName = "";
+        String bucketName = "";
         uploadHitFile(file, keyName, bucketName);
     }
 
     public static void uploadHitFile(File file, String nameAs, String toBucket) {
+        try {
+            BaseResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                    .uploadHit(file)
+                    .nameAs(nameAs)
+                    .toBucket(toBucket)
+                    .execute();
+            JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void uploadHitFileAsync(File file, String nameAs, String toBucket) {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .uploadHit(file)
                 .nameAs(nameAs)
@@ -53,6 +70,21 @@ public class UploadHitSample {
     }
 
     public static void uploadHitStream(InputStream stream, String nameAs, String toBucket) {
+        try {
+            BaseResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                    .uploadHit(stream)
+                    .nameAs(nameAs)
+                    .toBucket(toBucket)
+                    .execute();
+            JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void uploadHitStreamAsync(InputStream stream, String nameAs, String toBucket) {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .uploadHit(stream)
                 .nameAs(nameAs)

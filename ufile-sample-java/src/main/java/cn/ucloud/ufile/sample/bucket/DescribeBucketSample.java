@@ -4,7 +4,8 @@ import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.bean.BucketDescribeResponse;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
@@ -40,7 +41,9 @@ public class DescribeBucketSample {
 //                    .withProjectId(projectId)
                     .execute();
             JLog.D(TAG, String.format("[res] = %s", (res == null ? "null" : res.toString())));
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
             e.printStackTrace();
         }
     }

@@ -1,23 +1,21 @@
 package cn.ucloud.ufile.api.object.multi;
 
-import cn.ucloud.ufile.api.object.GenerateObjectPrivateUrlApi;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
+import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.MultiUploadResponse;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostStringRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.JLog;
 import cn.ucloud.ufile.util.Parameter;
-import cn.ucloud.ufile.util.ParameterValidator;
 import com.google.gson.JsonElement;
 import okhttp3.MediaType;
-import sun.security.validator.ValidatorException;
 
-import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
@@ -32,13 +30,11 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
      * Required
      * 分片上传初始化状态
      */
-    @NotNull(message = "Info is required to set through method 'which'")
     private MultiUploadInfo info;
     /**
      * Required
      * 上传分片的结果集合
      */
-    @NotNull(message = "PartStates is required to set through method 'which'")
     private List<MultiUploadPartState> partStates;
 
     /**
@@ -100,43 +96,50 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
             o1.getPartIndex() > o2.getPartIndex() ? 1 : (o1.getPartIndex() == o2.getPartIndex() ? 0 : 1);
 
     @Override
-    protected void prepareData() throws UfileException {
-        try {
-            ParameterValidator.validator(this);
+    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+        parameterValidat();
 
-            PostStringRequestBuilder builder = new PostStringRequestBuilder();
-            List<Parameter<String>> query = new ArrayList<>();
-            query.add(new Parameter<>("uploadId", info.getUploadId()));
-            query.add(new Parameter<>("newKey", (newKeyName == null ? "" : newKeyName)));
+        PostStringRequestBuilder builder = new PostStringRequestBuilder();
+        List<Parameter<String>> query = new ArrayList<>();
+        query.add(new Parameter<>("uploadId", info.getUploadId()));
+        query.add(new Parameter<>("newKey", (newKeyName == null ? "" : newKeyName)));
 
-            if (partStates == null)
-                partStates = new ArrayList<>();
+        if (partStates == null)
+            partStates = new ArrayList<>();
 
-            Collections.sort(partStates, partStateComparator);
+        Collections.sort(partStates, partStateComparator);
 
-            StringBuffer bodyBuffer = new StringBuffer();
-            for (int i = 0, len = partStates.size(); i < len; i++) {
-                MultiUploadPartState part = partStates.get(i);
-                JLog.T(TAG, part.toString());
-                bodyBuffer.append(part.geteTag() + (i < (len - 1) ? "," : ""));
-            }
-
-            String contentType = MediaType.parse(info.getMimeType()).toString();
-            String date = dateFormat.format(new Date(System.currentTimeMillis()));
-            String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, info.getBucket(), info.getKeyName(),
-                    contentType, "", date).setOptional(authOptionalData));
-
-            builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
-                    .addHeader("Content-Type", contentType)
-                    .addHeader("Content-Length", String.valueOf(bodyBuffer.length()))
-                    .addHeader("Accpet", "*/*")
-                    .addHeader("Date", date)
-                    .addHeader("authorization", authorization)
-                    .params(bodyBuffer.toString());
-
-            call = builder.build(httpClient.getOkHttpClient());
-        } catch (ValidatorException e) {
-            throw new UfileRequiredParamNotFoundException(e.getMessage());
+        StringBuffer bodyBuffer = new StringBuffer();
+        for (int i = 0, len = partStates.size(); i < len; i++) {
+            MultiUploadPartState part = partStates.get(i);
+            JLog.T(TAG, part.toString());
+            bodyBuffer.append(part.geteTag() + (i < (len - 1) ? "," : ""));
         }
+
+        String contentType = MediaType.parse(info.getMimeType()).toString();
+        String date = dateFormat.format(new Date(System.currentTimeMillis()));
+        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, info.getBucket(), info.getKeyName(),
+                contentType, "", date).setOptional(authOptionalData));
+
+        builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
+                .addHeader("Content-Type", contentType)
+                .addHeader("Content-Length", String.valueOf(bodyBuffer.length()))
+                .addHeader("Accpet", "*/*")
+                .addHeader("Date", date)
+                .addHeader("authorization", authorization)
+                .params(bodyBuffer.toString());
+
+        call = builder.build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    protected void parameterValidat() throws UfileParamException {
+        if (info == null)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'info' can not be null");
+
+        if (partStates == null)
+            throw new UfileRequiredParamNotFoundException(
+                    "The required param 'partStates' can not be null");
     }
 }

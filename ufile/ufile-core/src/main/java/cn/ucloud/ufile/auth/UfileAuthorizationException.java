@@ -1,6 +1,6 @@
 package cn.ucloud.ufile.auth;
 
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 
 /**
  * 授权异常
@@ -9,7 +9,7 @@ import cn.ucloud.ufile.exception.UfileException;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/7 18:19
  */
-public class UfileAuthorizationException extends UfileException {
+public class UfileAuthorizationException extends UfileClientException {
     public UfileAuthorizationException(String message) {
         super(message);
     }

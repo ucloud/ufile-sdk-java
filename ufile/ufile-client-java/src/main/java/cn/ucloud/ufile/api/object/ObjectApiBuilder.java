@@ -7,9 +7,10 @@ import cn.ucloud.ufile.auth.ObjectRemoteAuthorization;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectProfile;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.util.Etag;
 
 import java.io.*;
@@ -239,9 +240,9 @@ public class ObjectApiBuilder {
      * @param keyName    要对比的云端文件名
      * @param bucketName 要对比的云端文件的所属空间
      * @return ETag是否一致
-     * @throws UfileException
+     * @throws UfileClientException
      */
-    public boolean compareEtag(File localFile, String keyName, String bucketName) throws UfileException {
+    public boolean compareEtag(File localFile, String keyName, String bucketName) throws UfileClientException, UfileServerException {
         try {
             return compareEtag(new FileInputStream(localFile), keyName, bucketName);
         } catch (FileNotFoundException e) {
@@ -256,9 +257,9 @@ public class ObjectApiBuilder {
      * @param keyName     要对比的云端文件名
      * @param bucketName  要对比的云端文件的所属空间
      * @return ETag是否一致
-     * @throws UfileException
+     * @throws UfileClientException
      */
-    public boolean compareEtag(InputStream localStream, String keyName, String bucketName) throws UfileException {
+    public boolean compareEtag(InputStream localStream, String keyName, String bucketName) throws UfileClientException, UfileServerException {
         ObjectProfile res = objectProfile(keyName, bucketName).execute();
         try {
             Etag eTag = Etag.etag(localStream);
