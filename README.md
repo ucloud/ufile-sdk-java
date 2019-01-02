@@ -1,6 +1,8 @@
 # UCloud Ufile SDK for Java
 
 [![](https://img.shields.io/github/release/ucloud/ufile-sdk-java.svg)](https://github.com/ucloud/ufile-sdk-java)
+[![](https://img.shields.io/github/last-commit/ucloud/ufile-sdk-java.svg)](https://github.com/ucloud/ufile-sdk-java)
+[![](https://img.shields.io/github/commits-since/ucloud/ufile-sdk-java/latest.svg)](https://github.com/ucloud/ufile-sdk-java)
 
 ## Version History
 - ~~[Ver 1.0.0](https://github.com/ufilesdk-dev/ufile-javasdk)~~ 不建议使用
@@ -17,7 +19,7 @@
     <dependency>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile-client-java</artifactId>
-        <version>2.0.2</version>
+        <version>2.0.3</version>
     </dependency>
     ```
 
@@ -54,7 +56,9 @@ UfileClient.bucket(BUCKET_AUTHORIZER)
         BucketResponse res = UfileClient.bucket(BUCKET_AUTHORIZER)
             .createBucket(bucketName, region, bucketType)
             .execute();
-    } catch (UfileException e) {
+    } catch (UfileClientException e) {
+        e.printStackTrace();
+    } catch (UfileServerException e) {
         e.printStackTrace();
     }
     ```
@@ -127,29 +131,35 @@ UfileClient.object(OBJECT_AUTHORIZER, config)
 
     ``` java
     File file = new File("your file path");
-
-    PutObjectResultBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-         .putObject(file, "mimeType")
-         .nameAs("save as keyName")
-         .toBucket("upload to which bucket")
-         /**
-          * 是否上传校验MD5, Default = true
-          */
-     //  .withVerifyMd5(false)
-         /**
-          * 指定progress callback的间隔, Default = 每秒回调
-          */
-     //  .withProgressConfig(ProgressConfig.callbackWithPercent(10))
-         /**
-          * 配置进度监听
-          */
-         .setOnProgressListener(new OnProgressListener() {
-              @Override
-              public void onProgress(long bytesWritten, long contentLength) {
-                  
-              }
-         })
-         .execute();
+    
+    try {
+        PutObjectResultBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+             .putObject(file, "mimeType")
+             .nameAs("save as keyName")
+             .toBucket("upload to which bucket")
+             /**
+              * 是否上传校验MD5, Default = true
+              */
+         //  .withVerifyMd5(false)
+             /**
+              * 指定progress callback的间隔, Default = 每秒回调
+              */
+         //  .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+             /**
+              * 配置进度监听
+              */
+             .setOnProgressListener(new OnProgressListener() {
+                  @Override
+                  public void onProgress(long bytesWritten, long contentLength) {
+                      
+                  }
+             })
+             .execute();
+    } catch (UfileClientException e) {
+        e.printStackTrace();
+    } catch (UfileServerException e) {
+        e.printStackTrace();
+    }
     ```
 
 - 异步
