@@ -6,9 +6,7 @@ import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.PutObjectResultBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileFileException;
-import cn.ucloud.ufile.exception.UfileParamException;
-import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.*;
 import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.OnProgressListener;
@@ -234,7 +232,7 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     @Override
-    public PutObjectResultBean parseHttpResponse(Response response) throws Exception {
+    public PutObjectResultBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
         PutObjectResultBean result = super.parseHttpResponse(response);
         if (result != null && result.getRetCode() == 0)
             result.seteTag(response.header("ETag").replace("\"", ""));

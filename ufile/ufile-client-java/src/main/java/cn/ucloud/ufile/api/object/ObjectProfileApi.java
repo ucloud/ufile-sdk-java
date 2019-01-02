@@ -6,8 +6,10 @@ import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectProfile;
 import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileHttpException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.HeadRequestBuilder;
@@ -15,6 +17,7 @@ import cn.ucloud.ufile.util.HttpMethod;
 import com.google.gson.JsonElement;
 import okhttp3.Response;
 
+import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -110,7 +113,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
     }
 
     @Override
-    public ObjectProfile parseHttpResponse(Response response) throws Exception {
+    public ObjectProfile parseHttpResponse(Response response) throws UfileServerException {
         ObjectProfile result = new ObjectProfile();
         int code = response.code();
 
@@ -125,7 +128,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
 
             return result;
         } else {
-            throw new UfileHttpException(parseErrorResponse(response).toString());
+            throw new UfileServerException(parseErrorResponse(response));
         }
     }
 
@@ -141,7 +144,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
                 break;
             }
             default: {
-                errorBean.setErrMsg(String.format("Http error: Response-Code is %d", code));
+                errorBean.setErrMsg(String.format("Http Error: Response-Code is %d", code));
                 break;
             }
         }

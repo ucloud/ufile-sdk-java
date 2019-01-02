@@ -5,7 +5,6 @@ import cn.ucloud.ufile.auth.ObjectOptAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
-import cn.ucloud.ufile.exception.UfileException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;

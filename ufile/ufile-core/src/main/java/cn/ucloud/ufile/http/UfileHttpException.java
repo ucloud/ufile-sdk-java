@@ -1,6 +1,6 @@
 package cn.ucloud.ufile.http;
 
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 
 /**
  * UfileHttp异常
@@ -9,7 +9,7 @@ import cn.ucloud.ufile.exception.UfileException;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/13 22:30
  */
-public class UfileHttpException extends UfileException {
+public class UfileHttpException extends UfileClientException {
     public UfileHttpException(String message) {
         super(message);
     }

@@ -8,7 +8,7 @@ import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.ObjectProfile;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
@@ -349,7 +349,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     @Override
-    public DownloadFileBean execute() throws UfileException {
+    public DownloadFileBean execute() throws UfileClientException {
         prepareData();
 
         try {
@@ -369,7 +369,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         } catch (IOException e) {
             throw new UfileIOException("Calculate ETag error!", e);
         } catch (InterruptedException e) {
-            throw new UfileException("Invoke part occur error!", e);
+            throw new UfileClientException("Invoke part occur error!", e);
         }
     }
 
@@ -401,7 +401,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                             new ApiError(ApiError.ErrorType.ERROR_NORMAL_ERROR, new UfileIOException("Calculate ETag error!", e)), null);
                 }
             }
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
             if (httpCallback != null)
                 httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_PARAMS_ILLEGAL, e), null);
         } catch (InterruptedException e) {
@@ -431,13 +431,13 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
                 return parseHttpResponse(response);
             } catch (Throwable t) {
-                throw new UfileException(t);
+                throw new UfileClientException(t);
             }
         }
     }
 
     @Override
-    public DownloadFileBean parseHttpResponse(Response response) throws IOException, NumberFormatException {
+    public DownloadFileBean parseHttpResponse(Response response) throws UfileIOException, NumberFormatException {
         DownloadFileBean result = new DownloadFileBean();
         result.setContentLength(response.body().contentLength());
         String range = response.header("Content-Range", "");
@@ -448,11 +448,12 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         long total = Long.parseLong(rangeArr[1].trim());
         JLog.T(TAG, "[Content-Range]:" + range + " [start]:" + start + " [total]:" + total);
 
-        RandomAccessFile raf = new RandomAccessFile(finalFile, "rwd");
-        raf.seek(start);
-
         InputStream is = response.body().byteStream();
+        RandomAccessFile raf = null;
         try {
+            raf = new RandomAccessFile(finalFile, "rwd");
+            raf.seek(start);
+
             byte[] buffer = new byte[UfileConstants.DEFAULT_BUFFER_SIZE];
             int len = 0;
             while ((len = is.read(buffer)) > 0) {
@@ -473,6 +474,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 bytesWrittenCache.set(0);
                 onProgressListener.onProgress(written, total);
             }
+        } catch (IOException e) {
+            throw new UfileIOException("Occur IOException while IO stream");
         } finally {
             if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
                 if (progressTask != null)

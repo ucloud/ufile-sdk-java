@@ -3,7 +3,7 @@ package cn.ucloud.ufile.api.bucket;
 import cn.ucloud.ufile.annotation.UcloudParam;
 import cn.ucloud.ufile.auth.BucketAuthorizer;
 import cn.ucloud.ufile.api.UfileApi;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
@@ -54,7 +54,7 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
     }
 
     @Override
-    protected void prepareData() throws UfileException {
+    protected void prepareData() throws UfileClientException {
         try {
             parameterValidat();
 
@@ -71,9 +71,9 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
                     .mediaType(MediaType.parse("application/json; charset=utf-8"))
                     .build(httpClient.getOkHttpClient());
         } catch (IllegalAccessException e) {
-            throw new UfileException(e.getMessage(), e);
+            throw new UfileClientException(e.getMessage(), e);
         } catch (InvocationTargetException e) {
-            throw new UfileException(e.getMessage(), e);
+            throw new UfileClientException(e.getMessage(), e);
         }
     }
 

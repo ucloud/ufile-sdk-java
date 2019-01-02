@@ -5,8 +5,10 @@ import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostJsonRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
@@ -143,7 +145,7 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
     }
 
     @Override
-    public MultiUploadInfo parseHttpResponse(Response response) throws Exception {
+    public MultiUploadInfo parseHttpResponse(Response response) throws UfileServerException, UfileClientException {
         MultiUploadInfo state = super.parseHttpResponse(response);
         state.setMimeType(mimeType);
         return state;

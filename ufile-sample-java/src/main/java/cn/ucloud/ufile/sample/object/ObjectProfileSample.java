@@ -5,7 +5,8 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.bean.ObjectProfile;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
@@ -24,18 +25,20 @@ public class ObjectProfileSample {
         String keyName = "";
         String bucketName = "";
 
-        try {
-            execute(keyName, bucketName);
-        } catch (UfileException e) {
-            e.printStackTrace();
-        }
+        execute(keyName, bucketName);
     }
 
-    public static void execute(String keyName, String bucketName) throws UfileException {
-        ObjectProfile objectProfile = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                .objectProfile(keyName, bucketName)
-                .execute();
-        JLog.D(TAG, String.format("[res] = %s", (objectProfile == null ? "null" : objectProfile.toString())));
+    public static void execute(String keyName, String bucketName) {
+        try {
+            ObjectProfile objectProfile = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                    .objectProfile(keyName, bucketName)
+                    .execute();
+            JLog.D(TAG, String.format("[res] = %s", (objectProfile == null ? "null" : objectProfile.toString())));
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void executeAsync(String keyName, String bucketName) {

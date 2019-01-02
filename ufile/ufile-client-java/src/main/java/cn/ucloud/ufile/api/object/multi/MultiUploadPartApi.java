@@ -5,8 +5,10 @@ import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.OnProgressListener;
@@ -173,9 +175,9 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'buffer' can not be null or empty");
 
-        if (partIndex <= 0)
+        if (partIndex < 0)
             throw new UfileParamException(
-                    "The required param 'partIndex' must > 0");
+                    "The required param 'partIndex' must be >= 0");
     }
 
     /**
@@ -202,7 +204,7 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
     }
 
     @Override
-    public MultiUploadPartState parseHttpResponse(Response response) throws Exception {
+    public MultiUploadPartState parseHttpResponse(Response response) throws UfileServerException, UfileClientException {
         MultiUploadPartState result = super.parseHttpResponse(response);
         if (result != null && result.getRetCode() == 0)
             result.seteTag(response.header("ETag").replace("\"", ""));

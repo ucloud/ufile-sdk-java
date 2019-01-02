@@ -8,8 +8,9 @@ import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.DownloadStreamBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
@@ -49,29 +50,35 @@ public class GetObjectSample {
         }
     }
 
-    public static void getFile(String url, String localDir, String saveName) throws UfileException {
-        DownloadFileBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                .getFile(url)
-                .saveAt(localDir, saveName)
-                /**
-                 * 是否覆盖本地已有文件, Default = true;
-                 */
+    public static void getFile(String url, String localDir, String saveName) {
+        try {
+            DownloadFileBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                    .getFile(url)
+                    .saveAt(localDir, saveName)
+                    /**
+                     * 是否覆盖本地已有文件, Default = true;
+                     */
 //                .withCoverage(false)
-                /**
-                 * 指定progress callback的间隔
-                 */
+                    /**
+                     * 指定progress callback的间隔
+                     */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
-                /**
-                 * 配置进度监听
-                 */
-                .setOnProgressListener(new OnProgressListener() {
-                    @Override
-                    public void onProgress(long bytesWritten, long contentLength) {
-                        JLog.D(TAG, String.format("[progress] = %d%% - [%d/%d]", (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
-                    }
-                })
-                .execute();
-        JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+                    /**
+                     * 配置进度监听
+                     */
+                    .setOnProgressListener(new OnProgressListener() {
+                        @Override
+                        public void onProgress(long bytesWritten, long contentLength) {
+                            JLog.D(TAG, String.format("[progress] = %d%% - [%d/%d]", (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
+                        }
+                    })
+                    .execute();
+            JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void getFileAsync(String url, String localDir, String saveName) {
@@ -106,36 +113,40 @@ public class GetObjectSample {
                 });
     }
 
-    public static void getStream(String url, String localDir, String saveName) throws FileNotFoundException, UfileException {
-        OutputStream os = null;
-        os = new FileOutputStream(new File(localDir, saveName));
+    public static void getStream(String url, String localDir, String saveName) throws FileNotFoundException, UfileClientException {
+        try {
+            OutputStream os = null;
+            os = new FileOutputStream(new File(localDir, saveName));
 
-        DownloadStreamBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                .getStream(url)
-                /**
-                 * 重定向流
-                 *
-                 * 默认不重定向流，下载的流会以InputStream的形式在Response中回调，并且不会回调下载进度 onProgress;
-                 *
-                 * 如果配置了重定向的输出流，则Response {@link DownloadStreamBean}的 InputStream = null,
-                 * 因为流已被重定向导流到OutputStream，并且会回调进度 onProgress。
-                 */
-                .redirectStream(os)
-                /**
-                 * 指定progress callback的间隔
-                 */
+            DownloadStreamBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                    .getStream(url)
+                    /**
+                     * 重定向流
+                     *
+                     * 默认不重定向流，下载的流会以InputStream的形式在Response中回调，并且不会回调下载进度 onProgress;
+                     *
+                     * 如果配置了重定向的输出流，则Response {@link DownloadStreamBean}的 InputStream = null,
+                     * 因为流已被重定向导流到OutputStream，并且会回调进度 onProgress。
+                     */
+                    .redirectStream(os)
+                    /**
+                     * 指定progress callback的间隔
+                     */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
-                /**
-                 * 配置进度监听
-                 */
-                .setOnProgressListener(new OnProgressListener() {
-                    @Override
-                    public void onProgress(long bytesWritten, long contentLength) {
-                        JLog.D(TAG, String.format("[progress] = %d%% - [%d/%d]", (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
-                    }
-                })
-                .execute();
-        JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+                    /**
+                     * 配置进度监听
+                     */
+                    .setOnProgressListener(new OnProgressListener() {
+                        @Override
+                        public void onProgress(long bytesWritten, long contentLength) {
+                            JLog.D(TAG, String.format("[progress] = %d%% - [%d/%d]", (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
+                        }
+                    })
+                    .execute();
+            JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+        } catch (UfileServerException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void getStreamAsync(String url, String localDir, String saveName) {

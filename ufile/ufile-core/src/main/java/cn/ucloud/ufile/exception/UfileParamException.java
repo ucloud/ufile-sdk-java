@@ -8,7 +8,7 @@ package cn.ucloud.ufile.exception;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/13 16:25
  */
-public class UfileParamException extends UfileException {
+public class UfileParamException extends UfileClientException {
     public UfileParamException(String message) {
         super(message);
     }

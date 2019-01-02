@@ -3,6 +3,7 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.bean.DownloadStreamBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.BaseHttpCallback;
@@ -133,7 +134,7 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
     }
 
     @Override
-    public DownloadStreamBean parseHttpResponse(Response response) throws IOException {
+    public DownloadStreamBean parseHttpResponse(Response response) throws UfileIOException {
         DownloadStreamBean result = new DownloadStreamBean();
         long contentLength = response.body().contentLength();
         result.setContentLength(contentLength);
@@ -190,6 +191,8 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
                     bytesWrittenCache.set(0);
                     onProgressListener.onProgress(written, contentLength);
                 }
+            } catch (IOException e) {
+                throw new UfileIOException("Occur IOException while IO stream");
             } finally {
                 if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
                     if (progressTask != null)

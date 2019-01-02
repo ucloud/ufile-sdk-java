@@ -5,7 +5,8 @@ import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.exception.UfileException;
+import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
@@ -40,7 +41,9 @@ public class UploadHitSample {
                     .toBucket(toBucket)
                     .execute();
             JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
             e.printStackTrace();
         }
     }
@@ -74,7 +77,9 @@ public class UploadHitSample {
                     .toBucket(toBucket)
                     .execute();
             JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
-        } catch (UfileException e) {
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
             e.printStackTrace();
         }
     }
