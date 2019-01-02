@@ -93,7 +93,7 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
      * 设置要上传的文件和类型
      *
      * @param file     需上传的文件
-     * @param mimeType 需上传文件的MIME类型
+     * @param mimeType 需上传文件的MIME类型，可以通过MimeTypeUtil.getMimeType(File)来获取，也可用户自定义输入
      * @return {@link PutFileApi}
      */
     public PutFileApi from(File file, String mimeType) {
