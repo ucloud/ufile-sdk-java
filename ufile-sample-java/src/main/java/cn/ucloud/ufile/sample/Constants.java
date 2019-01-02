@@ -11,7 +11,6 @@ import cn.ucloud.ufile.util.JLog;
 public class Constants {
     static {
         // 开启Debug级别日志
-        JLog.SHOW_TEST = true;
         JLog.SHOW_DEBUG = true;
     }
 
@@ -19,15 +18,15 @@ public class Constants {
      * 本地Bucket相关API的签名器
      */
     public static final BucketAuthorization BUCKET_AUTHORIZER = new UfileBucketLocalAuthorization(
-            System.getenv("UcloudPublicKey"),
-            System.getenv("UcloudPrivateKey"));
+            您的公钥,
+            您的私钥);
 
     /**
      * 本地Object相关API的签名器
      */
     public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
-            System.getenv("UcloudPublicKey"),
-            System.getenv("UcloudPrivateKey"));
+            您的公钥,
+            您的私钥);
 
     /**
      * 远程Object相关API的签名器
