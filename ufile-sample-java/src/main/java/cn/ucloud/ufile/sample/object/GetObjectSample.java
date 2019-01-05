@@ -9,6 +9,7 @@ import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.DownloadStreamBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.OnProgressListener;
@@ -45,7 +46,11 @@ public class GetObjectSample {
                     .getDownloadUrlFromPrivateBucket(keyName, bucketName, expiresDuration)
                     .createUrl();
             getStream(url, localDir, saveName);
-        } catch (Exception e) {
+        } catch (UfileParamException e) {
+            e.printStackTrace();
+        } catch (UfileAuthorizationException e) {
+            e.printStackTrace();
+        } catch (UfileSignatureException e) {
             e.printStackTrace();
         }
     }
@@ -113,7 +118,7 @@ public class GetObjectSample {
                 });
     }
 
-    public static void getStream(String url, String localDir, String saveName) throws FileNotFoundException, UfileClientException {
+    public static void getStream(String url, String localDir, String saveName) {
         try {
             OutputStream os = null;
             os = new FileOutputStream(new File(localDir, saveName));
@@ -146,6 +151,10 @@ public class GetObjectSample {
             JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
         } catch (UfileServerException e) {
             e.printStackTrace();
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        } catch (UfileClientException e1) {
+            e1.printStackTrace();
         }
     }
 

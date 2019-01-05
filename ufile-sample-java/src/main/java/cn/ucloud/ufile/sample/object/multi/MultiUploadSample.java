@@ -9,7 +9,6 @@ import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.OnProgressListener;
-import cn.ucloud.ufile.http.ProgressConfig;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.util.JLog;
@@ -28,7 +27,7 @@ import java.util.concurrent.*;
  */
 public class MultiUploadSample {
     private static final String TAG = "MultiUploadSample";
-    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
     public static void main(String[] args) {
         try {

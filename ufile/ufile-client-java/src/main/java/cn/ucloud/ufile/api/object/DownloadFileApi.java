@@ -363,6 +363,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
 
             return new DownloadFileBean()
+                    .setContentType(profile.getContentType())
                     .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
                     .setFile(finalFile)
                     .setContentLength(finalFile.length());
@@ -393,6 +394,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             if (httpCallback != null) {
                 try {
                     httpCallback.onResponse(new DownloadFileBean()
+                            .setContentType(profile.getContentType())
                             .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
                             .setFile(finalFile)
                             .setContentLength(finalFile.length()));
@@ -440,6 +442,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     public DownloadFileBean parseHttpResponse(Response response) throws UfileIOException, NumberFormatException {
         DownloadFileBean result = new DownloadFileBean();
         result.setContentLength(response.body().contentLength());
+        result.setContentType(response.header("Content-Type"));
         String range = response.header("Content-Range", "");
         range = range.replace("bytes", "");
         String[] rangeArr = range.split("-");

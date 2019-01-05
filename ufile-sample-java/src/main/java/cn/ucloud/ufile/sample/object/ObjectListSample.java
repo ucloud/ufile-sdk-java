@@ -19,7 +19,7 @@ import okhttp3.Request;
  */
 public class ObjectListSample {
     private static final String TAG = "ObjectListSample";
-    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
     public static void main(String[] args) {
         String bucketName = "";

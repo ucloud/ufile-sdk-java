@@ -14,10 +14,21 @@ import java.io.File;
 public class DownloadFileBean {
     @SerializedName("ETag")
     private String eTag;
+    @SerializedName("Content-Type")
+    private String contentType;
     @SerializedName("Content-Length")
     private long contentLength;
     @SerializedName("File")
     private File file;
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public DownloadFileBean setContentType(String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
 
     public String geteTag() {
         return eTag;

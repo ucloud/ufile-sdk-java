@@ -138,6 +138,7 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         DownloadStreamBean result = new DownloadStreamBean();
         long contentLength = response.body().contentLength();
         result.setContentLength(contentLength);
+        result.setContentType(response.header("Content-Type"));
         result.seteTag(response.header("ETag").replace("\"", ""));
 
         InputStream is = response.body().byteStream();
