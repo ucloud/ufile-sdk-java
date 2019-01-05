@@ -165,6 +165,7 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         DownloadFileBean result = new DownloadFileBean();
         long contentLength = response.body().contentLength();
         result.setContentLength(contentLength);
+        result.setContentType(response.header("Content-Type"));
         result.seteTag(response.header("ETag").replace("\"", ""));
 
         if (onProgressListener != null) {

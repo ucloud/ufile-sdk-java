@@ -14,10 +14,21 @@ import java.io.InputStream;
 public class DownloadStreamBean {
     @SerializedName("ETag")
     private String eTag;
+    @SerializedName("Content-Type")
+    private String contentType;
     @SerializedName("Content-Length")
     private long contentLength;
     @SerializedName("InputStream")
     private InputStream inputStream;
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public DownloadStreamBean setContentType(String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
 
     public String geteTag() {
         return eTag;

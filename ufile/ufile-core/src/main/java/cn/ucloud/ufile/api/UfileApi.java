@@ -101,7 +101,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
 
             return parseHttpResponse(response);
         } catch (IOException e) {
-            throw new UfileIOException("Occur IOException while parsing response data");
+            throw new UfileIOException("Occur IOException while sending http request");
         }
     }
 
