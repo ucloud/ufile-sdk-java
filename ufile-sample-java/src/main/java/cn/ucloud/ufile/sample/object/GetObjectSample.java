@@ -10,7 +10,6 @@ import cn.ucloud.ufile.bean.DownloadStreamBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
-import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.UfileCallback;

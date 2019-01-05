@@ -35,9 +35,8 @@ public class LogInterceptor implements Interceptor {
 
         /* 记录请求耗时 */
         long startNs = System.nanoTime();
-        Response response;
         /* 发送请求，获得响应 */
-        response = chain.proceed(request);
+        Response response = chain.proceed(request);
 
         long tookMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNs);
         /* 打印请求耗时 */
@@ -48,16 +47,14 @@ public class LogInterceptor implements Interceptor {
 
         /* 获得返回的body，注意此处不要使用responseBody.string()获取返回数据，原因在于这个方法会消耗返回结果的数据(buffer) */
         ResponseBody responseBody = response.body();
-
-        if (JLog.SHOW_TEST) {
-            /* 为了不消耗buffer，我们这里使用source先获得buffer对象，然后clone()后使用 */
-            BufferedSource source = responseBody.source();
-            source.request(Long.MAX_VALUE); // Buffer the entire body.
-            /* 获得返回的数据 */
-            Buffer buffer = source.buffer();
+        /* 为了不消耗buffer，我们这里使用source先获得buffer对象，然后clone()后使用 */
+        BufferedSource source = responseBody.source();
+        source.request(Long.MAX_VALUE); // Buffer the entire body.
+        /* 获得返回的数据 */
+        Buffer buffer = source.buffer();
+        if (buffer.size() < 1024)
             /* 使用前clone() 下，避免直接消耗 */
             JLog.T(TAG, "[response-body]:" + buffer.clone().readString(Charset.forName("UTF-8")));
-        }
 
         return response;
     }
