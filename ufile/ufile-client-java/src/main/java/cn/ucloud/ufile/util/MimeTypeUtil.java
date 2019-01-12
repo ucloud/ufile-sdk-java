@@ -29,17 +29,23 @@ public class MimeTypeUtil {
             throw new UfileFileException(String.format("%s is not a file", file.getName()));
 
         String name = file.getName();
-        JLog.T(TAG, "[file name]:" + name);
+        return getMimeType(name);
+    }
 
-        int lastDot = name.lastIndexOf(".");
-        if (lastDot > (name.length() - 2))
-            name = "";
+    public static String getMimeType(String fileName) {
+        JLog.T(TAG, "[file name]:" + fileName);
+        if (fileName == null || fileName.isEmpty())
+            throw new IllegalArgumentException("fileName is null or empty!");
+
+        int lastDot = fileName.lastIndexOf(".");
+        if (lastDot > (fileName.length() - 2))
+            fileName = "";
         else
-            name = name.substring(lastDot + 1);
+            fileName = fileName.substring(lastDot + 1);
 
-        JLog.T(TAG, "[suffix]:" + name);
+        JLog.T(TAG, "[suffix]:" + fileName);
 
-        JsonElement res = MIME_TYPE_JSON.get(name);
+        JsonElement res = MIME_TYPE_JSON.get(fileName);
 
         return res == null ? MIME_TYPE_JSON.get("").getAsString() : res.getAsString();
     }
