@@ -27,12 +27,12 @@ import java.util.concurrent.*;
  */
 public class MultiUploadSample {
     private static final String TAG = "MultiUploadSample";
-    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
     public static void main(String[] args) {
-        File file = new File("/Users/joshua/Downloads/testDir/googlechrome.dmg");
+        File file = new File("");
         String keyName = file.getName();
-        String bucketName = "new-bucket";
+        String bucketName = "";
 
         // 先初始化分片上环请求
         MultiUploadInfo state = initMultiUpload(file, keyName, bucketName);
@@ -85,7 +85,7 @@ public class MultiUploadSample {
                 while (uploadCount < 3) {
                     try {
                         MultiUploadPartState partState = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                                .multiUploadPart(state, buffer, index)
+                                .multiUploadPart(state, sendData, index)
                                 /**
                                  * 指定progress callback的间隔
                                  */

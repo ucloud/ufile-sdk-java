@@ -11,7 +11,6 @@ import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
-import cn.ucloud.ufile.util.MimeTypeUtil;
 import okhttp3.Request;
 
 import java.io.*;

@@ -113,13 +113,18 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     public void executeAsync(BaseHttpCallback<T, UfileErrorBean> callback) {
         httpCallback = callback;
 
-        try {
-            prepareData();
-            call.enqueue(this);
-        } catch (UfileClientException e) {
-            if (callback != null)
-                httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_PARAMS_ILLEGAL, e), null);
-        }
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    prepareData();
+                    call.enqueue(UfileApi.this);
+                } catch (UfileClientException e) {
+                    if (callback != null)
+                        httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_PARAMS_ILLEGAL, e), null);
+                }
+            }
+        }.start();
     }
 
     @Override
