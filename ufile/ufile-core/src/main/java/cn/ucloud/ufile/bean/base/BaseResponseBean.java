@@ -3,6 +3,8 @@ package cn.ucloud.ufile.bean.base;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Response 基础类
  *
@@ -10,7 +12,7 @@ import com.google.gson.annotations.SerializedName;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/15 16:26
  */
-public class BaseResponseBean {
+public class BaseResponseBean implements Serializable {
     /**
      * 返回状态码, 正常返回 0
      */

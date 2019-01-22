@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.InputStream;
+import java.io.Serializable;
 
 /**
  *
@@ -11,7 +12,7 @@ import java.io.InputStream;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/15 16:52
  */
-public class DownloadStreamBean {
+public class DownloadStreamBean implements Serializable {
     @SerializedName("ETag")
     private String eTag;
     @SerializedName("Content-Type")

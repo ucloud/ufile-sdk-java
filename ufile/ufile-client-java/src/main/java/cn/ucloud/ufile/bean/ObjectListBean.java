@@ -3,6 +3,7 @@ package cn.ucloud.ufile.bean;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/21 15:41
  */
-public class ObjectListBean {
+public class ObjectListBean implements Serializable {
     @SerializedName("BucketId")
     private String bucketId;
     @SerializedName("BucketName")

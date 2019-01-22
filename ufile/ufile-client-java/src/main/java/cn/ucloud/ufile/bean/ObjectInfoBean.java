@@ -3,13 +3,15 @@ package cn.ucloud.ufile.bean;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/21 15:45
  */
-public class ObjectInfoBean {
+public class ObjectInfoBean implements Serializable {
     @SerializedName("BucketName")
     private String bucketName;
     @SerializedName("CreateTime")
