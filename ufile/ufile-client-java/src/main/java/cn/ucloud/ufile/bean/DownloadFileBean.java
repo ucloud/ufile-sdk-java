@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.File;
+import java.io.Serializable;
 
 /**
  *
@@ -11,7 +12,7 @@ import java.io.File;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/15 16:52
  */
-public class DownloadFileBean {
+public class DownloadFileBean implements Serializable {
     @SerializedName("ETag")
     private String eTag;
     @SerializedName("Content-Type")
