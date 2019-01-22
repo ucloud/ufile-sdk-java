@@ -19,12 +19,19 @@
     <dependency>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile-client-java</artifactId>
-        <version>2.0.4</version>
+        <version>2.0.5</version>
     </dependency>
     ```
 
 - JCenter
-    暂未提交JCenter仓库
+    ``` xml
+    dependencies {
+        /*
+         * your other dependencies
+         */
+        implementation 'cn.ucloud.ufile:ufile-client-java:2.0.5'
+    }
+    ```
 
 ## 快速入门
 
