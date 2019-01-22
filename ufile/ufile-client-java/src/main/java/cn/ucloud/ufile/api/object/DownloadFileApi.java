@@ -379,37 +379,42 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         onProgressListener = callback;
         httpCallback = callback;
 
-        try {
-            prepareData();
-
-            if (onProgressListener != null
-                    && progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
-                progressTimer = new Timer();
-                progressTask = new ProgressTask(totalSize);
-                progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
-            }
-
-            List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
-
-            if (httpCallback != null) {
+        new Thread() {
+            @Override
+            public void run() {
                 try {
-                    httpCallback.onResponse(new DownloadFileBean()
-                            .setContentType(profile.getContentType())
-                            .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
-                            .setFile(finalFile)
-                            .setContentLength(finalFile.length()));
-                } catch (IOException e) {
-                    httpCallback.onError(null,
-                            new ApiError(ApiError.ErrorType.ERROR_NORMAL_ERROR, new UfileIOException("Calculate ETag error!", e)), null);
+                    prepareData();
+
+                    if (onProgressListener != null
+                            && progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
+                        progressTimer = new Timer();
+                        progressTask = new ProgressTask(totalSize);
+                        progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
+                    }
+
+                    List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
+
+                    if (httpCallback != null) {
+                        try {
+                            httpCallback.onResponse(new DownloadFileBean()
+                                    .setContentType(profile.getContentType())
+                                    .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
+                                    .setFile(finalFile)
+                                    .setContentLength(finalFile.length()));
+                        } catch (IOException e) {
+                            httpCallback.onError(null,
+                                    new ApiError(ApiError.ErrorType.ERROR_NORMAL_ERROR, new UfileIOException("Calculate ETag error!", e)), null);
+                        }
+                    }
+                } catch (UfileClientException e) {
+                    if (httpCallback != null)
+                        httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_PARAMS_ILLEGAL, e), null);
+                } catch (InterruptedException e) {
+                    if (httpCallback != null)
+                        httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_NORMAL_ERROR, "Invoke part occur error!", e), null);
                 }
             }
-        } catch (UfileClientException e) {
-            if (httpCallback != null)
-                httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_PARAMS_ILLEGAL, e), null);
-        } catch (InterruptedException e) {
-            if (httpCallback != null)
-                httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_NORMAL_ERROR, "Invoke part occur error!", e), null);
-        }
+        }.start();
     }
 
     private class DownloadCallable implements Callable<DownloadFileBean> {

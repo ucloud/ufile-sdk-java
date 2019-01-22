@@ -242,7 +242,7 @@ public abstract class HttpRequestBuilder<T> {
      */
     protected Request createRequest() {
         if (builder != null)
-            builder.removeHeader("User-Agent").addHeader("User-Agent", "Ufile SDK from UCloud Co.,Ltd.");
+            builder.removeHeader("User-Agent").addHeader("User-Agent", "Ufile-SDK-Java/v2.0.5");
 
         return builder.build();
     }

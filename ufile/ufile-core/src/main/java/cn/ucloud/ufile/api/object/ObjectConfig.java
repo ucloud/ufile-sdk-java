@@ -104,7 +104,7 @@ public class ObjectConfig {
         if (customHost.startsWith("http"))
             return customHost;
 
-        return String.format("http://%s" + customHost);
+        return String.format("http://%s", customHost);
     }
 
     /**
