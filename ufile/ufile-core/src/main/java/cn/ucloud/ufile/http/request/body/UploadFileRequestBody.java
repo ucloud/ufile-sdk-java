@@ -16,6 +16,9 @@ import java.io.IOException;
  */
 public class UploadFileRequestBody extends UploadRequestBody<File> {
 
+    public UploadFileRequestBody() {
+    }
+
     /**
      * 构造方法
      *

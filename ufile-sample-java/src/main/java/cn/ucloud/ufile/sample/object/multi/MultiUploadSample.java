@@ -27,7 +27,7 @@ import java.util.concurrent.*;
  */
 public class MultiUploadSample {
     private static final String TAG = "MultiUploadSample";
-    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
         File file = new File("");

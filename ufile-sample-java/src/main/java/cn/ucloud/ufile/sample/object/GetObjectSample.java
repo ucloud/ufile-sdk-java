@@ -30,7 +30,7 @@ import java.io.OutputStream;
  */
 public class GetObjectSample {
     private static final String TAG = "GetObjectSample";
-    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
         String keyName = "";

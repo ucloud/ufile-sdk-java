@@ -22,7 +22,7 @@ import java.io.*;
  */
 public class PutObjectSample {
     private static final String TAG = "PutObjectSample";
-    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
         InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});

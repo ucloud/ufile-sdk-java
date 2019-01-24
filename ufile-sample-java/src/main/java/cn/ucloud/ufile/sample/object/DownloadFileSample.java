@@ -22,7 +22,7 @@ import okhttp3.Request;
  */
 public class DownloadFileSample {
     private static final String TAG = "DownloadFileSample";
-    private static ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
         String keyName = "";

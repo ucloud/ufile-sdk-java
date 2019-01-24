@@ -362,6 +362,18 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
             List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
 
+            if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
+                if (progressTask != null)
+                    progressTask.cancel();
+                if (progressTimer != null)
+                    progressTimer.cancel();
+
+                if (onProgressListener != null)
+                    synchronized (bytesWritten) {
+                        onProgressListener.onProgress(bytesWritten.get(), totalSize);
+                    }
+            }
+
             return new DownloadFileBean()
                     .setContentType(profile.getContentType())
                     .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE).geteTag())
@@ -393,6 +405,18 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                     }
 
                     List<Future<DownloadFileBean>> futures = mFixedThreadPool.invokeAll(callList);
+
+                    if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
+                        if (progressTask != null)
+                            progressTask.cancel();
+                        if (progressTimer != null)
+                            progressTimer.cancel();
+
+                        if (onProgressListener != null)
+                            synchronized (bytesWritten) {
+                                onProgressListener.onProgress(bytesWritten.get(), totalSize);
+                            }
+                    }
 
                     if (httpCallback != null) {
                         try {
@@ -485,17 +509,6 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         } catch (IOException e) {
             throw new UfileIOException("Occur IOException while IO stream");
         } finally {
-            if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
-                if (progressTask != null)
-                    progressTask.cancel();
-                if (progressTimer != null)
-                    progressTimer.cancel();
-
-                if (onProgressListener != null)
-                    synchronized (bytesWritten) {
-                        onProgressListener.onProgress(bytesWritten.get(), total);
-                    }
-            }
             FileUtil.close(raf, is);
         }
 
