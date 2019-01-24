@@ -19,12 +19,19 @@
     <dependency>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile-client-java</artifactId>
-        <version>2.0.4</version>
+        <version>2.0.6</version>
     </dependency>
     ```
 
 - JCenter
-    暂未提交JCenter仓库
+    ``` xml
+    dependencies {
+        /*
+         * your other dependencies
+         */
+        implementation 'cn.ucloud.ufile:ufile-client-java:2.0.6'
+    }
+    ```
 
 ## 快速入门
 
@@ -82,6 +89,9 @@ UfileClient.bucket(BUCKET_AUTHORIZER)
     ```
 
 ### 对象相关操作
+
+##### 关于ObjectConfig的region参数，是指您的bucket所创建在的地区编码，请参考[UCloud 地区列表](https://docs.ucloud.cn/api/summary/regionlist.html)
+
 ``` java
 // 对象相关API的授权器
 ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
@@ -101,7 +111,8 @@ ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectRemoteAuthorization(
 // 对象操作需要ObjectConfig来配置您的地区和域名后缀
 ObjectConfig config = new ObjectConfig("your bucket region", "ufileos.com");
 
-/** 您也可以使用已登记的自定义域名
+/** 
+ * 您也可以使用已登记的自定义域名
  * 注意'http://www.your_domain.com'指向的是某个特定的bucket+region+域名后缀，
  * eg：http://www.your_domain.com -> www.your_bucket.bucket_region.ufileos.com
  */
