@@ -3,6 +3,7 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.auth.ObjectDownloadAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
@@ -96,6 +97,50 @@ public class GenerateObjectPrivateUrlApi {
                 .addParam(new Parameter("Signature", signature))
                 .addParam(new Parameter("Expires", String.valueOf(expiresTime)))
                 .generateGetUrl(builder.getBaseUrl(), builder.getParams());
+    }
+
+    public interface CreatePrivateUrlCallback {
+        void onSuccess(String url);
+
+        void onFailed(UfileClientException e);
+    }
+
+    /**
+     * 生成下载URL(异步)
+     *
+     * @param callback 异步生成结果回调
+     * @return 下载URL
+     * @throws UfileRequiredParamNotFoundException 必要参数未找到时抛出
+     * @throws UfileAuthorizationException         授权异常时抛出
+     * @throws UfileSignatureException             签名异常时抛出
+     */
+    public void createUrlAsync(CreatePrivateUrlCallback callback) {
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    parameterValidat();
+                    long expiresTime = System.currentTimeMillis() / 1000 + expiresDuration;
+
+                    String signature = authorizer.authorizePrivateUrl(
+                            (ObjectDownloadAuthParam) new ObjectDownloadAuthParam(HttpMethod.GET, bucketName, keyName, expiresTime)
+                                    .setOptional(authOptionalData));
+
+                    GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
+                            .baseUrl(generateFinalHost(bucketName, keyName));
+
+                    String url = builder.addParam(new Parameter("UCloudPublicKey", authorizer.getPublicKey()))
+                            .addParam(new Parameter("Signature", signature))
+                            .addParam(new Parameter("Expires", String.valueOf(expiresTime)))
+                            .generateGetUrl(builder.getBaseUrl(), builder.getParams());
+                    if (callback != null)
+                        callback.onSuccess(url);
+                } catch (UfileParamException | UfileAuthorizationException | UfileSignatureException e) {
+                    if (callback != null)
+                        callback.onFailed(e);
+                }
+            }
+        }.start();
     }
 
     private String generateFinalHost(String bucketName, String keyName) {
