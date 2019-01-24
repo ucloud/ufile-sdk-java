@@ -486,15 +486,17 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             throw new UfileIOException("Occur IOException while IO stream");
         } finally {
             if (progressConfig.type == ProgressConfig.ProgressIntervalType.PROGRESS_INTERVAL_TIME) {
-                if (progressTask != null)
-                    progressTask.cancel();
-                if (progressTimer != null)
-                    progressTimer.cancel();
+                if (bytesWritten.get() <= total) {
+                    if (progressTask != null)
+                        progressTask.cancel();
+                    if (progressTimer != null)
+                        progressTimer.cancel();
 
-                if (onProgressListener != null)
-                    synchronized (bytesWritten) {
-                        onProgressListener.onProgress(bytesWritten.get(), total);
-                    }
+                    if (onProgressListener != null)
+                        synchronized (bytesWritten) {
+                            onProgressListener.onProgress(bytesWritten.get(), total);
+                        }
+                }
             }
             FileUtil.close(raf, is);
         }
