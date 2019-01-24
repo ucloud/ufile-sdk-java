@@ -18,6 +18,9 @@ import java.io.InputStream;
  */
 public class UploadStreamRequestBody extends UploadRequestBody<InputStream> {
 
+    public UploadStreamRequestBody() {
+    }
+
     /**
      * 构造方法
      *
@@ -42,6 +45,8 @@ public class UploadStreamRequestBody extends UploadRequestBody<InputStream> {
         }
         return this;
     }
+
+
 
     @Override
     public void writeTo(BufferedSink sink) throws IOException {

@@ -21,9 +21,11 @@ import java.util.HashMap;
 public class PutFileRequestBuilder extends HttpRequestBuilder<File> {
     private OnProgressListener onProgressListener;
     private ProgressConfig progressConfig;
+    private UploadFileRequestBody requestBody;
 
     public PutFileRequestBuilder(OnProgressListener onProgressListener) {
         this.onProgressListener = onProgressListener;
+        this.requestBody = new UploadFileRequestBody();
     }
 
     public PutFileRequestBuilder setProgressConfig(ProgressConfig progressConfig) {
@@ -31,9 +33,16 @@ public class PutFileRequestBuilder extends HttpRequestBuilder<File> {
         return this;
     }
 
+    public PutFileRequestBuilder setBufferSize(long bufferSize) {
+        this.requestBody.setBufferSize(bufferSize);
+        return this;
+    }
+
     @Override
     public Call build(OkHttpClient httpClient) {
-        UploadFileRequestBody requestBody = (UploadFileRequestBody) new UploadFileRequestBody(params, mediaType, onProgressListener)
+        this.requestBody.setContent(params)
+                .setContentType(mediaType)
+                .setOnProgressListener(onProgressListener)
                 .setProgressConfig(progressConfig == null ? ProgressConfig.callbackDefault() : progressConfig);
 
         if (header == null)

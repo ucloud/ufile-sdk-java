@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.http.request.body;
 
+import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.ProgressConfig;
 import cn.ucloud.ufile.util.FileUtil;
@@ -52,9 +53,9 @@ public abstract class UploadRequestBody<T> extends RequestBody {
     protected ProgressConfig progressConfig;
 
     /**
-     * 流写入的buffer大小，Default = 32 KB
+     * 流写入的buffer大小，Default = 256 KB
      */
-    protected long bufferSize = 32 << 10;
+    protected long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
 
     /**
      * 已写入的大小
@@ -89,6 +90,9 @@ public abstract class UploadRequestBody<T> extends RequestBody {
                 }
             }
         }
+    }
+
+    public UploadRequestBody() {
     }
 
     /**
@@ -135,6 +139,11 @@ public abstract class UploadRequestBody<T> extends RequestBody {
     @Override
     public long contentLength() {
         return contentLength;
+    }
+
+    public UploadRequestBody<T> setContentLength(long contentLength) {
+        this.contentLength = contentLength;
+        return this;
     }
 
     /**

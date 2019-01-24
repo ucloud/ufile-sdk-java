@@ -21,9 +21,11 @@ import java.util.HashMap;
 public class PutStreamRequestBuilder extends HttpRequestBuilder<InputStream> {
     private OnProgressListener onProgressListener;
     private ProgressConfig progressConfig;
+    private UploadStreamRequestBody requestBody;
 
     public PutStreamRequestBuilder(OnProgressListener onProgressListener) {
         this.onProgressListener = onProgressListener;
+        this.requestBody = new UploadStreamRequestBody();
     }
 
     public PutStreamRequestBuilder setProgressConfig(ProgressConfig progressConfig) {
@@ -31,11 +33,19 @@ public class PutStreamRequestBuilder extends HttpRequestBuilder<InputStream> {
         return this;
     }
 
+    public PutStreamRequestBuilder setBufferSize(long bufferSize) {
+        this.requestBody.setBufferSize(bufferSize);
+        return this;
+    }
+
     @Override
     public Call build(OkHttpClient httpClient) {
-        UploadStreamRequestBody requestBody = (UploadStreamRequestBody) new UploadStreamRequestBody(params, mediaType,
-                Long.parseLong(header.getOrDefault("Content-Length", "0")), onProgressListener)
+        this.requestBody.setContent(params)
+                .setContentType(mediaType)
+                .setContentLength(Long.parseLong(header.getOrDefault("Content-Length", "0")))
+                .setOnProgressListener(onProgressListener)
                 .setProgressConfig(progressConfig == null ? ProgressConfig.callbackDefault() : progressConfig);
+
         if (header == null)
             header = new HashMap<>();
 
