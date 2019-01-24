@@ -24,7 +24,7 @@
     ```
 
 - JCenter
-    ``` xml
+    ``` java
     dependencies {
         /*
          * your other dependencies
