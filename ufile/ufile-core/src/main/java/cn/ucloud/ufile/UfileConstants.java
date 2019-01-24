@@ -1,12 +1,12 @@
 package cn.ucloud.ufile;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/22 15:00
  */
 public class UfileConstants {
+    public static final String SDK_VERSION = "2.0.6";
     /**
      * 默认分片大小（4MB）
      */

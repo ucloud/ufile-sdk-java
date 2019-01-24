@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.http.request;
 
+import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.util.Parameter;
 import okhttp3.Call;
@@ -242,7 +243,7 @@ public abstract class HttpRequestBuilder<T> {
      */
     protected Request createRequest() {
         if (builder != null)
-            builder.removeHeader("User-Agent").addHeader("User-Agent", "Ufile-SDK-Java/v2.0.5");
+            builder.removeHeader("User-Agent").addHeader("User-Agent", String.format("Ufile-SDK-Java/Ver-%s", UfileConstants.SDK_VERSION));
 
         return builder.build();
     }
