@@ -33,4 +33,8 @@ public class UfileServerException extends Exception {
     public UfileServerException(Throwable cause) {
         super(cause);
     }
+
+    public UfileErrorBean getErrorBean() {
+        return errorBean;
+    }
 }
