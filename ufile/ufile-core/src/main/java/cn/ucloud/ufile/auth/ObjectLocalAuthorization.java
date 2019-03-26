@@ -32,7 +32,7 @@ public abstract class ObjectLocalAuthorization extends ObjectAuthorization {
     }
 
     /**
-     * 构造方法
+     * 构造方法 (若您的运行环境在Java 1.8以下，请使用该方法)
      *
      * @param publicKey  用户公钥
      * @param privateKey 用户私钥

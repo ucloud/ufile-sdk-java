@@ -114,7 +114,7 @@ public class GenerateObjectPrivateUrlApi {
      * @throws UfileAuthorizationException         授权异常时抛出
      * @throws UfileSignatureException             签名异常时抛出
      */
-    public void createUrlAsync(CreatePrivateUrlCallback callback) {
+    public void createUrlAsync(final CreatePrivateUrlCallback callback) {
         new Thread() {
             @Override
             public void run() {

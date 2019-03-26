@@ -92,8 +92,12 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
     /**
      * 上传分片结果集排序器
      */
-    private Comparator<MultiUploadPartState> partStateComparator = (o1, o2) ->
-            o1.getPartIndex() > o2.getPartIndex() ? 1 : (o1.getPartIndex() == o2.getPartIndex() ? 0 : 1);
+    private Comparator<MultiUploadPartState> partStateComparator = new Comparator<MultiUploadPartState>() {
+        @Override
+        public int compare(MultiUploadPartState o1, MultiUploadPartState o2) {
+            return o1.getPartIndex() > o2.getPartIndex() ? 1 : (o1.getPartIndex() == o2.getPartIndex() ? 0 : 1);
+        }
+    };
 
     @Override
     protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {

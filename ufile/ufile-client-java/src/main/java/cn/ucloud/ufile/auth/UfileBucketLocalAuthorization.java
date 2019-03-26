@@ -44,6 +44,11 @@ public final class UfileBucketLocalAuthorization extends BucketLocalAuthorizatio
     /**
      * key排序比较器
      */
-    private Comparator<Parameter> keyComparator = Comparator.comparing(o -> o.key);
+    private Comparator<Parameter> keyComparator = new Comparator<Parameter>() {
+        @Override
+        public int compare(Parameter o1, Parameter o2) {
+            return o1.key.compareTo(o2.key);
+        }
+    };
 
 }

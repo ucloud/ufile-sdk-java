@@ -7,10 +7,12 @@ import cn.ucloud.ufile.auth.ObjectRemoteAuthorization;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectProfile;
+import cn.ucloud.ufile.compat.base64.DefaultBase64UrlEncoderCompat;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
+import cn.ucloud.ufile.compat.base64.Base64UrlEncoderCompat;
 import cn.ucloud.ufile.util.Etag;
 
 import java.io.*;
@@ -242,9 +244,25 @@ public class ObjectApiBuilder {
      * @return ETag是否一致
      * @throws UfileClientException
      */
-    public boolean compareEtag(File localFile, String keyName, String bucketName) throws UfileClientException, UfileServerException {
+    public boolean compareEtag(File localFile, String keyName, String bucketName)
+            throws UfileClientException, UfileServerException {
+        return compareEtag(localFile, keyName, bucketName, new DefaultBase64UrlEncoderCompat());
+    }
+
+    /**
+     * 比对ETag值 (若您的运行环境在Java 1.8以下，请使用该方法)
+     *
+     * @param localFile  要对比的本地文件
+     * @param keyName    要对比的云端文件名
+     * @param bucketName 要对比的云端文件的所属空间
+     * @param base64     兼容Java 1.8以下的Base64 Url编码器接口
+     * @return ETag是否一致
+     * @throws UfileClientException
+     */
+    public boolean compareEtag(File localFile, String keyName, String bucketName, Base64UrlEncoderCompat base64)
+            throws UfileClientException, UfileServerException {
         try {
-            return compareEtag(new FileInputStream(localFile), keyName, bucketName);
+            return compareEtag(new FileInputStream(localFile), keyName, bucketName, base64);
         } catch (FileNotFoundException e) {
             throw new UfileIOException(e);
         }
@@ -259,10 +277,26 @@ public class ObjectApiBuilder {
      * @return ETag是否一致
      * @throws UfileClientException
      */
-    public boolean compareEtag(InputStream localStream, String keyName, String bucketName) throws UfileClientException, UfileServerException {
+    public boolean compareEtag(InputStream localStream, String keyName, String bucketName)
+            throws UfileClientException, UfileServerException {
+        return compareEtag(localStream, keyName, bucketName, new DefaultBase64UrlEncoderCompat());
+    }
+
+    /**
+     * 比对ETag值 (若您的运行环境在Java 1.8以下，请使用该方法)
+     *
+     * @param localStream 要对比的本地流
+     * @param keyName     要对比的云端文件名
+     * @param bucketName  要对比的云端文件的所属空间
+     * @param base64      兼容Java 1.8以下的Base64 Url编码器接口
+     * @return ETag是否一致
+     * @throws UfileClientException
+     */
+    public boolean compareEtag(InputStream localStream, String keyName, String bucketName,
+                               Base64UrlEncoderCompat base64) throws UfileClientException, UfileServerException {
         ObjectProfile res = objectProfile(keyName, bucketName).execute();
         try {
-            Etag eTag = Etag.etag(localStream);
+            Etag eTag = Etag.etag(localStream, base64);
             return eTag.geteTag().equals(res.geteTag());
         } catch (IOException e) {
             throw new UfileIOException(e);
