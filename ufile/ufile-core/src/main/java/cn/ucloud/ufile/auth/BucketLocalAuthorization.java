@@ -36,7 +36,7 @@ public abstract class BucketLocalAuthorization extends BucketAuthorization {
      *
      * @param publicKey  用户公钥
      * @param privateKey 用户私钥
-     * @param signer     签名器
+     * @param signer     签名器 {@link Signer}
      */
     protected BucketLocalAuthorization(String publicKey, String privateKey, Signer signer) {
         super(publicKey);

@@ -112,6 +112,18 @@ public class ObjectApiBuilder {
     }
 
     /**
+     * append 数据
+     *
+     * @param appendData 要append的数据
+     * @param mimeType   mime类型
+     * @return
+     */
+    public AppendObjectApi appendObject(byte[] appendData, String mimeType) {
+        return new AppendObjectApi(authorizer, host, client.getHttpClient())
+                .from(appendData, mimeType);
+    }
+
+    /**
      * 文件秒传
      *
      * @param file 本地文件

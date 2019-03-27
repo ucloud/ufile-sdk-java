@@ -36,7 +36,7 @@ public abstract class ObjectLocalAuthorization extends ObjectAuthorization {
      *
      * @param publicKey  用户公钥
      * @param privateKey 用户私钥
-     * @param signer     签名器
+     * @param signer     签名器 {@link Signer}
      */
     protected ObjectLocalAuthorization(String publicKey, String privateKey, Signer signer) {
         super(publicKey);
