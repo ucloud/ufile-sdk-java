@@ -8,8 +8,14 @@
 - ~~[Ver 1.0.0](https://github.com/ufilesdk-dev/ufile-javasdk)~~ 不建议使用
 
 ## 环境要求
-- Java 1.8或以上
+- 开发环境: Java 1.8或以上
+- 运行环境: 可向下兼容至 Java 1.7, 详情请查看 `兼容Java 1.7`
 
+## API Doc
+
+- **[ufile-client-java ](https://github.com/ucloud/ufile-sdk-java/tree/master/ufile/ufile-client-java/apidocs.zip)**
+    - **[ufile-core ](https://github.com/ucloud/ufile-sdk-java/tree/master/ufile/ufile-core/apidocs.zip)**
+    
 ## 安装
 - Maven
 
@@ -19,7 +25,7 @@
     <dependency>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile-client-java</artifactId>
-        <version>2.0.6</version>
+        <version>2.1.0</version>
     </dependency>
     ```
 
@@ -30,7 +36,7 @@
         /*
          * your other dependencies
          */
-        implementation 'cn.ucloud.ufile:ufile-client-java:2.0.6'
+        implementation 'cn.ucloud.ufile:ufile-client-java:2.1.0'
     }
     ```
 
@@ -208,6 +214,66 @@ UfileClient.object(OBJECT_AUTHORIZER, config)
                 }
          });
     ```
+
+## 兼容Java 1.7
+> 由于默认版本基于Java 1.8开发，SDK内部使用到的Base64都来自于Java 1.8提供的Base64模块。
+
+- 若您的项目实际运行环境为Java 1.7，那么请注意一下几个API的使用:
+    - UfileSigner:
+        在您使用BucketLocalAuthorization或ObjectLocalAuthorization及其子类的时候，请使用参数为: `(String publicKey, String privateKey, Signer signer)` 的构造方法。其中Signer接口的实例可使用`UfileSigner`，并使用参数为 `(Base64StdEncoderCompat base64)`的构造方法
+        
+    ``` java
+    public abstract class BucketLocalAuthorization extends BucketAuthorization {
+        /**
+         * 构造方法 (若您的运行环境在Java 1.8以下，请使用该方法)
+         *
+         * @param publicKey  用户公钥
+         * @param privateKey 用户私钥
+         * @param signer     签名器 {@link Signer}
+         */
+        protected BucketLocalAuthorization(String publicKey, String privateKey, Signer signer) {
+            super(publicKey);
+            this.privateKey = privateKey;
+            this.signer = signer;
+        }
+    }
+    ```
+    
+    ``` java
+    public final class UfileSigner implements Signer {
+        /**
+         * 构造方法 (若您的运行环境在Java 1.8以下，请使用该方法)
+         *
+         * @param base64 兼容Java 1.8以下的Base64 标准编码器接口
+         */
+        public UfileSigner(Base64StdEncoderCompat base64) {
+            this.base64 = base64;
+        }
+    }
+    ```
+    
+    - Etag:
+        所有的和Etag值计算相关的方法和类，在使用时请选用带有`Base64UrlEncoderCompat`参数的方法。并且与其相关的以下API:
+
+        - DownloadFileApi
+        - UploadFileHitApi
+        - UploadStreamHitApi
+        
+        请配置以下参数:
+        ``` java
+        /**
+         * 配置Base64 Url编码器，不调用该方法将会默认使用Java 1.8的Base64类
+         * (若您的运行环境在Java 1.8以下，请使用该方法)
+         *
+         * @param base64 兼容Java 1.8以下的Base64 Url编码器接口
+         * @return {@link UploadStreamHitApi}
+         */
+        public Object withBase64UrlEncoder(Base64UrlEncoderCompat base64) {
+            this.base64 = base64;
+            return this;
+        }
+        ```
+
 
 ## License
 [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0.html)

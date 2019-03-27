@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/13 14:26
@@ -22,15 +21,20 @@ public class ParameterMaker {
             // 参数转化 1. 转化属性
             Class<?> objectClass = bean.getClass();
             Class<?> superclass = objectClass.getSuperclass();
+            List<Parameter<V>> tmp = new ArrayList<>();
             if (superclass != null) {
-                params.addAll(getFieldParam(superclass, bean));
+                tmp = getFieldParam(superclass, bean);
+                params.addAll(tmp);
             }
-            params.addAll(getFieldParam(objectClass, bean));
+            tmp = getFieldParam(objectClass, bean);
+            params.addAll(tmp);
             // 参数转化 2. 方法转化
             if (superclass != null) {
-                params.addAll(getMethodParam(superclass, bean));
+                tmp = getMethodParam(superclass, bean);
+                params.addAll(tmp);
             }
-            params.addAll(getMethodParam(objectClass, bean));
+            tmp = getMethodParam(objectClass, bean);
+            params.addAll(tmp);
         } else {
             throw new NullPointerException("params object can not be null");
         }
@@ -69,8 +73,8 @@ public class ParameterMaker {
     /**
      * 根据类对象 获取方法参数
      *
-     * @param clazz            类对象的class
-     * @param bean 类对象
+     * @param clazz 类对象的class
+     * @param bean  类对象
      * @return 方法参数列表
      * @throws Exception 对不满足要求的参数  抛出异常
      */

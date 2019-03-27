@@ -40,9 +40,10 @@ public class PutStreamRequestBuilder extends HttpRequestBuilder<InputStream> {
 
     @Override
     public Call build(OkHttpClient httpClient) {
+        String contentLen = header.get("Content-Length");
         this.requestBody.setContent(params)
                 .setContentType(mediaType)
-                .setContentLength(Long.parseLong(header.getOrDefault("Content-Length", "0")))
+                .setContentLength(Long.parseLong(contentLen == null ? "0" : contentLen))
                 .setOnProgressListener(onProgressListener)
                 .setProgressConfig(progressConfig == null ? ProgressConfig.callbackDefault() : progressConfig);
 

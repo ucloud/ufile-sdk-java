@@ -79,7 +79,7 @@ public class DownloadFileSample {
         }
     }
 
-    public static void downloadFileAsync(String keyName, String bucketName, String localDir, String saveName) {
+    public static void downloadFileAsync(String keyName, String bucketName, final String localDir, final String saveName) {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .objectProfile(keyName, bucketName)
                 .executeAsync(new UfileCallback<ObjectProfile>() {

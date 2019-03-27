@@ -110,7 +110,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      *
      * @param callback API异步执行回调
      */
-    public void executeAsync(BaseHttpCallback<T, UfileErrorBean> callback) {
+    public void executeAsync(final BaseHttpCallback<T, UfileErrorBean> callback) {
         httpCallback = callback;
 
         new Thread() {

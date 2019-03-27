@@ -6,6 +6,8 @@ import cn.ucloud.ufile.auth.ObjectOptAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.compat.base64.Base64UrlEncoderCompat;
+import cn.ucloud.ufile.compat.base64.DefaultBase64UrlEncoderCompat;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
@@ -45,6 +47,10 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
      * Bucket空间名称
      */
     protected String bucketName;
+    /**
+     * 兼容Java 1.8以下的Base64 编码器接口
+     */
+    private Base64UrlEncoderCompat base64;
 
     private ByteArrayOutputStream cacheOutputStream;
 
@@ -93,6 +99,18 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
     }
 
     /**
+     * 配置Base64 Url编码器，不调用该方法将会默认使用Java 1.8的Base64类
+     * (若您的运行环境在Java 1.8以下，请使用该方法)
+     *
+     * @param base64 兼容Java 1.8以下的Base64 Url编码器接口
+     * @return {@link UploadStreamHitApi}
+     */
+    public UploadStreamHitApi withBase64UrlEncoder(Base64UrlEncoderCompat base64) {
+        this.base64 = base64;
+        return this;
+    }
+
+    /**
      * 配置签名可选参数
      *
      * @param authOptionalData 签名可选参数
@@ -119,7 +137,8 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
         backupStream();
 
         try {
-            query.add(new Parameter<>("Hash", Etag.etag(new ByteArrayInputStream(cacheOutputStream.toByteArray()), UfileConstants.MULTIPART_SIZE).geteTag()));
+            query.add(new Parameter<>("Hash", Etag.etag(new ByteArrayInputStream(cacheOutputStream.toByteArray()),
+                    UfileConstants.MULTIPART_SIZE, base64 == null ? new DefaultBase64UrlEncoderCompat() : base64).geteTag()));
         } catch (IOException e) {
             throw new UfileIOException("Calculate ETag failed!", e);
         }

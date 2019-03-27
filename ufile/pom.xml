@@ -7,7 +7,7 @@
     <groupId>cn.ucloud.ufile</groupId>
     <artifactId>ufile</artifactId>
     <packaging>pom</packaging>
-    <version>2.0.6</version>
+    <version>2.1.0</version>
 
     <modules>
         <module>ufile-core</module>
@@ -26,8 +26,8 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/ucloud/ucloud-sdk-java</url>
-        <connection>https://github.com/ucloud/ucloud-sdk-java.git</connection>
+        <url>https://github.com/ucloud/ufile-sdk-java</url>
+        <connection>https://github.com/ucloud/ufile-sdk-java.git</connection>
         <developerConnection>https://www.ucloud.cn</developerConnection>
     </scm>
 
@@ -35,7 +35,7 @@
         <developer>
             <name>yinjun</name>
             <email>joshua.yin@ucloud.cn</email>
-            <url>https://github.com/ucloud/ucloud-sdk-java</url>
+            <url>https://github.com/ucloud/ufile-sdk-java</url>
         </developer>
     </developers>
 
