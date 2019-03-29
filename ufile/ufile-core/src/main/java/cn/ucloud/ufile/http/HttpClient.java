@@ -1,8 +1,10 @@
 package cn.ucloud.ufile.http;
 
 import cn.ucloud.ufile.http.interceptor.LogInterceptor;
+import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,6 +34,26 @@ public class HttpClient {
                 .writeTimeout(DEFAULT_WRITE_TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(DEFAULT_READ_TIMEOUT, TimeUnit.SECONDS)
                 .addInterceptor(new LogInterceptor())
+                .build();
+    }
+
+    /**
+     * 获取 HttpClient异步线程池
+     *
+     * @return HttpClient异步线程池
+     */
+    public ExecutorService getExecutorService() {
+        return this.mOkHttpClient.dispatcher().executorService();
+    }
+
+    /**
+     * 设置HttpClient异步线程池
+     *
+     * @param executorService HttpClient异步线程池
+     */
+    public void setExecutorService(ExecutorService executorService) {
+        this.mOkHttpClient = mOkHttpClient.newBuilder()
+                .dispatcher(new Dispatcher(executorService))
                 .build();
     }
 

@@ -3,6 +3,7 @@ package cn.ucloud.ufile.api;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileServerException;
+import cn.ucloud.ufile.util.JLog;
 import com.google.gson.Gson;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileClientException;
@@ -13,12 +14,14 @@ import cn.ucloud.ufile.http.response.ResponseParser;
 import com.google.gson.JsonElement;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Ufile API请求基类
@@ -61,6 +64,20 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      */
     protected JsonElement authOptionalData;
 
+    protected OkHttpClient okHttpClient;
+
+    /**
+     * 连接超时时间
+     */
+    protected long readTimeOut;
+    /**
+     * 读取超时时间
+     */
+    protected long writeTimeOut;
+    /**
+     * 写入超时时间
+     */
+    protected long connTimeOut;
 
     /**
      * 构造方法
@@ -71,6 +88,61 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     protected UfileApi(HttpClient httpClient, String host) {
         this.httpClient = httpClient;
         this.host = host;
+        this.okHttpClient = httpClient.getOkHttpClient();
+    }
+
+    /**
+     * 设置连接超时时间，Default = 10 sec {@link HttpClient}
+     *
+     * @param connTimeOut 连接超时时间
+     */
+    public void setConnTimeOut(long connTimeOut) {
+        this.connTimeOut = connTimeOut;
+    }
+
+    /**
+     * 设置读取超时时间，Default = 30 sec {@link HttpClient}
+     *
+     * @param readTimeOut 读取超时时间
+     */
+    public void setReadTimeOut(long readTimeOut) {
+        this.readTimeOut = readTimeOut;
+    }
+
+    /**
+     * 设置写入超时时间，Default = 30 sec {@link HttpClient}
+     *
+     * @param writeTimeOut 写入超时时间
+     */
+    public void setWriteTimeOut(long writeTimeOut) {
+        this.writeTimeOut = writeTimeOut;
+    }
+
+    /**
+     * 获取连接超时时间，Default = 10 sec {@link HttpClient}
+     *
+     * @return 连接超时时间
+     */
+    public long getConnTimeOut() {
+        return connTimeOut > 0 ? connTimeOut : HttpClient.DEFAULT_CONNECT_TIMEOUT;
+    }
+
+    /**
+     * 获取读取超时时间，Default = 30 sec {@link HttpClient}
+     *
+     * @return 读取超时时间
+     */
+    public long getReadTimeOut() {
+        return readTimeOut > 0 ? readTimeOut : HttpClient.DEFAULT_READ_TIMEOUT;
+    }
+
+    /**
+     * 获取写入超时时间，Default = 30 sec {@link HttpClient}
+     *
+     * @return 写入超时时间
+     */
+    public long getWriteTimeOut() {
+        return writeTimeOut > 0 ? writeTimeOut : HttpClient.DEFAULT_WRITE_TIMEOUT;
     }
 
     /**
@@ -113,7 +185,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     public void executeAsync(final BaseHttpCallback<T, UfileErrorBean> callback) {
         httpCallback = callback;
 
-        new Thread() {
+        okHttpClient.dispatcher().executorService().submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -124,7 +196,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
                         httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_PARAMS_ILLEGAL, e), null);
                 }
             }
-        }.start();
+        });
     }
 
     @Override

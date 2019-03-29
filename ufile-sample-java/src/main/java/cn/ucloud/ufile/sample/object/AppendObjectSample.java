@@ -11,7 +11,6 @@ import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
-import cn.ucloud.ufile.util.MimeTypeUtil;
 import okhttp3.Request;
 
 
@@ -47,6 +46,10 @@ public class AppendObjectSample {
                      */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
                     /**
+                     * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                     */
+//                    .setBufferSize(4 << 20)
+                    /**
                      * 配置进度监听
                      */
                     .setOnProgressListener(new OnProgressListener() {
@@ -76,6 +79,10 @@ public class AppendObjectSample {
                  * 指定progress callback的间隔
                  */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                /**
+                 * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                 */
+//                    .setBufferSize(4 << 20)
                 .executeAsync(new UfileCallback<AppendObjectResultBean>() {
                     @Override
                     public void onProgress(long bytesWritten, long contentLength) {

@@ -93,6 +93,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
                 contentType, "", date).setOptional(authOptionalData));
 
         call = new HeadRequestBuilder()
+                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(generateFinalHost(bucketName, keyName))
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")

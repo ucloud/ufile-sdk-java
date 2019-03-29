@@ -132,6 +132,7 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
 
         GetRequestBuilder builder = new GetRequestBuilder();
         call = builder.baseUrl(generateFinalHost(bucketName, "") + "?list&" + builder.generateUrlQuery(query))
+                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)

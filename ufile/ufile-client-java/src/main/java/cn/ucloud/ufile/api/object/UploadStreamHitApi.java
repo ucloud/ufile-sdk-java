@@ -147,6 +147,7 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
         query.add(new Parameter<>("FileSize", String.valueOf(new ByteArrayInputStream(cacheOutputStream.toByteArray()).available())));
 
         call = builder.baseUrl(builder.generateGetUrl(url, query))
+                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
                 .addHeader("authorization", authorization)

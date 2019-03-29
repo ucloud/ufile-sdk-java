@@ -64,6 +64,7 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
             query.add(new Parameter<>("Signature", signature));
 
             call = new GetRequestBuilder()
+                    .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                     .baseUrl(host)
                     .addHeader("Content-Type", "application/json; charset=utf-8")
                     .addHeader("Accpet", "*/*")
