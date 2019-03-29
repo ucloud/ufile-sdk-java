@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.api.object;
 
+import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
@@ -63,6 +64,11 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
      * 进度回调设置
      */
     private ProgressConfig progressConfig;
+
+    /**
+     * 流写入的buffer大小，Default = 256 KB
+     */
+    private long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
 
     /**
      * 构造方法
@@ -145,6 +151,17 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
         return this;
     }
 
+    /**
+     * 设置流读写的Buffer大小，默认 256 KB
+     *
+     * @param bufferSize Buffer大小
+     * @return {@link PutFileApi}
+     */
+    public PutFileApi setBufferSize(long bufferSize) {
+        this.bufferSize = bufferSize;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileParamException, UfileFileException, UfileAuthorizationException, UfileSignatureException {
         parameterValidat();
@@ -162,6 +179,8 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
         PutFileRequestBuilder builder = (PutFileRequestBuilder) new PutFileRequestBuilder(onProgressListener)
+                .setBufferSize(bufferSize)
+                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(generateFinalHost(bucketName, keyName))
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")

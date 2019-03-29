@@ -48,6 +48,10 @@ public class PutObjectSample {
                      */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
                     /**
+                     * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                     */
+//                    .setBufferSize(4 << 20)
+                    /**
                      * 配置进度监听
                      */
                     .setOnProgressListener(new OnProgressListener() {
@@ -78,6 +82,10 @@ public class PutObjectSample {
                  * 指定progress callback的间隔
                  */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                /**
+                 * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                 */
+//                .setBufferSize(4 << 20)
                 .executeAsync(new UfileCallback<PutObjectResultBean>() {
                     @Override
                     public void onProgress(long bytesWritten, long contentLength) {
@@ -107,11 +115,15 @@ public class PutObjectSample {
                     /**
                      * 是否上传校验MD5
                      */
-                    //                .withVerifyMd5(false)
+//                .withVerifyMd5(false)
                     /**
                      * 指定progress callback的间隔
                      */
-                    //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+//                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                    /**
+                     * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                     */
+//                    .setBufferSize(4 << 20)
                     /**
                      * 配置进度监听
                      */
@@ -143,6 +155,10 @@ public class PutObjectSample {
                  * 指定progress callback的间隔
                  */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                /**
+                 * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                 */
+//                .setBufferSize(4 << 20)
                 .executeAsync(new UfileCallback<PutObjectResultBean>() {
                     @Override
                     public void onProgress(long bytesWritten, long contentLength) {

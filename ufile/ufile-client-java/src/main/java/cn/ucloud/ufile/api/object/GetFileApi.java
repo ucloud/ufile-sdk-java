@@ -47,6 +47,10 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
     private ProgressConfig progressConfig;
     private AtomicLong bytesWritten;
     private AtomicLong bytesWrittenCache;
+    /**
+     * 流读取的buffer大小，Default = 256 KB
+     */
+    private long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
 
     /**
      * 构造方法
@@ -95,12 +99,24 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         return this;
     }
 
+    /**
+     * 设置流读写的Buffer大小，默认 256 KB
+     *
+     * @param bufferSize Buffer大小
+     * @return {@link GetFileApi}
+     */
+    public GetFileApi setBufferSize(long bufferSize) {
+        this.bufferSize = bufferSize;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileParamException {
         parameterValidat();
         bytesWritten = new AtomicLong(0);
         bytesWrittenCache = new AtomicLong(0);
         call = new GetRequestBuilder()
+                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(host)
                 .build(httpClient.getOkHttpClient());
     }
@@ -223,7 +239,7 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
-            byte[] buffer = new byte[UfileConstants.DEFAULT_BUFFER_SIZE];
+            byte[] buffer = new byte[(int) bufferSize];
             int len = 0;
 
             while ((len = is.read(buffer)) > 0) {

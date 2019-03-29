@@ -68,6 +68,10 @@ public class GetObjectSample {
                      */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
                     /**
+                     * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                     */
+//                    .setBufferSize(4 << 20)
+                    /**
                      * 配置进度监听
                      */
                     .setOnProgressListener(new OnProgressListener() {
@@ -97,6 +101,10 @@ public class GetObjectSample {
                  * 指定progress callback的间隔
                  */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                /**
+                 * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                 */
+//                    .setBufferSize(4 << 20)
                 .executeAsync(new UfileCallback<DownloadFileBean>() {
                     @Override
                     public void onProgress(long bytesWritten, long contentLength) {
@@ -137,6 +145,10 @@ public class GetObjectSample {
                      * 指定progress callback的间隔
                      */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                    /**
+                     * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                     */
+//                    .setBufferSize(4 << 20)
                     /**
                      * 配置进度监听
                      */
@@ -180,6 +192,10 @@ public class GetObjectSample {
                  * 指定progress callback的间隔
                  */
 //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                /**
+                 * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                 */
+//                    .setBufferSize(4 << 20)
                 .executeAsync(new UfileCallback<DownloadStreamBean>() {
                     @Override
                     public void onProgress(long bytesWritten, long contentLength) {

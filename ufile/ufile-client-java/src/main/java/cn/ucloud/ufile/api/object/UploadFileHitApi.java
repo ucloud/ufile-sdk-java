@@ -139,6 +139,7 @@ public class UploadFileHitApi extends UfileObjectApi<BaseResponseBean> {
         query.add(new Parameter<>("FileSize", String.valueOf(file.length())));
 
         call = builder.baseUrl(builder.generateGetUrl(url, query))
+                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
                 .addHeader("authorization", authorization)

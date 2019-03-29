@@ -121,6 +121,10 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      */
     private ExecutorService mFixedThreadPool;
     /**
+     * 流读取的buffer大小，Default = 256 KB
+     */
+    private long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    /**
      * 兼容Java 1.8以下的Base64 编码器接口
      */
     private Base64UrlEncoderCompat base64;
@@ -224,10 +228,21 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      * 配置签名可选参数
      *
      * @param authOptionalData 签名可选参数
-     * @return
+     * @return {@link DownloadFileApi}
      */
     public DownloadFileApi withAuthOptionalData(JsonElement authOptionalData) {
         this.authOptionalData = authOptionalData;
+        return this;
+    }
+
+    /**
+     * 设置流读写的Buffer大小，默认 256 KB
+     *
+     * @param bufferSize Buffer大小
+     * @return {@link DownloadFileApi}
+     */
+    public DownloadFileApi setBufferSize(long bufferSize) {
+        this.bufferSize = bufferSize;
         return this;
     }
 
@@ -311,6 +326,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                     .baseUrl(host)
                     .addHeader("Range", String.format("bytes=%d-%d", start, end));
+            builder.setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut);
             callList.add(new DownloadCallable(builder.build(httpClient.getOkHttpClient()), i));
         }
 
@@ -402,6 +418,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             throw new UfileIOException("Calculate ETag error!", e);
         } catch (InterruptedException e) {
             throw new UfileClientException("Invoke part occur error!", e);
+        } finally {
+            mFixedThreadPool.shutdown();
         }
     }
 
@@ -410,7 +428,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         onProgressListener = callback;
         httpCallback = callback;
 
-        new Thread() {
+        okHttpClient.dispatcher().executorService().submit(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -456,9 +474,11 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 } catch (InterruptedException e) {
                     if (httpCallback != null)
                         httpCallback.onError(null, new ApiError(ApiError.ErrorType.ERROR_NORMAL_ERROR, "Invoke part occur error!", e), null);
+                } finally {
+                    mFixedThreadPool.shutdown();
                 }
             }
-        }.start();
+        });
     }
 
     private class DownloadCallable implements Callable<DownloadFileBean> {
@@ -506,7 +526,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             raf = new RandomAccessFile(finalFile, "rwd");
             raf.seek(start);
 
-            byte[] buffer = new byte[UfileConstants.DEFAULT_BUFFER_SIZE];
+            byte[] buffer = new byte[(int) bufferSize];
             int len = 0;
             while ((len = is.read(buffer)) > 0) {
                 raf.write(buffer, 0, len);

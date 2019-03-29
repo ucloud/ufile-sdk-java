@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.api.object;
 
+import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
@@ -70,6 +71,11 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
     private ProgressConfig progressConfig;
 
     /**
+     * 流写入的buffer大小，Default = 256 KB
+     */
+    private long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+
+    /**
      * 构造方法
      *
      * @param authorizer Object授权器
@@ -133,6 +139,17 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
     }
 
     /**
+     * 设置流读写的Buffer大小，默认 256 KB
+     *
+     * @param bufferSize Buffer大小
+     * @return {@link AppendObjectApi}
+     */
+    public AppendObjectApi setBufferSize(long bufferSize) {
+        this.bufferSize = bufferSize;
+        return this;
+    }
+
+    /**
      * 配置签名可选参数
      *
      * @param authOptionalData 签名可选参数
@@ -155,7 +172,9 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
         PutStreamRequestBuilder builder = new PutStreamRequestBuilder(onProgressListener);
+        builder.setBufferSize(bufferSize);
         builder.baseUrl(generateFinalHost(bucketName, keyName) + "?append&" + builder.generateUrlQuery(query))
+                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
