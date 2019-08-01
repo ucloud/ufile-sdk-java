@@ -116,7 +116,6 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
         StringBuffer bodyBuffer = new StringBuffer();
         for (int i = 0, len = partStates.size(); i < len; i++) {
             MultiUploadPartState part = partStates.get(i);
-            JLog.T(TAG, part.toString());
             bodyBuffer.append(part.geteTag() + (i < (len - 1) ? "," : ""));
         }
 

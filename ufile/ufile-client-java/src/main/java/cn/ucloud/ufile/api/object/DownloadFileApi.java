@@ -123,7 +123,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     /**
      * 流读取的buffer大小，Default = 256 KB
      */
-    private long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
     /**
      * 兼容Java 1.8以下的Base64 编码器接口
      */
@@ -241,7 +241,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      * @param bufferSize Buffer大小
      * @return {@link DownloadFileApi}
      */
-    public DownloadFileApi setBufferSize(long bufferSize) {
+    public DownloadFileApi setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
         return this;
     }

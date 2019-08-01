@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutorService;
 public class UfileClient {
     private static volatile UfileClient mInstance;
     private HttpClient httpClient;
-    private ExecutorService executorService;
 
     private UfileClient() {
         this.httpClient = new HttpClient();

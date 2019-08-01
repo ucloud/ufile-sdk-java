@@ -68,7 +68,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
     /**
      * 流写入的buffer大小，Default = 256 KB
      */
-    private long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
 
     /**
      * 构造方法
@@ -146,7 +146,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
      * @param bufferSize Buffer大小
      * @return {@link PutStreamApi}
      */
-    public PutStreamApi setBufferSize(long bufferSize) {
+    public PutStreamApi setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
         return this;
     }
