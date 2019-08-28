@@ -416,7 +416,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                     future.get();
                 }
             } catch (ExecutionException e) {
-                throw new UfileClientException(e);
+                throw new UfileClientException(e.getMessage());
             }
 
             Etag etag = Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE);
@@ -475,7 +475,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                             future.get();
                         }
                     } catch (ExecutionException e) {
-                        throw new UfileClientException(e);
+                        throw new UfileClientException(e.getMessage());
                     }
 
                     if (httpCallback != null) {
@@ -520,8 +520,11 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 if (response == null)
                     throw new UfileHttpException("Response is null");
 
-                if (response.code() != RESP_CODE_SUCCESS)
-                    throw new UfileHttpException(parseErrorResponse(response).toString());
+                if (response.code() != RESP_CODE_SUCCESS) {
+                    if (response.code() / 100 != 2)
+                        throw new UfileHttpException(parseErrorResponse(response).toString());
+                    throw new UfileHttpException(String.format("Response code = %d, need %d", response.code(), RESP_CODE_SUCCESS));
+                }
 
                 return parseHttpResponse(response);
             } catch (Throwable t) {
