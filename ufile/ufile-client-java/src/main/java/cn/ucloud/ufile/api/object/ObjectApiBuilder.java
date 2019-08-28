@@ -248,6 +248,18 @@ public class ObjectApiBuilder {
     }
 
     /**
+     * 下载文件
+     *
+     * @param profile objectRestore 返回的response，包含了Ufile云上指定的文件信息，{@link ObjectRestoreApi}
+     * @return {@link DownloadFileApi}
+     */
+    public ObjectRestoreApi objectRestore(String keyName, String bucketName) {
+        return new ObjectRestoreApi(authorizer, host, client.getHttpClient())
+                .which(keyName)
+                .atBucket(bucketName);
+    }
+
+    /**
      * 比对ETag值
      *
      * @param localFile  要对比的本地文件

@@ -172,8 +172,10 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
         PutStreamRequestBuilder builder = new PutStreamRequestBuilder(onProgressListener);
+        //keyName 进行了修改
+        String keyName_tmp = keyName + "?append&" + builder.generateUrlQuery(query);
         builder.setBufferSize(bufferSize);
-        builder.baseUrl(generateFinalHost(bucketName, keyName) + "?append&" + builder.generateUrlQuery(query))
+        builder.baseUrl(generateFinalHost(bucketName, keyName_tmp))
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
@@ -191,7 +193,7 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
             }
         }
 
-        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, bucketName, keyName,
+        String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, bucketName, keyName_tmp,
                 contentType, contentMD5, date).setOptional(authOptionalData));
         builder.addHeader("authorization", authorization);
 
