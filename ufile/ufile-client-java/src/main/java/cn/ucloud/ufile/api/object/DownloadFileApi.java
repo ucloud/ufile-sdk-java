@@ -30,10 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -127,6 +124,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     /**
      * 兼容Java 1.8以下的Base64 编码器接口
      */
+    @Deprecated
     private Base64UrlEncoderCompat base64;
 
     /**
@@ -219,6 +217,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      * @param base64 兼容Java 1.8以下的Base64 Url编码器接口
      * @return {@link DownloadFileApi}
      */
+    @Deprecated
     public DownloadFileApi withBase64UrlEncoder(Base64UrlEncoderCompat base64) {
         this.base64 = base64;
         return this;
@@ -408,10 +407,22 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                     }
             }
 
+            if (futures == null)
+                throw new UfileClientException("Invoke futures are null!");
+            try {
+                for (Future<DownloadFileBean> future : futures) {
+                    if (future == null)
+                        throw new UfileClientException("Invoke future is null!");
+                    future.get();
+                }
+            } catch (ExecutionException e) {
+                throw new UfileClientException(e);
+            }
+
+            Etag etag = Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE);
             return new DownloadFileBean()
                     .setContentType(profile.getContentType())
-                    .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE,
-                            base64 == null ? new DefaultBase64UrlEncoderCompat() : base64).geteTag())
+                    .seteTag(etag == null ? null : etag.geteTag())
                     .setFile(finalFile)
                     .setContentLength(finalFile.length());
         } catch (IOException e) {
@@ -455,12 +466,24 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                             }
                     }
 
+                    if (futures == null)
+                        throw new UfileClientException("Invoke futures are null!");
+                    try {
+                        for (Future<DownloadFileBean> future : futures) {
+                            if (future == null)
+                                throw new UfileClientException("Invoke future is null!");
+                            future.get();
+                        }
+                    } catch (ExecutionException e) {
+                        throw new UfileClientException(e);
+                    }
+
                     if (httpCallback != null) {
                         try {
+                            Etag etag = Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE);
                             httpCallback.onResponse(new DownloadFileBean()
                                     .setContentType(profile.getContentType())
-                                    .seteTag(Etag.etag(finalFile, UfileConstants.MULTIPART_SIZE,
-                                            base64 == null ? new DefaultBase64UrlEncoderCompat() : base64).geteTag())
+                                    .seteTag(etag == null ? null : etag.geteTag())
                                     .setFile(finalFile)
                                     .setContentLength(finalFile.length()));
                         } catch (IOException e) {
