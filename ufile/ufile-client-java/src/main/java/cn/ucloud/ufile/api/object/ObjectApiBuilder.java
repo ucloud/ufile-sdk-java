@@ -248,10 +248,12 @@ public class ObjectApiBuilder {
     }
 
     /**
-     * 下载文件
+     * 归档存储的文件
+     * 先进行 Restore 的解冻，才能进行下载
      *
-     * @param profile objectRestore 返回的response，包含了Ufile云上指定的文件信息，{@link ObjectRestoreApi}
-     * @return {@link DownloadFileApi}
+     * @param keyName    云端文件名
+     * @param bucketName 空间名
+     * @return {@link ObjectRestoreApi}
      */
     public ObjectRestoreApi objectRestore(String keyName, String bucketName) {
         return new ObjectRestoreApi(authorizer, host, client.getHttpClient())

@@ -10,9 +10,6 @@ import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
-import cn.ucloud.ufile.http.request.HeadRequestBuilder;
-import cn.ucloud.ufile.http.request.HttpRequestBuilder;
-import cn.ucloud.ufile.http.request.PutFileRequestBuilder;
 import cn.ucloud.ufile.http.request.PutJsonRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import com.google.gson.JsonElement;
@@ -21,7 +18,8 @@ import okhttp3.Response;
 import java.util.Date;
 
 /**
- * API-获取云端对象描述信息
+ * API-归档文件
+ * 先进行 Restore 的解冻，才能进行下载
  *
  * @author: delex
  * @E-mail: delex.xie@ucloud.cn

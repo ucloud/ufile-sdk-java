@@ -50,6 +50,7 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
     /**
      * 兼容Java 1.8以下的Base64 编码器接口
      */
+    @Deprecated
     private Base64UrlEncoderCompat base64;
 
     private ByteArrayOutputStream cacheOutputStream;
@@ -105,6 +106,7 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
      * @param base64 兼容Java 1.8以下的Base64 Url编码器接口
      * @return {@link UploadStreamHitApi}
      */
+    @Deprecated
     public UploadStreamHitApi withBase64UrlEncoder(Base64UrlEncoderCompat base64) {
         this.base64 = base64;
         return this;
@@ -137,8 +139,7 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
         backupStream();
 
         try {
-            query.add(new Parameter<>("Hash", Etag.etag(new ByteArrayInputStream(cacheOutputStream.toByteArray()),
-                    UfileConstants.MULTIPART_SIZE, base64 == null ? new DefaultBase64UrlEncoderCompat() : base64).geteTag()));
+            query.add(new Parameter<>("Hash", Etag.etag(new ByteArrayInputStream(cacheOutputStream.toByteArray())).geteTag()));
         } catch (IOException e) {
             throw new UfileIOException("Calculate ETag failed!", e);
         }

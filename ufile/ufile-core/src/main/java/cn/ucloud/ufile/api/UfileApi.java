@@ -3,7 +3,6 @@ package cn.ucloud.ufile.api;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileServerException;
-import cn.ucloud.ufile.util.JLog;
 import com.google.gson.Gson;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileClientException;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Ufile API请求基类

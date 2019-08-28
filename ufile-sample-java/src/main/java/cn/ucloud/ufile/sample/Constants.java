@@ -28,7 +28,7 @@ public class Constants {
      */
     public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
             "YourBucket_PublicKey_Or_TokenPublicKey",
-            "YourBucket_PrivateKey_Or_TokenPublicKey");
+            "YourBucket_PrivateKey");
 
     /**
      * 远程Object相关API的签名器

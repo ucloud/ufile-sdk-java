@@ -6,6 +6,7 @@ package cn.ucloud.ufile.compat.base64;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2019-03-26 19:00
  */
+@Deprecated
 public interface Base64UrlEncoderCompat {
     /**
      * Base64 URL编码

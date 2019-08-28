@@ -1,6 +1,7 @@
 package cn.ucloud.ufile.util;
 
 import cn.ucloud.ufile.compat.base64.Base64UrlEncoderCompat;
+import cn.ucloud.ufile.compat.base64.DefaultBase64UrlEncoderCompat;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import cn.ucloud.ufile.UfileConstants;
@@ -51,15 +52,37 @@ public class Etag {
     /**
      * 计算ETag，计算ETag分片的大小默认使用{@link UfileConstants}指定的大小，4 MB
      *
+     * @param file 待计算ETag的文件
+     * @return ETag对象
+     * @throws IOException
+     */
+    public static Etag etag(File file) throws IOException {
+        return etag(file, UfileConstants.MULTIPART_SIZE);
+    }
+
+    /**
+     * 计算ETag，计算ETag分片的大小默认使用{@link UfileConstants}指定的大小，4 MB
+     *
      * @param file   待计算ETag的文件
      * @param base64 Base64 UrlEncoder兼容器 {@link Base64UrlEncoderCompat}
      * @return ETag对象
      * @throws IOException
      */
+    @Deprecated
     public static Etag etag(File file, Base64UrlEncoderCompat base64) throws IOException {
-        return etag(file, UfileConstants.MULTIPART_SIZE, base64);
+        return etag(file, UfileConstants.MULTIPART_SIZE);
     }
 
+    /**
+     * 计算ETag，计算ETag分片的大小默认使用{@link UfileConstants}指定的大小，4 MB
+     *
+     * @param inputStream 待计算ETag的流
+     * @return ETag对象
+     * @throws IOException
+     */
+    public static Etag etag(InputStream inputStream) throws IOException {
+        return etag(inputStream, UfileConstants.MULTIPART_SIZE);
+    }
 
     /**
      * 计算ETag，计算ETag分片的大小默认使用{@link UfileConstants}指定的大小，4 MB
@@ -69,8 +92,24 @@ public class Etag {
      * @return ETag对象
      * @throws IOException
      */
+    @Deprecated
     public static Etag etag(InputStream inputStream, Base64UrlEncoderCompat base64) throws IOException {
-        return etag(inputStream, UfileConstants.MULTIPART_SIZE, base64);
+        return etag(inputStream, UfileConstants.MULTIPART_SIZE);
+    }
+
+    /**
+     * 计算ETag
+     *
+     * @param file     待计算ETag的文件
+     * @param partSize 计算ETag分片的大小
+     * @return ETag对象
+     * @throws IOException
+     */
+    public static Etag etag(File file, int partSize) throws IOException {
+        if (file == null || !file.exists() || !file.isFile())
+            return null;
+
+        return etag(new FileInputStream(file), partSize);
     }
 
     /**
@@ -82,11 +121,12 @@ public class Etag {
      * @return ETag对象
      * @throws IOException
      */
+    @Deprecated
     public static Etag etag(File file, int partSize, Base64UrlEncoderCompat base64) throws IOException {
         if (file == null || !file.exists() || !file.isFile())
             return null;
 
-        return etag(new FileInputStream(file), partSize, base64);
+        return etag(new FileInputStream(file), partSize);
     }
 
     /**
@@ -94,11 +134,10 @@ public class Etag {
      *
      * @param inputStream 待计算ETag的流
      * @param partSize    计算ETag分片的大小
-     * @param base64      Base64 UrlEncoder兼容器 {@link Base64UrlEncoderCompat}
      * @return ETag对象
      * @throws IOException
      */
-    public static Etag etag(InputStream inputStream, int partSize, Base64UrlEncoderCompat base64) throws IOException {
+    public static Etag etag(InputStream inputStream, int partSize) throws IOException {
         Etag eTag = new Etag();
         if (inputStream == null || partSize <= 0)
             return null;
@@ -127,7 +166,7 @@ public class Etag {
                         break;
                     }
                     byte[] tmp = digestSub.digest();
-                    eTag.partEtags.add(base64.urlEncodeToString(tmp));
+                    eTag.partEtags.add(Base64.getUrlEncoder().encodeToString(tmp));
                     digest.update(tmp);
                 }
             } else {
@@ -138,7 +177,7 @@ public class Etag {
 
             sha1Res = digest.digest();
             System.arraycopy(sha1Res, 0, buff, 4, sha1Res.length);
-            eTag.eTag = base64.urlEncodeToString(buff);
+            eTag.eTag = Base64.getUrlEncoder().encodeToString(buff);
             return eTag;
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();

@@ -1,6 +1,7 @@
 package cn.ucloud.ufile.compat.base64;
 
-import java.util.Base64;
+
+import cn.ucloud.ufile.util.Base64;
 
 /**
  * @description:
@@ -8,6 +9,7 @@ import java.util.Base64;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2019-03-26 20:42
  */
+@Deprecated
 public class DefaultBase64Compat implements Base64Compat {
     @Override
     public byte[] decode(byte[] src) {

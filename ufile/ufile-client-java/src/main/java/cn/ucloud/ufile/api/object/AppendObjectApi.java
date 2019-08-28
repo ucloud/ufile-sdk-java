@@ -73,7 +73,7 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
     /**
      * 流写入的buffer大小，Default = 256 KB
      */
-    private long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
 
     /**
      * 构造方法
@@ -144,7 +144,7 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
      * @param bufferSize Buffer大小
      * @return {@link AppendObjectApi}
      */
-    public AppendObjectApi setBufferSize(long bufferSize) {
+    public AppendObjectApi setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
         return this;
     }

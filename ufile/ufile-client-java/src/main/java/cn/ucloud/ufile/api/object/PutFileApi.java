@@ -68,7 +68,7 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
     /**
      * 流写入的buffer大小，Default = 256 KB
      */
-    private long bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
 
     /**
      * 构造方法
@@ -157,7 +157,7 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
      * @param bufferSize Buffer大小
      * @return {@link PutFileApi}
      */
-    public PutFileApi setBufferSize(long bufferSize) {
+    public PutFileApi setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
         return this;
     }
@@ -166,13 +166,13 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
     protected void prepareData() throws UfileParamException, UfileFileException, UfileAuthorizationException, UfileSignatureException {
         parameterValidat();
         if (!file.exists())
-            throw new UfileFileException("Profile file is inexistent!");
+            throw new UfileFileException("File is inexistent!");
 
         if (!file.isFile())
-            throw new UfileFileException("Profile is not a file!");
+            throw new UfileFileException("It is not a file!");
 
         if (!file.canRead())
-            throw new UfileFileException("Profile file is not readable!");
+            throw new UfileFileException("File is not readable!");
 
         String contentType = mediaType.toString();
         String contentMD5 = "";
