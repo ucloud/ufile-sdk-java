@@ -15,7 +15,8 @@ public class Constants {
     }
 
     /**
-     * 本地Bucket相关API的签名器
+     * 本地Bucket相关API的签名器（账号在ucloud 的API 公私钥，不能使用token）
+     * 如果只用到了文件操作，不需要配置下面的bucket 操作公私钥
      */
     public static final BucketAuthorization BUCKET_AUTHORIZER = new UfileBucketLocalAuthorization(
             System.getenv("UcloudPublicKey"),
@@ -23,10 +24,11 @@ public class Constants {
 
     /**
      * 本地Object相关API的签名器
+     * 请修改下面的公私钥
      */
     public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
-            System.getenv("UcloudPublicKey"),
-            System.getenv("UcloudPrivateKey"));
+            "YourBucket_PublicKey_Or_TokenPublicKey",
+            "YourBucket_PrivateKey_Or_TokenPublicKey");
 
     /**
      * 远程Object相关API的签名器
