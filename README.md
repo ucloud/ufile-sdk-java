@@ -25,7 +25,7 @@
     <dependency>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile-client-java</artifactId>
-        <version>2.1.2</version>
+        <version>2.1.3</version>
     </dependency>
     ```
 
@@ -36,7 +36,7 @@
         /*
          * your other dependencies
          */
-        implementation 'cn.ucloud.ufile:ufile-client-java:2.1.2'
+        implementation 'cn.ucloud.ufile:ufile-client-java:2.1.3'
     }
     ```
 

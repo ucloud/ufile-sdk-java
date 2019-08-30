@@ -6,6 +6,7 @@ import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectRestoreBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
@@ -82,7 +83,7 @@ public class ObjectRestoreApi extends UfileObjectApi<ObjectRestoreBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
 
         String keyName_tmp = keyName; //参数参与签名
@@ -92,7 +93,7 @@ public class ObjectRestoreApi extends UfileObjectApi<ObjectRestoreBean> {
 
         call = new PutJsonRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
-                .baseUrl(generateFinalHost(bucketName, keyName_tmp + "?restore"))
+                .baseUrl(generateFinalHost(bucketName, keyName_tmp) + "?restore")
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
                 .addHeader("authorization", authorization)

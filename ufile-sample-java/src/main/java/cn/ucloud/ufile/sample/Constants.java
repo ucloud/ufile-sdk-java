@@ -11,6 +11,7 @@ import cn.ucloud.ufile.util.JLog;
 public class Constants {
     static {
         // 开启Debug级别日志
+        JLog.SHOW_TEST = true;
         JLog.SHOW_DEBUG = true;
     }
 

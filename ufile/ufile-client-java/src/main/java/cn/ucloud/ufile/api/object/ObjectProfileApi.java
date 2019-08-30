@@ -84,7 +84,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
 
         String contentType = "application/json; charset=utf-8";

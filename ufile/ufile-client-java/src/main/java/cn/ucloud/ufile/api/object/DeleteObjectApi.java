@@ -5,6 +5,7 @@ import cn.ucloud.ufile.auth.ObjectOptAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
@@ -79,7 +80,7 @@ public class DeleteObjectApi extends UfileObjectApi<BaseResponseBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
         String contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));

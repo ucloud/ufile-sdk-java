@@ -128,7 +128,7 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
         List<Parameter<String>> query = new ArrayList<>();
         query.add(new Parameter<>("uploadId", info.getUploadId()));

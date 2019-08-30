@@ -246,7 +246,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
 
         File dir = new File(localPath);

@@ -8,6 +8,7 @@ import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.compat.base64.Base64UrlEncoderCompat;
 import cn.ucloud.ufile.compat.base64.DefaultBase64UrlEncoderCompat;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
@@ -124,7 +125,7 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileIOException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
 
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
