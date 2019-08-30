@@ -161,7 +161,7 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileIOException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
 
         List<Parameter<String>> query = new ArrayList<>();

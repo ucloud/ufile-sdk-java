@@ -108,7 +108,7 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
 
         String contentType = mediaType.toString();

@@ -12,6 +12,9 @@ import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 
 /**
  * API-生成私有下载URL
@@ -82,7 +85,7 @@ public class GenerateObjectPrivateUrlApi {
      * @throws UfileAuthorizationException         授权异常时抛出
      * @throws UfileSignatureException             签名异常时抛出
      */
-    public String createUrl() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+    public String createUrl() throws UfileClientException {
         parameterValidat();
         long expiresTime = System.currentTimeMillis() / 1000 + expiresDuration;
 
@@ -135,7 +138,7 @@ public class GenerateObjectPrivateUrlApi {
                             .generateGetUrl(builder.getBaseUrl(), builder.getParams());
                     if (callback != null)
                         callback.onSuccess(url);
-                } catch (UfileParamException | UfileAuthorizationException | UfileSignatureException e) {
+                } catch (UfileClientException e) {
                     if (callback != null)
                         callback.onFailed(e);
                 }
@@ -143,14 +146,20 @@ public class GenerateObjectPrivateUrlApi {
         }.start();
     }
 
-    private String generateFinalHost(String bucketName, String keyName) {
+    private String generateFinalHost(String bucketName, String keyName) throws UfileClientException {
         if (host == null || host.length() == 0)
             return host;
 
         if (host.startsWith("http"))
             return String.format("%s/%s", host, keyName);
 
-        return String.format("http://%s.%s/%s", bucketName, host, keyName);
+        try {
+            bucketName = URLEncoder.encode(bucketName, "UTF-8");
+            keyName = URLEncoder.encode(keyName, "UTF-8");
+            return String.format("http://%s.%s/%s", bucketName, host, keyName);
+        } catch (UnsupportedEncodingException e) {
+            throw new UfileClientException("Occur error during URLEncode bucketName and keyName");
+        }
     }
 
     protected void parameterValidat() throws UfileParamException {

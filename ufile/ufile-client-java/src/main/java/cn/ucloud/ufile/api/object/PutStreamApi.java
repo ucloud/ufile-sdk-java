@@ -163,7 +163,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileIOException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         try {
             parameterValidat();
 
@@ -205,6 +205,8 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
             call = builder.build(httpClient.getOkHttpClient());
         } catch (IOException e) {
             throw new UfileIOException(e.getMessage());
+        } catch (UfileClientException e) {
+            throw e;
         }
     }
 

@@ -2,7 +2,11 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.api.UfileApi;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.http.HttpClient;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * Ufile 对象存储相关API基类
@@ -33,13 +37,19 @@ public abstract class UfileObjectApi<T> extends UfileApi<T> {
      * @param keyName    对象名称
      * @return API域名
      */
-    protected String generateFinalHost(String bucketName, String keyName) {
+    protected String generateFinalHost(String bucketName, String keyName) throws UfileClientException {
         if (host == null || host.length() == 0)
             return host;
 
         if (host.startsWith("http"))
             return String.format("%s/%s", host, keyName);
 
-        return String.format("http://%s.%s/%s", bucketName, host, keyName);
+        try {
+            bucketName = URLEncoder.encode(bucketName, "UTF-8");
+            keyName = URLEncoder.encode(keyName, "UTF-8");
+            return String.format("http://%s.%s/%s", bucketName, host, keyName);
+        } catch (UnsupportedEncodingException e) {
+            throw new UfileClientException("Occur error during URLEncode bucketName and keyName");
+        }
     }
 }

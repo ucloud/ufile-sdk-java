@@ -163,7 +163,7 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileFileException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
         if (!file.exists())
             throw new UfileFileException("File is inexistent!");

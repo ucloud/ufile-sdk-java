@@ -5,6 +5,7 @@ import cn.ucloud.ufile.auth.ObjectOptAuthParam;
 import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectListBean;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.http.HttpClient;
@@ -114,7 +115,7 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
     }
 
     @Override
-    protected void prepareData() throws UfileParamException, UfileAuthorizationException, UfileSignatureException {
+    protected void prepareData() throws UfileClientException {
         parameterValidat();
         List<Parameter<String>> query = new ArrayList<>();
         if (prefix != null)
