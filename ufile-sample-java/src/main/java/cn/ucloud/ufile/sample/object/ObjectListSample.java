@@ -38,7 +38,7 @@ public class ObjectListSample {
                     /**
                      * 分页标记
                      */
-//                .withMarker("")
+//                .withMarker("")   //如果要拉下一页，withMarker 里要把response 的master 填进去，就可以拉下一页
                     /**
                      * 分页数据上限，Default = 20
                      */
