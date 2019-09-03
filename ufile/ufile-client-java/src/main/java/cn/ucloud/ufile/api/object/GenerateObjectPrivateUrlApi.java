@@ -154,8 +154,8 @@ public class GenerateObjectPrivateUrlApi {
             return String.format("%s/%s", host, keyName);
 
         try {
-            bucketName = URLEncoder.encode(bucketName, "UTF-8");
-            keyName = URLEncoder.encode(keyName, "UTF-8");
+            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+","%20");
+            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+","%20");
             return String.format("http://%s.%s/%s", bucketName, host, keyName);
         } catch (UnsupportedEncodingException e) {
             throw new UfileClientException("Occur error during URLEncode bucketName and keyName");
