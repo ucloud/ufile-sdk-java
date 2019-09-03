@@ -138,9 +138,9 @@ public abstract class HttpRequestBuilder<T> {
         StringBuffer queryBuffer = new StringBuffer();
         for (Parameter<String> param : query) {
             try {
-                queryBuffer.append(URLEncoder.encode(param.key, "UTF-8"))
+                queryBuffer.append(URLEncoder.encode(param.key, "UTF-8").replace("+","%20"))
                         .append("=")
-                        .append(URLEncoder.encode(param.value, "UTF-8"))
+                        .append(URLEncoder.encode(param.value, "UTF-8").replace("+","%20"))
                         .append("&");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -167,9 +167,9 @@ public abstract class HttpRequestBuilder<T> {
         StringBuffer queryBuffer = new StringBuffer();
         for (String key : query.keySet()) {
             try {
-                queryBuffer.append(URLEncoder.encode(key, "UTF-8"))
+                queryBuffer.append(URLEncoder.encode(key, "UTF-8").replace("+","%20"))
                         .append("=")
-                        .append(URLEncoder.encode(query.get(key), "UTF-8"))
+                        .append(URLEncoder.encode(query.get(key), "UTF-8").replace("+","%20"))
                         .append("&");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
