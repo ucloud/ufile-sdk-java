@@ -172,7 +172,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             return parseHttpResponse(response);
         } catch (IOException e) {
             throw new UfileIOException("Occur IOException while sending http request, " +
-                    "you can check the file which you want to upload/download is exist or changed");
+                    "you can check the file which you want to upload/download is exist or changed", e);
         }
     }
 
@@ -266,7 +266,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             content = (content == null || content.length() == 0) ? "{}" : content;
             return new Gson().fromJson(content, type);
         } catch (IOException e) {
-            throw new UfileIOException("Occur IOException while parsing response data");
+            throw new UfileIOException("Occur IOException while parsing response data", e);
         }
     }
 
@@ -288,7 +288,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             errorBean.setxSessionId(response.header("X-SessionId"));
             return errorBean;
         } catch (IOException e) {
-            throw new UfileIOException("Occur IOException while parsing error data");
+            throw new UfileIOException("Occur IOException while parsing error data", e);
         }
     }
 }

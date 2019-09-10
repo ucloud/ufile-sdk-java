@@ -51,6 +51,8 @@ public class GetObjectSample {
             e.printStackTrace();
         } catch (UfileSignatureException e) {
             e.printStackTrace();
+        } catch (UfileClientException e) {
+            e.printStackTrace();
         }
     }
 
