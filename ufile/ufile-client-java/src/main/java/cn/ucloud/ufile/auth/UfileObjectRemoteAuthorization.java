@@ -38,6 +38,8 @@ public final class UfileObjectRemoteAuthorization extends ObjectRemoteAuthorizat
         json.addProperty("date", param.getDate());
         if (param.getOptional() != null)
             json.addProperty("optional", param.getOptional().toString());
+        if (param.getPutPolicy() != null && param.getPutPolicy().getPolicy() != null)
+            json.addProperty("put_policy", param.getPutPolicy().getPolicy());
 
         Call call = new PostJsonRequestBuilder()
                 .baseUrl(apiConfig.getObjectOptAuthServer())

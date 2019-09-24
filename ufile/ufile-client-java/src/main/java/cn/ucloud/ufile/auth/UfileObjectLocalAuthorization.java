@@ -66,10 +66,14 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
         signData.append(date + "\n");
         signData.append("/" + bucket);
         signData.append("/" + keyName);
+        if (param.getPutPolicy() != null && param.getPutPolicy().getPolicy() != null)
+            signData.append(param.getPutPolicy().getPolicy());
 
         String signature = signer.signature(privateKey, signData.toString());
 
-        return "UCloud " + publicKey + ":" + signature;
+        return "UCloud " + publicKey + ":" + signature
+                + ((param.getPutPolicy() == null || param.getPutPolicy().getPolicy() == null) ?
+                "" : (":" + param.getPutPolicy().getPolicy()));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.auth;
 
+import cn.ucloud.ufile.api.object.policy.PutPolicy;
 import cn.ucloud.ufile.util.HttpMethod;
 
 /**
@@ -21,6 +22,11 @@ public class ObjectOptAuthParam extends ObjectBaseAuthParam {
      * 日期（yyyyMMddHHmmss）
      */
     private String date;
+
+    /**
+     * 上传策略
+     */
+    private PutPolicy putPolicy;
 
     public ObjectOptAuthParam(HttpMethod method, String bucket, String keyName) {
         this(method, bucket, keyName, "", "", "");
@@ -57,6 +63,15 @@ public class ObjectOptAuthParam extends ObjectBaseAuthParam {
 
     public ObjectOptAuthParam setDate(String date) {
         this.date = date;
+        return this;
+    }
+
+    public PutPolicy getPutPolicy() {
+        return putPolicy;
+    }
+
+    public ObjectOptAuthParam setPutPolicy(PutPolicy putPolicy) {
+        this.putPolicy = putPolicy;
         return this;
     }
 }

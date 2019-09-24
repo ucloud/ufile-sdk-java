@@ -3,13 +3,9 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
-import cn.ucloud.ufile.auth.UfileAuthorizationException;
-import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.ObjectProfile;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.compat.base64.Base64UrlEncoderCompat;
-import cn.ucloud.ufile.compat.base64.DefaultBase64UrlEncoderCompat;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
@@ -121,11 +117,6 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      * 流读取的buffer大小，Default = 256 KB
      */
     private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
-    /**
-     * 兼容Java 1.8以下的Base64 编码器接口
-     */
-    @Deprecated
-    private Base64UrlEncoderCompat base64;
 
     /**
      * 构造方法
@@ -207,19 +198,6 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      */
     public DownloadFileApi withProgressConfig(ProgressConfig config) {
         this.progressConfig = config == null ? this.progressConfig : config;
-        return this;
-    }
-
-    /**
-     * 配置Base64 Url编码器，不调用该方法将会默认使用Java 1.8的Base64类
-     * (若您的运行环境在Java 1.8以下，请使用该方法)
-     *
-     * @param base64 兼容Java 1.8以下的Base64 Url编码器接口
-     * @return {@link DownloadFileApi}
-     */
-    @Deprecated
-    public DownloadFileApi withBase64UrlEncoder(Base64UrlEncoderCompat base64) {
-        this.base64 = base64;
         return this;
     }
 
