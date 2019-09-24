@@ -33,7 +33,7 @@ public final class PutPolicyForCallback extends PutPolicy {
         private List<PolicyParam> callbackBody;
 
         public Builder(String callbackUrl) {
-            this(callbackUrl, new ArrayList<>());
+            this(callbackUrl, new ArrayList<PolicyParam>());
         }
 
         public Builder(String callbackUrl, List<PolicyParam> callbackBody) {
