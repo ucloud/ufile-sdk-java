@@ -29,6 +29,12 @@ public class BaseResponseBean implements Serializable {
     @SerializedName("Message")
     protected String message;
 
+    /**
+     * 上传策略-回调结果
+     */
+    @SerializedName("callbackRet")
+    protected String callbackRet;
+
     public int getRetCode() {
         return retCode;
     }
@@ -51,6 +57,14 @@ public class BaseResponseBean implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getCallbackRet() {
+        return callbackRet;
+    }
+
+    public void setCallbackRet(String callbackRet) {
+        this.callbackRet = callbackRet;
     }
 
     @Override

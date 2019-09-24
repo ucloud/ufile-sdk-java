@@ -32,6 +32,12 @@ public class UfileErrorBean {
     @SerializedName("X-SessionId")
     private String xSessionId;
 
+    /**
+     * 上传策略-回调结果
+     */
+    @SerializedName("callbackRet")
+    private String callbackRet;
+
     public int getResponseCode() {
         return responseCode;
     }
@@ -62,6 +68,14 @@ public class UfileErrorBean {
 
     public void setxSessionId(String xSessionId) {
         this.xSessionId = xSessionId;
+    }
+
+    public void setCallbackRet(String callbackRet) {
+        this.callbackRet = callbackRet;
+    }
+
+    public String getCallbackRet() {
+        return callbackRet;
     }
 
     @Override

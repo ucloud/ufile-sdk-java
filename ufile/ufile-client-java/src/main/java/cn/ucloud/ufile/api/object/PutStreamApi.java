@@ -1,10 +1,9 @@
 package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.UfileConstants;
+import cn.ucloud.ufile.api.object.policy.PutPolicy;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.auth.UfileAuthorizationException;
-import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.PutObjectResultBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.*;
@@ -14,6 +13,7 @@ import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.ProgressConfig;
 import cn.ucloud.ufile.http.request.PutStreamRequestBuilder;
 import cn.ucloud.ufile.util.*;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import okhttp3.MediaType;
 import okhttp3.Response;
@@ -69,6 +69,11 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
      * 流写入的buffer大小，Default = 256 KB
      */
     private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+
+    /**
+     * UFile上传回调策略
+     */
+    private PutPolicy putPolicy;
 
     /**
      * 构造方法
@@ -162,6 +167,17 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         return this;
     }
 
+    /**
+     * 设置上传回调策略
+     *
+     * @param putPolicy 上传回调策略
+     * @return {@link PutStreamApi}
+     */
+    public PutStreamApi withPutPolicy(PutPolicy putPolicy) {
+        this.putPolicy = putPolicy;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileClientException {
         try {
@@ -194,7 +210,8 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
             }
 
             String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, bucketName, keyName,
-                    contentType, contentMD5, date).setOptional(authOptionalData));
+                    contentType, contentMD5, date).setPutPolicy(putPolicy).setOptional(authOptionalData));
+
             builder.addHeader("authorization", authorization);
 
             builder.params(inputStream);
@@ -271,11 +288,37 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
     }
 
     @Override
-    public PutObjectResultBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
-        PutObjectResultBean result = super.parseHttpResponse(response);
-        if (result != null && result.getRetCode() == 0)
-            result.seteTag(response.header("ETag").replace("\"", ""));
+    public PutObjectResultBean parseHttpResponse(Response response) {
+        PutObjectResultBean result = new PutObjectResultBean();
+        String eTag = response.header("ETag");
+        eTag = eTag == null ? null : eTag.replace("\"", "");
+        result.seteTag(eTag);
+
+        if (putPolicy != null) {
+            result.setCallbackRet(readResponseBody(response));
+        }
 
         return result;
+    }
+
+    @Override
+    public UfileErrorBean parseErrorResponse(Response response) throws UfileClientException {
+        UfileErrorBean errorBean = null;
+        if (putPolicy != null) {
+            String content = readResponseBody(response);
+            response.body().close();
+            try {
+                errorBean = new Gson().fromJson((content == null || content.length() == 0) ? "{}" : content, UfileErrorBean.class);
+            } catch (Exception e) {
+                errorBean = new UfileErrorBean();
+            }
+            errorBean.setResponseCode(response.code());
+            errorBean.setxSessionId(response.header("X-SessionId"));
+            errorBean.setCallbackRet(content);
+            return errorBean;
+        } else {
+            errorBean = super.parseErrorResponse(response);
+        }
+        return errorBean;
     }
 }

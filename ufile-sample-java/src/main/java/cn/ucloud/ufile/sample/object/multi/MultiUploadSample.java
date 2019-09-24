@@ -4,6 +4,9 @@ import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.api.object.multi.MultiUploadPartState;
 import cn.ucloud.ufile.api.object.multi.MultiUploadInfo;
+import cn.ucloud.ufile.api.object.policy.PolicyParam;
+import cn.ucloud.ufile.api.object.policy.PutPolicy;
+import cn.ucloud.ufile.api.object.policy.PutPolicyForCallback;
 import cn.ucloud.ufile.bean.MultiUploadResponse;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
@@ -18,7 +21,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.*;
 
 /**
  * @author: joshua
@@ -150,8 +152,20 @@ public class MultiUploadSample {
 
     public static MultiUploadResponse finishMultiUpload(MultiUploadInfo state, List<MultiUploadPartState> partStates) {
         try {
+            /**
+             * 上传回调策略
+             * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode。
+             * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
+             */
+            PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
+                    .addCallbackBody(new PolicyParam("key", "value"))
+                    .build();
             MultiUploadResponse res = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .finishMultiUpload(state, partStates)
+                    /**
+                     * 配置上传回调策略
+                     */
+//                .withPutPolicy(putPolicy)
                     .execute();
             JLog.D(TAG, "finish->" + res.toString());
             return res;

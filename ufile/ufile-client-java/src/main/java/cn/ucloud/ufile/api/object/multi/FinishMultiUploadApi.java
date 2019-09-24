@@ -1,21 +1,20 @@
 package cn.ucloud.ufile.api.object.multi;
 
 import cn.ucloud.ufile.api.object.UfileObjectApi;
+import cn.ucloud.ufile.api.object.policy.PutPolicy;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.auth.UfileAuthorizationException;
-import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.MultiUploadResponse;
-import cn.ucloud.ufile.exception.UfileClientException;
-import cn.ucloud.ufile.exception.UfileParamException;
-import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.exception.*;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostStringRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
-import cn.ucloud.ufile.util.JLog;
 import cn.ucloud.ufile.util.Parameter;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import okhttp3.MediaType;
+import okhttp3.Response;
 
 import java.util.*;
 
@@ -43,6 +42,11 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
      * 新名称，由于分片上传流程是独立的，为了避免当分片上传完成时，初始化的keyName被后续文件占用，此时可选填newKeyName
      */
     protected String newKeyName;
+
+    /**
+     * UFile上传回调策略
+     */
+    private PutPolicy putPolicy;
 
     /**
      * 构造方法
@@ -100,6 +104,17 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
         }
     };
 
+    /**
+     * 设置上传回调策略
+     *
+     * @param putPolicy 上传回调策略
+     * @return {@link FinishMultiUploadApi}
+     */
+    public FinishMultiUploadApi withPutPolicy(PutPolicy putPolicy) {
+        this.putPolicy = putPolicy;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileClientException {
         parameterValidat();
@@ -123,7 +138,7 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
         String contentType = MediaType.parse(info.getMimeType()).toString();
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, info.getBucket(), info.getKeyName(),
-                contentType, "", date).setOptional(authOptionalData));
+                contentType, "", date).setPutPolicy(putPolicy).setOptional(authOptionalData));
 
         builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
                 .addHeader("Content-Type", contentType)
@@ -145,5 +160,40 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
         if (partStates == null)
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'partStates' can not be null");
+    }
+
+    @Override
+    public MultiUploadResponse parseHttpResponse(Response response) throws UfileServerException, UfileClientException {
+        MultiUploadResponse result = null;
+
+        if (putPolicy != null) {
+            result = new MultiUploadResponse();
+            result.setCallbackRet(readResponseBody(response));
+        } else {
+            result = super.parseHttpResponse(response);
+        }
+
+        return result;
+    }
+
+    @Override
+    public UfileErrorBean parseErrorResponse(Response response) throws UfileClientException {
+        UfileErrorBean errorBean = null;
+        if (putPolicy != null) {
+            String content = readResponseBody(response);
+            response.body().close();
+            try {
+                errorBean = new Gson().fromJson((content == null || content.length() == 0) ? "{}" : content, UfileErrorBean.class);
+            } catch (Exception e) {
+                errorBean = new UfileErrorBean();
+            }
+            errorBean.setResponseCode(response.code());
+            errorBean.setxSessionId(response.header("X-SessionId"));
+            errorBean.setCallbackRet(content);
+            return errorBean;
+        } else {
+            errorBean = super.parseErrorResponse(response);
+        }
+        return errorBean;
     }
 }

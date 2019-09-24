@@ -4,9 +4,16 @@ import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.api.UfileApi;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.http.HttpClient;
+import cn.ucloud.ufile.util.FileUtil;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * Ufile 对象存储相关API基类
@@ -45,11 +52,27 @@ public abstract class UfileObjectApi<T> extends UfileApi<T> {
             return String.format("%s/%s", host, keyName);
 
         try {
-            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+","%20");
-            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+","%20");
+            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+", "%20");
+            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+", "%20");
             return String.format("http://%s.%s/%s", bucketName, host, keyName);
         } catch (UnsupportedEncodingException e) {
             throw new UfileClientException("Occur error during URLEncode bucketName and keyName");
         }
+    }
+
+    protected String readResponseBody(Response response) {
+        if (response == null)
+            return null;
+        ResponseBody body = response.body();
+        if (body == null)
+            return null;
+
+        try {
+            return body.string();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

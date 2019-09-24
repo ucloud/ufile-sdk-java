@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/21 17:30
@@ -18,6 +17,12 @@ public class MultiUploadResponse implements Serializable {
     private String keyName;
     @SerializedName("FileSize")
     private int fileSize;
+
+    /**
+     * 上传策略-回调结果
+     */
+    @SerializedName("callbackRet")
+    protected String callbackRet;
 
     public String getBucket() {
         return bucket;
@@ -41,6 +46,14 @@ public class MultiUploadResponse implements Serializable {
 
     public void setFileSize(int fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public String getCallbackRet() {
+        return callbackRet;
+    }
+
+    public void setCallbackRet(String callbackRet) {
+        this.callbackRet = callbackRet;
     }
 
     @Override

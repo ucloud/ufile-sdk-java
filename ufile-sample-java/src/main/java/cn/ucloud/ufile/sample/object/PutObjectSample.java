@@ -3,6 +3,9 @@ package cn.ucloud.ufile.sample.object;
 import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
+import cn.ucloud.ufile.api.object.policy.PolicyParam;
+import cn.ucloud.ufile.api.object.policy.PutPolicy;
+import cn.ucloud.ufile.api.object.policy.PutPolicyForCallback;
 import cn.ucloud.ufile.bean.PutObjectResultBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileClientException;
@@ -15,7 +18,6 @@ import cn.ucloud.ufile.util.MimeTypeUtil;
 import okhttp3.Request;
 
 import java.io.*;
-import java.net.URLEncoder;
 
 /**
  * @author: joshua
@@ -38,10 +40,22 @@ public class PutObjectSample {
 
     public static void putFile(File file, String mimeType, String nameAs, String toBucket) {
         try {
+            /**
+             * 上传回调策略
+             * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
+             * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
+             */
+            PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
+                    .addCallbackBody(new PolicyParam("key", "value"))
+                    .build();
             PutObjectResultBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .putObject(file, mimeType)
                     .nameAs(nameAs)
                     .toBucket(toBucket)
+                    /**
+                     * 配置上传回调策略
+                     */
+//                .withPutPolicy(putPolicy)
                     /**
                      * 是否上传校验MD5
                      */
@@ -72,11 +86,23 @@ public class PutObjectSample {
         }
     }
 
-    public static void putFileAsync(File file, String mimeType, String nameAs, String toBucket) {
+    public static void putFileAsync(File file, String mimeType, String nameAs, String toBucket) throws UfileClientException {
+        /**
+         * 上传回调策略
+         * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
+         * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
+         */
+        PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
+                .addCallbackBody(new PolicyParam("key", "value"))
+                .build();
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .putObject(file, mimeType)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
+                /**
+                 * 配置上传回调策略
+                 */
+//                .withPutPolicy(putPolicy)
                 /**
                  * 是否上传校验MD5
                  */
@@ -111,10 +137,22 @@ public class PutObjectSample {
 
     public static void putStream(InputStream stream, String mimeType, String nameAs, String toBucket) {
         try {
+            /**
+             * 上传回调策略
+             * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
+             * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
+             */
+            PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
+                    .addCallbackBody(new PolicyParam("key", "value"))
+                    .build();
             PutObjectResultBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .putObject(stream, mimeType)
                     .nameAs(nameAs)
                     .toBucket(toBucket)
+                    /**
+                     * 配置上传回调策略
+                     */
+//                .withPutPolicy(putPolicy)
                     /**
                      * 是否上传校验MD5
                      */
@@ -145,11 +183,23 @@ public class PutObjectSample {
         }
     }
 
-    public static void putStreamAsync(InputStream stream, String mimeType, String nameAs, String toBucket) {
+    public static void putStreamAsync(InputStream stream, String mimeType, String nameAs, String toBucket) throws UfileClientException {
+        /**
+         * 上传回调策略
+         * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
+         * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
+         */
+        PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
+                .addCallbackBody(new PolicyParam("key", "value"))
+                .build();
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .putObject(stream, mimeType)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
+                /**
+                 * 配置上传回调策略
+                 */
+//                .withPutPolicy(putPolicy)
                 /**
                  * 是否上传校验MD5
                  */
