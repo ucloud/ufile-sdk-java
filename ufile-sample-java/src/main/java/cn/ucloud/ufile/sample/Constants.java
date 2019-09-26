@@ -28,8 +28,8 @@ public class Constants {
      * 请修改下面的公私钥
      */
     public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
-            "YourBucket_PublicKey_Or_TokenPublicKey",
-            "YourBucket_PrivateKey");
+            System.getenv("UcloudPublicKey"),
+            System.getenv("UcloudPrivateKey"));
 
     /**
      * 远程Object相关API的签名器

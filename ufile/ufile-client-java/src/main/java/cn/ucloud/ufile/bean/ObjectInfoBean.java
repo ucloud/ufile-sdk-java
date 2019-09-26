@@ -28,6 +28,8 @@ public class ObjectInfoBean implements Serializable {
     private long size;
     @SerializedName("first_object")
     private String firstObject;
+    @SerializedName("StorageClass")
+    private String storageClass;
 
     public String getBucketName() {
         return bucketName;
@@ -91,6 +93,14 @@ public class ObjectInfoBean implements Serializable {
 
     public void setFirstObject(String firstObject) {
         this.firstObject = firstObject;
+    }
+
+    public String getStorageClass() {
+        return storageClass;
+    }
+
+    public void setStorageClass(String storageClass) {
+        this.storageClass = storageClass;
     }
 
     @Override

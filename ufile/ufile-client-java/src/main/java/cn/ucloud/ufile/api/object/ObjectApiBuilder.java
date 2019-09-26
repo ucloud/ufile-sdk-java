@@ -181,6 +181,17 @@ public class ObjectApiBuilder {
     }
 
     /**
+     * 获取目录格式的文件列表
+     *
+     * @param bucketName 空间名
+     * @return {@link ObjectListWithDirFormatApi}
+     */
+    public ObjectListWithDirFormatApi objectListWithDirFormat(String bucketName) {
+        return new ObjectListWithDirFormatApi(authorizer, host, client.getHttpClient())
+                .atBucket(bucketName);
+    }
+
+    /**
      * 分片上传-初始化
      *
      * @param keyName    目标对象名
@@ -257,6 +268,43 @@ public class ObjectApiBuilder {
         return new ObjectRestoreApi(authorizer, host, client.getHttpClient())
                 .which(keyName)
                 .atBucket(bucketName);
+    }
+
+
+    /**
+     * 复制云端对象文件
+     *
+     * @param srcBucket  源bucket
+     * @param srcKeyName 源文件名
+     * @return {@link CopyObjectApi}
+     */
+    public CopyObjectApi copyObject(String srcBucket, String srcKeyName) {
+        return new CopyObjectApi(authorizer, host, client.getHttpClient())
+                .from(srcBucket, srcKeyName);
+    }
+
+    /**
+     * 重命名云端对象文件
+     *
+     * @param bucketName 需要重命名的对象所在bucket
+     * @param keyName    需要重命名的对象名称
+     * @return {@link RenameObjectApi}
+     */
+    public RenameObjectApi renameObject(String bucketName, String keyName) {
+        return new RenameObjectApi(authorizer, host, client.getHttpClient())
+                .which(bucketName, keyName);
+    }
+
+    /**
+     * 换存云端对象文件的转储类型
+     *
+     * @param bucketName 需要转换的对象所在bucket
+     * @param keyName    需要转换的对象所在bucket
+     * @return {@link StorageTypeSwitchApi}
+     */
+    public StorageTypeSwitchApi switchStorageType(String bucketName, String keyName) {
+        return new StorageTypeSwitchApi(authorizer, host, client.getHttpClient())
+                .which(bucketName, keyName);
     }
 
     /**

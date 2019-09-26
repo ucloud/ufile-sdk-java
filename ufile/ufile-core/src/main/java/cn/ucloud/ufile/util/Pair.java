@@ -3,7 +3,8 @@ package cn.ucloud.ufile.util;
 import java.util.Objects;
 
 /**
- *  键值对
+ * 键值对
+ *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/8 14:44
