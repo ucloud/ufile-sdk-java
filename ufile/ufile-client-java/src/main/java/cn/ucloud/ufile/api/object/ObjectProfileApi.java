@@ -2,22 +2,18 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.auth.UfileAuthorizationException;
-import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.ObjectProfile;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
-import cn.ucloud.ufile.http.UfileHttpException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.HeadRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import com.google.gson.JsonElement;
 import okhttp3.Response;
 
-import java.io.IOException;
 import java.util.Date;
 
 /**
