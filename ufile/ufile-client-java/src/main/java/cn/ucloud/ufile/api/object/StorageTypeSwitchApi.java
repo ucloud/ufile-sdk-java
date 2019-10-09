@@ -13,8 +13,6 @@ import cn.ucloud.ufile.util.Parameter;
 import cn.ucloud.ufile.util.StorageType;
 import com.google.gson.JsonElement;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,9 +40,9 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseResponseBean> {
 
     /**
      * Required
-     * 云端对象新名称
+     * 要修改的存储类型 {@link StorageType}
      */
-    protected StorageType storageType;
+    protected String storageType;
 
     /**
      * 构造方法
@@ -73,10 +71,10 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseResponseBean> {
     /**
      * 设置要转换的存储类型
      *
-     * @param storageType 存储类型 {@link StorageType}
+     * @param storageType 存储类型，详情请见{@link StorageType}
      * @return {@link StorageTypeSwitchApi}
      */
-    public StorageTypeSwitchApi turnTypeTo(StorageType storageType) {
+    public StorageTypeSwitchApi turnTypeTo(String storageType) {
         this.storageType = storageType;
         return this;
     }
@@ -104,7 +102,7 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseResponseBean> {
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut);
 
         List<Parameter<String>> params = new ArrayList<>();
-        params.add(new Parameter<>("storageClass", storageType.name()));
+        params.add(new Parameter<>("storageClass", storageType));
 
         builder.baseUrl(builder.generateGetUrl(generateFinalHost(bucketName, keyName), params))
                 .addHeader("Content-Type", contentType)
@@ -129,8 +127,8 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseResponseBean> {
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'srcKeyName' can not be null or empty");
 
-        if (storageType == null)
+        if (storageType == null || storageType.isEmpty())
             throw new UfileRequiredParamNotFoundException(
-                    "The required param 'storageType' can not be null");
+                    "The required param 'storageType' can not be null or empty");
     }
 }

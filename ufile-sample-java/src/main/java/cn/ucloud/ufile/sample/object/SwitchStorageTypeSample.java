@@ -26,11 +26,13 @@ public class SwitchStorageTypeSample {
     public static void main(String[] args) {
         String bucketName = "";
         String keyName = "";
-        StorageType storageType = StorageType.STANDARD;
-        switchStorageType(bucketName, keyName, storageType);
+        /**
+         * 目前支持3种存储类型均在StorageType中标明
+         */
+        switchStorageType(bucketName, keyName, StorageType.STANDARD);
     }
 
-    public static void switchStorageType(String bucketName, String keyName, StorageType storageType) {
+    public static void switchStorageType(String bucketName, String keyName, String storageType) {
         try {
             BaseResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .switchStorageType(bucketName, keyName)
@@ -44,7 +46,7 @@ public class SwitchStorageTypeSample {
         }
     }
 
-    public static void switchStorageTypeAsync(String bucketName, String keyName, StorageType storageType) {
+    public static void switchStorageTypeAsync(String bucketName, String keyName, String storageType) {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .switchStorageType(bucketName, keyName)
                 .turnTypeTo(storageType)

@@ -55,7 +55,7 @@ package cn.ucloud.ufile.util;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2019/9/26 16:57
  */
-public enum StorageType {
+public class StorageType {
     /**
      * 标准存储：提供高可靠、高可用、高性能的对象存储服务，具有高吞吐和低延时的服务响应能，能够支持频繁的热点数据访问。
      * 数据持久性：99.999999999%
@@ -63,7 +63,7 @@ public enum StorageType {
      * 访问：实时访问
      * 适用场景：各种社交、分享类的图片、音视频应用、大型网站、大数据分析、移动应用、游戏程序
      */
-    STANDARD,
+    public static final String STANDARD = "STANDARD";
     /**
      * 低频存储：提供高可靠性，较低存储成本和较低访问时延的对象存储服务，适合长期保存不经常访问的数据。
      * 存储单价低于标准类型，低频存储有最短存储时间和最小对象大小，存储时间短于30天提前被删除会产生一定费用。单个文件大小低于64KB，
@@ -73,7 +73,7 @@ public enum StorageType {
      * 访问：实时访问
      * 适用场景：各类移动应用、智能设备、政企业务数据、企业数据的长期备份，支持实时数据访问
      */
-    IA,
+    public static final String IA = "IA";
     /**
      * 归档存储：提供了高可靠性，极低存储成本和长期保存的离线冷数据存储，适合需要长期保存（建议半年以上）的归档数据，
      * 在存储周期内极少被访问。在三种存储类型中单价最低，归档存储有有最短存储时间和和最小对象大小，
@@ -83,5 +83,5 @@ public enum StorageType {
      * 访问：访问前需要解冻，从冷冻状态恢复到可读取状态需要几十秒等待时间
      * 适用场景：长期保存的档案数据等合规性文件归档、医疗影像、科学资料、影视素材
      */
-    ARCHIVE
+    public static final String ARCHIVE = "ARCHIVE";
 }
