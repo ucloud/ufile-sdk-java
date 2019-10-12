@@ -3,8 +3,6 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.auth.UfileAuthorizationException;
-import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.bean.AppendObjectResultBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.*;

@@ -2,7 +2,7 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.bean.ObjectListBean;
+import cn.ucloud.ufile.bean.ObjectListWithDirFormatBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
@@ -17,28 +17,13 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * API-获取云端对象列表
+ * API-获取目录格式的云端对象列表
  *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
- * @date: 2018/11/12 19:09
+ * @date: 2019/09/26 19:09
  */
-public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
-    /**
-     * Optional
-     * 过滤前缀
-     */
-    private String prefix;
-    /**
-     * Optional
-     * 分页标记
-     */
-    private String marker;
-    /**
-     * Optional
-     * 分页数据上限，Default = 20
-     */
-    private Integer limit;
+public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDirFormatBean> {
 
     /**
      * Required
@@ -47,13 +32,37 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
     private String bucketName;
 
     /**
+     * Optional
+     * 返回以Prefix作为前缀的目录文件列表
+     */
+    private String prefix;
+
+    /**
+     * Optional
+     * 返回以字母排序后，大于Marker的目录文件列表
+     */
+    private String marker;
+
+    /**
+     * Optional
+     * 指定返回目录文件列表的最大数量，默认值为100，不超过1000
+     */
+    private Integer limit;
+
+    /**
+     * Optional
+     * 目录分隔符，默认为'/'，当前只支持是'/'
+     */
+    private String delimiter;
+
+    /**
      * 构造方法
      *
      * @param authorizer Object授权器
      * @param host       API域名
      * @param httpClient Http客户端
      */
-    protected ObjectListApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
+    protected ObjectListWithDirFormatApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
         super(authorizer, host, httpClient);
     }
 
@@ -61,9 +70,9 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
      * 配置指定Bucket
      *
      * @param bucketName bucket名称
-     * @return {@link ObjectListApi}
+     * @return {@link ObjectListWithDirFormatApi}
      */
-    public ObjectListApi atBucket(String bucketName) {
+    public ObjectListWithDirFormatApi atBucket(String bucketName) {
         this.bucketName = bucketName;
         return this;
     }
@@ -72,9 +81,9 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
      * 配置过滤前缀
      *
      * @param prefix 前缀
-     * @return {@link ObjectListApi}
+     * @return {@link ObjectListWithDirFormatApi}
      */
-    public ObjectListApi withPrefix(String prefix) {
+    public ObjectListWithDirFormatApi withPrefix(String prefix) {
         this.prefix = prefix;
         return this;
     }
@@ -83,9 +92,9 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
      * 配置分页标记
      *
      * @param marker 分页标记
-     * @return {@link ObjectListApi}
+     * @return {@link ObjectListWithDirFormatApi}
      */
-    public ObjectListApi withMarker(String marker) {
+    public ObjectListWithDirFormatApi withMarker(String marker) {
         this.marker = marker;
         return this;
     }
@@ -93,11 +102,22 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
     /**
      * 配置分页数据长度
      *
-     * @param limit 分页数据长度
-     * @return {@link ObjectListApi}
+     * @param limit 分页数据长度：Default = 100，<= 1000
+     * @return {@link ObjectListWithDirFormatApi}
      */
-    public ObjectListApi dataLimit(int limit) {
+    public ObjectListWithDirFormatApi dataLimit(int limit) {
         this.limit = limit;
+        return this;
+    }
+
+    /**
+     * 配置目录分隔符
+     *
+     * @param delimiter 分页数据长度：Default = '/'，当前只支持是'/'
+     * @return {@link ObjectListWithDirFormatApi}
+     */
+    public ObjectListWithDirFormatApi withDelimiter(String delimiter) {
+        this.delimiter = delimiter;
         return this;
     }
 
@@ -105,9 +125,9 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
      * 配置签名可选参数
      *
      * @param authOptionalData 签名可选参数
-     * @return
+     * @return {@link ObjectListWithDirFormatApi}
      */
-    public ObjectListApi withAuthOptionalData(JsonElement authOptionalData) {
+    public ObjectListWithDirFormatApi withAuthOptionalData(JsonElement authOptionalData) {
         this.authOptionalData = authOptionalData;
         return this;
     }
@@ -121,7 +141,9 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
         if (marker != null)
             query.add(new Parameter<>("marker", marker));
         if (limit != null)
-            query.add(new Parameter<>("limit", String.valueOf(limit.intValue())));
+            query.add(new Parameter<>("max-keys", String.valueOf(limit.intValue())));
+        if (delimiter != null)
+            query.add(new Parameter<>("delimiter", delimiter));
 
         String contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
@@ -130,7 +152,7 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
                 contentType, "", date).setOptional(authOptionalData));
 
         GetRequestBuilder builder = new GetRequestBuilder();
-        call = builder.baseUrl(generateFinalHost(bucketName, "") + "?list&" + builder.generateUrlQuery(query))
+        call = builder.baseUrl(generateFinalHost(bucketName, "") + "?listobjects&" + builder.generateUrlQuery(query))
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")

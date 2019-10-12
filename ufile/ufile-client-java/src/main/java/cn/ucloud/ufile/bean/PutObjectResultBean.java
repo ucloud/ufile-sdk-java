@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import cn.ucloud.ufile.bean.base.BaseResponseBean;
 
-
 /**
  *
  * @author: joshua
@@ -13,7 +12,7 @@ import cn.ucloud.ufile.bean.base.BaseResponseBean;
  */
 public class PutObjectResultBean extends BaseResponseBean {
     @SerializedName("ETag")
-    private String eTag;
+    protected String eTag;
 
     public String geteTag() {
         return eTag;

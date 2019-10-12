@@ -2,19 +2,14 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.auth.UfileAuthorizationException;
-import cn.ucloud.ufile.auth.sign.UfileSignatureException;
-import cn.ucloud.ufile.bean.ObjectRestoreBean;
-import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
-import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PutJsonRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import com.google.gson.JsonElement;
-import okhttp3.Response;
 
 import java.util.Date;
 
@@ -26,7 +21,7 @@ import java.util.Date;
  * @E-mail: delex.xie@ucloud.cn
  * @date: 2019/08/27 19:09
  */
-public class ObjectRestoreApi extends UfileObjectApi<ObjectRestoreBean> {
+public class ObjectRestoreApi extends UfileObjectApi<BaseResponseBean> {
     /**
      * Required
      * 云端对象名称
@@ -109,37 +104,5 @@ public class ObjectRestoreApi extends UfileObjectApi<ObjectRestoreBean> {
         if (bucketName == null || bucketName.isEmpty())
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'bucketName' can not be null or empty");
-    }
-
-    @Override
-    public ObjectRestoreBean parseHttpResponse(Response response) throws UfileServerException {
-        ObjectRestoreBean result = new ObjectRestoreBean();
-        int code = response.code();
-
-        if (code == RESP_CODE_SUCCESS) {
-            return result;
-        } else {
-            throw new UfileServerException(parseErrorResponse(response));
-        }
-    }
-
-    @Override
-    public UfileErrorBean parseErrorResponse(Response response) {
-        UfileErrorBean errorBean = new UfileErrorBean();
-        errorBean.setxSessionId(response.header("X-SessionId"));
-        int code = response.code();
-        errorBean.setResponseCode(code);
-        switch (code) {
-            case 404: {
-                errorBean.setErrMsg(String.format("The object '%s' is not existed in the bucket '%s'", keyName, bucketName));
-                break;
-            }
-            default: {
-                errorBean.setErrMsg(String.format("Http Error: Response-Code is %d", code));
-                break;
-            }
-        }
-
-        return errorBean;
     }
 }
