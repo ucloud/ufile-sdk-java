@@ -25,18 +25,18 @@
     <dependency>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile-client-java</artifactId>
-        <version>2.2.1</version>
+        <version>2.3.0</version>
     </dependency>
     ```
 
-- JCenter
+- Gradle
 
     ``` java
     dependencies {
         /*
          * your other dependencies
          */
-        implementation 'cn.ucloud.ufile:ufile-client-java:2.2.1'
+        implementation 'cn.ucloud.ufile:ufile-client-java:2.3.0'
     }
     ```
 
