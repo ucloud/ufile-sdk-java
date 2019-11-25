@@ -58,6 +58,8 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
         try {
             parameterValidat();
 
+            contentType = "application/json; charset=utf-8";
+
             List<Parameter<String>> query = ParameterMaker.makeParameter(this);
             query.add(new Parameter("PublicKey", authorizer.getPublicKey()));
             String signature = authorizer.authorizeBucketUrl(query);
@@ -66,7 +68,7 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
             call = new GetRequestBuilder()
                     .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                     .baseUrl(host)
-                    .addHeader("Content-Type", "application/json; charset=utf-8")
+                    .addHeader("Content-Type", contentType)
                     .addHeader("Accpet", "*/*")
                     .params(query)
                     .mediaType(MediaType.parse("application/json; charset=utf-8"))

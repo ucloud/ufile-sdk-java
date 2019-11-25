@@ -104,7 +104,7 @@ public class UploadFileHitApi extends UfileObjectApi<BaseResponseBean> {
 
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, bucketName, keyName,
-                "", "", date).setOptional(authOptionalData));
+                contentType, "", date).setOptional(authOptionalData));
 
         PostJsonRequestBuilder builder = new PostJsonRequestBuilder();
 
@@ -121,6 +121,7 @@ public class UploadFileHitApi extends UfileObjectApi<BaseResponseBean> {
 
         call = builder.baseUrl(builder.generateGetUrl(url, query))
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
+                .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
                 .addHeader("authorization", authorization)

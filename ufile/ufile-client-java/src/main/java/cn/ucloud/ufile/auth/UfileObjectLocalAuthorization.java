@@ -4,6 +4,7 @@ import cn.ucloud.ufile.auth.sign.Signer;
 import cn.ucloud.ufile.auth.sign.UfileSignatureException;
 import cn.ucloud.ufile.auth.sign.UfileSigner;
 import cn.ucloud.ufile.util.HttpMethod;
+import cn.ucloud.ufile.util.JLog;
 
 /**
  * Ufile默认的本地签名生成器
@@ -69,6 +70,8 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
         if (param.getPutPolicy() != null && param.getPutPolicy().getPolicy() != null)
             signData.append(param.getPutPolicy().getPolicy());
 
+        JLog.D("TEST", "[signData]:" + signData.toString());
+
         String signature = signer.signature(privateKey, signData.toString());
 
         return "UCloud " + publicKey + ":" + signature
@@ -105,6 +108,8 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
         signData.append(expires + "\n");
         signData.append("/" + bucket);
         signData.append("/" + keyName);
+
+        JLog.D("TEST", "[signData]:" + signData.toString());
 
         return signer.signature(privateKey, signData.toString());
     }

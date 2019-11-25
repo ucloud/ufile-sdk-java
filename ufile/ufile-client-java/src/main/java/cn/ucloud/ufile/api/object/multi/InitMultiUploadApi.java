@@ -109,7 +109,7 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
-        String contentType = mediaType.toString();
+        contentType = mediaType.toString();
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, bucketName, keyName,
                 contentType, "", date).setOptional(authOptionalData));

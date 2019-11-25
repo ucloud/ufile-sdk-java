@@ -135,7 +135,7 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
             bodyBuffer.append(part.geteTag() + (i < (len - 1) ? "," : ""));
         }
 
-        String contentType = MediaType.parse(info.getMimeType()).toString();
+        contentType = MediaType.parse(info.getMimeType()).toString();
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, info.getBucket(), info.getKeyName(),
                 contentType, "", date).setPutPolicy(putPolicy).setOptional(authOptionalData));

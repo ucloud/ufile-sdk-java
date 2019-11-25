@@ -145,7 +145,7 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
         if (delimiter != null)
             query.add(new Parameter<>("delimiter", delimiter));
 
-        String contentType = "application/json; charset=utf-8";
+        contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.GET, bucketName, "",

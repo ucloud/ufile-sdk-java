@@ -43,6 +43,10 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      */
     protected Call call;
     /**
+     * Request Content-Type
+     */
+    protected String contentType = "";
+    /**
      * Http API回调
      */
     protected BaseHttpCallback<T, UfileErrorBean> httpCallback;

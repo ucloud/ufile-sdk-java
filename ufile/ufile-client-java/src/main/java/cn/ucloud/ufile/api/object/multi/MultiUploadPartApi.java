@@ -132,7 +132,7 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
         query.add(new Parameter<>("uploadId", info.getUploadId()));
         query.add(new Parameter<>("partNumber", String.valueOf(partIndex)));
 
-        String contentType = MediaType.parse(info.getMimeType()).toString();
+        contentType = MediaType.parse(info.getMimeType()).toString();
         String contentMD5 = "";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 

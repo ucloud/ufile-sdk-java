@@ -22,7 +22,7 @@ import java.util.Date;
  *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
- * @date: 2018/11/12 19:08
+ * @date: 201/11/12 19:08
  */
 public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
 
@@ -102,7 +102,7 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
-        String contentType = "application/json; charset=utf-8";
+        contentType = "application/json; charset=utf-8";
         String contentMD5 = "";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
         String xUfileCopySource = null;
