@@ -222,6 +222,22 @@ public class ObjectApiBuilder {
     }
 
     /**
+     * 分片上传-上传分片
+     *
+     * @param state     initMultiUpload 返回的response
+     * @param part      分片数据
+     * @param offset    分片数据偏移量
+     * @param length    分片数据长度
+     * @param partIndex 分片序号
+     * @return {@link MultiUploadPartApi}
+     */
+    public MultiUploadPartApi multiUploadPart(MultiUploadInfo state, byte[] part, int offset, int length, int partIndex) {
+        return new MultiUploadPartApi(authorizer, host, client.getHttpClient())
+                .which(state)
+                .from(part, offset, length, partIndex);
+    }
+
+    /**
      * 分片上传-中断上传
      *
      * @param state initMultiUpload 返回的response

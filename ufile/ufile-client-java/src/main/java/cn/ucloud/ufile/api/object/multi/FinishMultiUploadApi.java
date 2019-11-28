@@ -10,6 +10,7 @@ import cn.ucloud.ufile.exception.*;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostStringRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
+import cn.ucloud.ufile.util.MetadataDirective;
 import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -47,6 +48,16 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
      * UFile上传回调策略
      */
     private PutPolicy putPolicy;
+
+    /**
+     * 用户自定义文件元数据
+     */
+    protected Map<String, String> metadatas;
+
+    /**
+     * 用户自定义元数据设置方式
+     */
+    protected String metadataDirective;
 
     /**
      * 构造方法
@@ -115,6 +126,53 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
         return this;
     }
 
+    /**
+     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+     * 默认为null，若配置null则表示取消配置自定义数据
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param datas 自定义数据 {@link List<Parameter>}
+     */
+    public FinishMultiUploadApi withMetaDatas(Map<String, String> datas) {
+        if (datas == null) {
+            metadatas = null;
+            return this;
+        }
+
+        metadatas = new HashMap<>(datas);
+        return this;
+    }
+
+    /**
+     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+     * key不能为空或者""
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param data 自定义数据 {@link Parameter<String>}
+     */
+    public FinishMultiUploadApi addMetaData(Parameter<String> data) {
+        if (data == null)
+            return this;
+
+        if (metadatas == null)
+            metadatas = new HashMap<>();
+
+        metadatas.put(data.key, data.value);
+        return this;
+    }
+
+    /**
+     * 配置用户自定义元数据设置方式
+     *
+     * @param metadataDirective 用户自定义元数据设置方式 {@link MetadataDirective}
+     */
+    public FinishMultiUploadApi withMetadataDirective(String metadataDirective) {
+        this.metadataDirective = metadataDirective;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileClientException {
         parameterValidat();
@@ -148,6 +206,22 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
                 .addHeader("authorization", authorization)
                 .params(bodyBuffer.toString());
 
+        if (metadataDirective != null)
+            builder.addHeader("X-Ufile-Metadata-Directive", metadataDirective);
+
+        if (metadatas != null && !metadatas.isEmpty()) {
+            Set<String> keys = metadatas.keySet();
+            if (keys != null) {
+                for (String key : keys) {
+                    if (key == null || key.isEmpty())
+                        continue;
+
+                    String value = metadatas.get(key);
+                    builder.addHeader(new StringBuilder("X-Ufile-Meta-").append(key).toString(), value == null ? "" : value);
+                }
+            }
+        }
+
         call = builder.build(httpClient.getOkHttpClient());
     }
 
@@ -171,6 +245,9 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
             result.setCallbackRet(readResponseBody(response));
         } else {
             result = super.parseHttpResponse(response);
+            String eTag = response.header("ETag");
+            eTag = eTag == null ? null : eTag.replace("\"", "");
+            result.seteTag(eTag);
         }
 
         return result;

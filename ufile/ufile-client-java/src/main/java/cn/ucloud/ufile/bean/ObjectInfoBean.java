@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/21 15:45
@@ -15,7 +14,7 @@ public class ObjectInfoBean implements Serializable {
     @SerializedName("BucketName")
     private String bucketName;
     @SerializedName("CreateTime")
-    private long createTime;
+    private Long createTime;
     @SerializedName("FileName")
     private String fileName;
     @SerializedName("Hash")
@@ -23,13 +22,15 @@ public class ObjectInfoBean implements Serializable {
     @SerializedName("MimeType")
     private String mimeType;
     @SerializedName("ModifyTime")
-    private long modifyTime;
+    private Long modifyTime;
     @SerializedName("Size")
-    private long size;
+    private Long size;
     @SerializedName("first_object")
     private String firstObject;
     @SerializedName("StorageClass")
     private String storageClass;
+    @SerializedName("RestoreStatus")
+    private String restoreStatus;
 
     public String getBucketName() {
         return bucketName;
@@ -39,7 +40,7 @@ public class ObjectInfoBean implements Serializable {
         this.bucketName = bucketName;
     }
 
-    public long getCreateTime() {
+    public Long getCreateTime() {
         return createTime;
     }
 
@@ -71,7 +72,7 @@ public class ObjectInfoBean implements Serializable {
         this.mimeType = mimeType;
     }
 
-    public long getModifyTime() {
+    public Long getModifyTime() {
         return modifyTime;
     }
 
@@ -79,7 +80,7 @@ public class ObjectInfoBean implements Serializable {
         this.modifyTime = modifyTime;
     }
 
-    public long getSize() {
+    public Long getSize() {
         return size;
     }
 
@@ -101,6 +102,14 @@ public class ObjectInfoBean implements Serializable {
 
     public void setStorageClass(String storageClass) {
         this.storageClass = storageClass;
+    }
+
+    public String getRestoreStatus() {
+        return restoreStatus;
+    }
+
+    public void setRestoreStatus(String restoreStatus) {
+        this.restoreStatus = restoreStatus;
     }
 
     @Override

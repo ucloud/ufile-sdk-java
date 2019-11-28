@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/20 15:57
@@ -27,7 +27,18 @@ public class ObjectProfile implements Serializable {
     @SerializedName("Bucket")
     private String bucket;
     @SerializedName("KeyName")
-    private String keyName;
+    private  String keyName;
+    private transient Map<String,String> metadatas;
+    /**
+     * 请求下载文件的存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+     */
+    @SerializedName("StorageType")
+    private String storageType;
+    /**
+     * 如果请求下载文件的存储类型为ARCHIVE，且文件处于解冻状态，则这个响应头会返回对应文件的解冻过期时间
+     */
+    @SerializedName("RestoreTime")
+    private String restoreTime;
 
     public String getContentType() {
         return contentType;
@@ -91,6 +102,30 @@ public class ObjectProfile implements Serializable {
 
     public void setKeyName(String keyName) {
         this.keyName = keyName;
+    }
+
+    public Map<String,String> getMetadatas() {
+        return metadatas;
+    }
+
+    public void setMetadatas(Map<String,String> metadatas) {
+        this.metadatas = metadatas;
+    }
+
+    public String getStorageType() {
+        return storageType;
+    }
+
+    public void setStorageType(String storageType) {
+        this.storageType = storageType;
+    }
+
+    public String getRestoreTime() {
+        return restoreTime;
+    }
+
+    public void setRestoreTime(String restoreTime) {
+        this.restoreTime = restoreTime;
     }
 
     @Override

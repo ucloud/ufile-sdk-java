@@ -13,11 +13,11 @@ import cn.ucloud.ufile.http.ProgressConfig;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
 import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.UfileConstants;
+import cn.ucloud.ufile.util.Parameter;
 import okhttp3.Response;
 
 import java.io.*;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -183,6 +183,21 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         result.setContentLength(contentLength);
         result.setContentType(response.header("Content-Type"));
         result.seteTag(response.header("ETag").replace("\"", ""));
+
+        if (response.headers() != null) {
+            Set<String> names = response.headers().names();
+            if (names != null) {
+                Map<String, String> metadata = new HashMap<>();
+                for (String name : names) {
+                    if (name == null || !name.startsWith("X-Ufile-Meta-"))
+                        continue;
+
+                    String key = name.substring(13);
+                    metadata.put(key, response.header(name, ""));
+                }
+                result.setMetadatas(metadata);
+            }
+        }
 
         if (onProgressListener != null) {
             switch (progressConfig.type) {

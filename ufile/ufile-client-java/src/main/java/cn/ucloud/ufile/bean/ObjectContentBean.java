@@ -1,9 +1,11 @@
 package cn.ucloud.ufile.bean;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author: joshua
@@ -17,16 +19,19 @@ public class ObjectContentBean implements Serializable {
     private String key;
     @SerializedName("MimeType")
     private String mimeType;
-    @SerializedName("ETag")
+    @SerializedName("Etag")
     private String eTag;
     @SerializedName("Size")
     private String size;
     @SerializedName("StorageClass")
-    private String storageClass;
+    private String storageType;
     @SerializedName("LastModified")
     private Long lastModified;
     @SerializedName("CreateTime")
     private Long createTime;
+    @SerializedName("UserMeta")
+    private JsonObject jsonUserMeta;
+    private transient Map<String, String> userMeta;
 
     public String getBucketName() {
         return bucketName;
@@ -68,19 +73,19 @@ public class ObjectContentBean implements Serializable {
         this.size = size;
     }
 
-    public String getStorageClass() {
-        return storageClass;
+    public String getStorageType() {
+        return storageType;
     }
 
-    public void setStorageClass(String storageClass) {
-        this.storageClass = storageClass;
+    public void setStorageType(String storageType) {
+        this.storageType = storageType;
     }
 
     public Long getLastModified() {
         return lastModified;
     }
 
-    public void setLastModified(Long lastModified) {
+    public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
     }
 
@@ -88,8 +93,20 @@ public class ObjectContentBean implements Serializable {
         return createTime;
     }
 
-    public void setCreateTime(Long createTime) {
+    public void setCreateTime(long createTime) {
         this.createTime = createTime;
+    }
+
+    public JsonObject getJsonUserMeta() {
+        return jsonUserMeta;
+    }
+
+    public Map<String, String> getUserMeta() {
+        return userMeta;
+    }
+
+    public void setUserMeta(Map<String, String> userMeta) {
+        this.userMeta = userMeta;
     }
 
     @Override

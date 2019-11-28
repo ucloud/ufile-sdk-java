@@ -20,7 +20,7 @@ import okhttp3.Response;
 
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
+import java.util.*;
 
 /**
  * API-Put上传小文件
@@ -74,6 +74,16 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
      * UFile上传回调策略
      */
     private PutPolicy putPolicy;
+
+    /**
+     * 用户自定义文件元数据
+     */
+    protected Map<String, String> metadatas;
+
+    /**
+     * 文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+     */
+    protected String storageType;
 
     /**
      * 构造方法
@@ -178,6 +188,53 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
         return this;
     }
 
+    /**
+     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+     * 默认为null，若配置null则表示取消配置自定义数据
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param datas 自定义数据 {@link List<Parameter>}
+     */
+    public PutFileApi withMetaDatas(Map<String, String> datas) {
+        if (datas == null) {
+            metadatas = null;
+            return this;
+        }
+
+        metadatas = new HashMap<>(datas);
+        return this;
+    }
+
+    /**
+     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+     * key不能为空或者""
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param data 自定义数据 {@link Parameter<String>}
+     */
+    public PutFileApi addMetaData(Parameter<String> data) {
+        if (data == null)
+            return this;
+
+        if (metadatas == null)
+            metadatas = new HashMap<>();
+
+        metadatas.put(data.key, data.value);
+        return this;
+    }
+
+    /**
+     * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+     *
+     * @param storageType 文件存储类型，{@link StorageType}
+     */
+    public PutFileApi withStorageType(String storageType) {
+        this.storageType = storageType;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileClientException {
         parameterValidat();
@@ -203,6 +260,22 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
                 .addHeader("Content-Length", String.valueOf(file.length()))
                 .addHeader("Date", date)
                 .mediaType(mediaType);
+
+        if (storageType != null)
+            builder.addHeader("X-Ufile-Storage-Class", storageType);
+
+        if (metadatas != null && !metadatas.isEmpty()) {
+            Set<String> keys = metadatas.keySet();
+            if (keys != null) {
+                for (String key : keys) {
+                    if (key == null || key.isEmpty())
+                        continue;
+
+                    String value = metadatas.get(key);
+                    builder.addHeader(new StringBuilder("X-Ufile-Meta-").append(key).toString(), value == null ? "" : value);
+                }
+            }
+        }
 
         if (isVerifyMd5) {
             try {

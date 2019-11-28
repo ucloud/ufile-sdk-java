@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  *
@@ -21,6 +22,8 @@ public class DownloadStreamBean implements Serializable {
     private long contentLength;
     @SerializedName("InputStream")
     private InputStream inputStream;
+
+    private transient Map<String,String> metadatas;
 
     public String getContentType() {
         return contentType;
@@ -56,6 +59,14 @@ public class DownloadStreamBean implements Serializable {
     public DownloadStreamBean setInputStream(InputStream inputStream) {
         this.inputStream = inputStream;
         return this;
+    }
+
+    public Map<String,String> getMetadatas() {
+        return metadatas;
+    }
+
+    public void setMetadatas(Map<String,String> metadatas) {
+        this.metadatas = metadatas;
     }
 
     @Override
