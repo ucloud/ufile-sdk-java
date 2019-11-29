@@ -111,7 +111,7 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
      * <p>
      * 所有的自定义数据总大小不能超过 8KB。
      *
-     * @param datas 自定义数据 {@link List<Parameter>}
+     * @param datas 自定义数据，Key：不能为null和""，并且只支持字母大小写、数字和减号分隔符"-"  {@link List<Parameter>}
      */
     public InitMultiUploadApi withMetaDatas(Map<String, String> datas) {
         if (datas == null) {
@@ -129,7 +129,7 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
      * <p>
      * 所有的自定义数据总大小不能超过 8KB。
      *
-     * @param data 自定义数据 {@link Parameter<String>}
+     * @param data 自定义数据，Key：不能为null和""，并且只支持字母大小写、数字和减号分隔符"-"  {@link Parameter<String>}
      */
     public InitMultiUploadApi addMetaData(Parameter<String> data) {
         if (data == null)
