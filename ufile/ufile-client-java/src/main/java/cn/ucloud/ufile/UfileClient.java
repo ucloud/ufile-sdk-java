@@ -20,15 +20,38 @@ public class UfileClient {
     private static volatile UfileClient mInstance;
     private HttpClient httpClient;
 
+    private Config config;
+
     private UfileClient() {
-        this.httpClient = new HttpClient();
+        this(new Config());
+    }
+
+    private UfileClient(Config config) {
+        if (config == null) {
+            config = new Config();
+        }
+        this.config = config;
+        this.httpClient = new HttpClient(config.httpClientConfig);
     }
 
     private static UfileClient createClient() {
         if (mInstance == null) {
             synchronized (UfileClient.class) {
-                if (mInstance == null)
+                if (mInstance == null) {
                     mInstance = new UfileClient();
+                }
+            }
+        }
+
+        return mInstance;
+    }
+
+    private static UfileClient createClient(Config config) {
+        if (mInstance == null) {
+            synchronized (UfileClient.class) {
+                if (mInstance == null) {
+                    mInstance = new UfileClient(config);
+                }
             }
         }
 
@@ -39,14 +62,45 @@ public class UfileClient {
         return httpClient;
     }
 
+    public static class Config {
+        private HttpClient.Config httpClientConfig;
+
+        public Config() {
+            this(new HttpClient.Config());
+        }
+
+        public Config(HttpClient.Config httpClientConfig) {
+            this.httpClientConfig = httpClientConfig;
+        }
+
+        public HttpClient.Config getHttpClientConfig() {
+            return httpClientConfig;
+        }
+
+        public Config setHttpClientConfig(HttpClient.Config httpClientConfig) {
+            this.httpClientConfig = httpClientConfig;
+            return this;
+        }
+    }
+
     /**
      * 设置HttpClient异步线程池
      *
      * @param executorService HttpClient异步线程池
      */
+    @Deprecated
     public static void setExecutorService(ExecutorService executorService) {
-        if (mInstance != null)
-            mInstance.httpClient.setExecutorService(executorService);
+    }
+
+    /**
+     * 配置并构建UfileClient
+     * 必须在调用bucket()和object()之前调用，否则无效
+     *
+     * @param config {@link Config}
+     * @return UfileClient实例{@link UfileClient}
+     */
+    public synchronized static UfileClient configure(Config config) {
+        return createClient(config);
     }
 
     /**
@@ -54,10 +108,20 @@ public class UfileClient {
      *
      * @return HttpClient异步线程池
      */
+    @Deprecated
     public static ExecutorService getExecutorService() {
         if (mInstance == null)
             return null;
         return mInstance.httpClient.getExecutorService();
+    }
+
+    /**
+     * 获取UfileClient配置项
+     *
+     * @return UfileClient配置项 {@link Config}
+     */
+    public Config getConfig() {
+        return config;
     }
 
     /**
@@ -66,7 +130,7 @@ public class UfileClient {
      * @param authorizer Bucket相关API授权者{@link BucketAuthorizer}
      * @return Bucket相关API构造器 {@link BucketApiBuilder}
      */
-    public static BucketApiBuilder bucket(BucketAuthorizer authorizer) {
+    public synchronized static BucketApiBuilder bucket(BucketAuthorizer authorizer) {
         return new BucketApiBuilder(createClient(), authorizer);
     }
 
@@ -77,7 +141,7 @@ public class UfileClient {
      * @param config     Object相关API配置选项
      * @return Object相关API构造器 {@link ObjectApiBuilder}
      */
-    public static ObjectApiBuilder object(ObjectAuthorizer authorizer, ObjectConfig config) {
+    public synchronized static ObjectApiBuilder object(ObjectAuthorizer authorizer, ObjectConfig config) {
         return new ObjectApiBuilder(createClient(), authorizer, config.host());
     }
 }

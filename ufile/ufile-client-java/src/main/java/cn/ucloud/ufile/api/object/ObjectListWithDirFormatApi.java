@@ -189,11 +189,10 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
                     if (keys != null) {
                         Map<String, String> metadata = new HashMap<>();
                         for (String name : keys) {
-                            if (name == null || !name.startsWith("X-Ufile-Meta-"))
+                            if (name == null || name.isEmpty())
                                 continue;
 
-                            String key = name.substring(13);
-                            metadata.put(key, json.get(name).getAsString());
+                            metadata.put(name.toLowerCase(), json.get(name).getAsString());
                         }
                         content.setUserMeta(metadata);
                     }

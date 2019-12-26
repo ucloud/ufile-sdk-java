@@ -132,7 +132,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
                         if (name == null || !name.startsWith("X-Ufile-Meta-"))
                             continue;
 
-                        String key = name.substring(13);
+                        String key = name.substring(13).toLowerCase();
                         metadata.put(key, response.header(name, ""));
                     }
                     result.setMetadatas(metadata);

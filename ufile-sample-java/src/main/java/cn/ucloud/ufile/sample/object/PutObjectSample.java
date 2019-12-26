@@ -33,9 +33,9 @@ public class PutObjectSample {
         InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
         // 如果上传File，则文件的MimeType可以使用MimeTypeUtil.getMimeType(File)来获取，MimeTypeUtil可能支持的type类型不全，用户可以按需自行填写
         File file = new File("");
-        String keyName = "¿Ha olvidado la contraseña?/baidu-1w.txt";
+        String keyName = "";
         String mimeType = MimeTypeUtil.getMimeType(keyName);
-        String bucketName = "new-bucket";
+        String bucketName = "";
         putStream(is, mimeType, keyName, bucketName);
     }
 
