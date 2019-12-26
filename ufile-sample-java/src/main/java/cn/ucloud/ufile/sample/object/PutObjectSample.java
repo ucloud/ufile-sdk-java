@@ -15,6 +15,7 @@ import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
 import cn.ucloud.ufile.util.MimeTypeUtil;
+import cn.ucloud.ufile.util.StorageType;
 import okhttp3.Request;
 
 import java.io.*;
@@ -35,7 +36,7 @@ public class PutObjectSample {
         String keyName = "";
         String mimeType = MimeTypeUtil.getMimeType(keyName);
         String bucketName = "";
-        putFile(file, mimeType, keyName, bucketName);
+        putStream(is, mimeType, keyName, bucketName);
     }
 
     public static void putFile(File file, String mimeType, String nameAs, String toBucket) {
@@ -52,6 +53,21 @@ public class PutObjectSample {
                     .putObject(file, mimeType)
                     .nameAs(nameAs)
                     .toBucket(toBucket)
+                    /**
+                     * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+                     */
+                    .withStorageType(StorageType.STANDARD)
+                    /**
+                     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+                     * 所有的自定义数据总大小不能超过 8KB。
+                     */
+//                    .withMetaDatas()
+                    /**
+                     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+                     * key不能为空或者""
+                     *
+                     */
+//                    .addMetaData(new Parameter<>("key","value"))
                     /**
                      * 配置上传回调策略
                      */
@@ -99,6 +115,21 @@ public class PutObjectSample {
                 .putObject(file, mimeType)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
+                /**
+                 * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+                 */
+                .withStorageType(StorageType.STANDARD)
+                /**
+                 * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+                 * 所有的自定义数据总大小不能超过 8KB。
+                 */
+//                    .withMetaDatas()
+                /**
+                 * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+                 * key不能为空或者""
+                 *
+                 */
+//                    .addMetaData(new Parameter<>("key","value"))
                 /**
                  * 配置上传回调策略
                  */
@@ -150,6 +181,21 @@ public class PutObjectSample {
                     .nameAs(nameAs)
                     .toBucket(toBucket)
                     /**
+                     * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+                     */
+                    .withStorageType(StorageType.STANDARD)
+                    /**
+                     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+                     * 所有的自定义数据总大小不能超过 8KB。
+                     */
+//                    .withMetaDatas()
+                    /**
+                     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+                     * key不能为空或者""
+                     *
+                     */
+//                    .addMetaData(new Parameter<>("key","value"))
+                    /**
                      * 配置上传回调策略
                      */
 //                .withPutPolicy(putPolicy)
@@ -196,6 +242,21 @@ public class PutObjectSample {
                 .putObject(stream, mimeType)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
+                /**
+                 * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+                 */
+                .withStorageType(StorageType.STANDARD)
+                /**
+                 * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+                 * 所有的自定义数据总大小不能超过 8KB。
+                 */
+//                    .withMetaDatas()
+                /**
+                 * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+                 * key不能为空或者""
+                 *
+                 */
+//                    .addMetaData(new Parameter<>("key","value"))
                 /**
                  * 配置上传回调策略
                  */

@@ -2,19 +2,21 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.bean.ObjectContentBean;
 import cn.ucloud.ufile.bean.ObjectListWithDirFormatBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import okhttp3.Response;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * API-获取目录格式的云端对象列表
@@ -145,7 +147,7 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
         if (delimiter != null)
             query.add(new Parameter<>("delimiter", delimiter));
 
-        String contentType = "application/json; charset=utf-8";
+        contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.GET, bucketName, "",
@@ -170,5 +172,33 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
         if (limit != null && limit.intValue() < 1)
             throw new UfileParamException(
                     "The required param 'limit' must be > 0");
+    }
+
+    @Override
+    public ObjectListWithDirFormatBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
+        ObjectListWithDirFormatBean result = super.parseHttpResponse(response);
+        if (result != null) {
+            List<ObjectContentBean> contents = result.getObjectContents();
+            if (contents != null && !contents.isEmpty()) {
+                for (ObjectContentBean content : contents) {
+                    if (content == null || content.getJsonUserMeta() == null)
+                        continue;
+
+                    JsonObject json = content.getJsonUserMeta();
+                    Set<String> keys = json.keySet();
+                    if (keys != null) {
+                        Map<String, String> metadata = new HashMap<>();
+                        for (String name : keys) {
+                            if (name == null || name.isEmpty())
+                                continue;
+
+                            metadata.put(name.toLowerCase(), json.get(name).getAsString());
+                        }
+                        content.setUserMeta(metadata);
+                    }
+                }
+            }
+        }
+        return result;
     }
 }

@@ -25,7 +25,7 @@
     <dependency>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile-client-java</artifactId>
-        <version>2.3.0</version>
+        <version>2.4.0</version>
     </dependency>
     ```
 
@@ -36,7 +36,7 @@
         /*
          * your other dependencies
          */
-        implementation 'cn.ucloud.ufile:ufile-client-java:2.3.0'
+        implementation 'cn.ucloud.ufile:ufile-client-java:2.4.0'
     }
     ```
 
@@ -50,6 +50,19 @@
     - 异步执行需要传入UfileCallback<T>的回调接口，执行成功时会回调onResponse，泛型<T>为回调结果(即：同步执行的返回类型)，**值得注意的是，若Ufile Server业务错误，也会回调onResponse，请注意结果类中的信息**，若出现异常，则回调onError。
     
     - 如果是上传下载等耗时API，建议使用异步执行(executeAsync)，并可以重写UfileCallback中的onProgress回调来进行进度监听
+
+## 配置UfileClient
+
+- 必须在使用UfileClient之前调用，即：必须是UfileClient第一个调用的方法才有效。否则使用默认UfileClient.Config
+
+    ``` java
+    UfileClient.configure(new UfileClient.Config(
+                    new HttpClient.Config(int maxIdleConnections, long keepAliveDuration, TimeUnit keepAliveTimeUnit)
+                            .setTimeout(连接超时ms，读取超时ms，写入超时ms)
+                            .setExecutorService(线程池)
+                            .addInterceptor(okhttp3拦截器)
+                            .addNetInterceptor(okhttp3网络拦截器)));
+    ```
 
 ### Bucket相关操作
 ``` java

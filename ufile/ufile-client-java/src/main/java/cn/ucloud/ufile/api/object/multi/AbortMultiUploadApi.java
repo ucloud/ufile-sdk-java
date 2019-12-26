@@ -68,7 +68,7 @@ public class AbortMultiUploadApi extends UfileObjectApi<BaseResponseBean> {
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
-        String contentType = "application/json; charset=utf-8";
+        contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
         String authorization = authorizer.authorization((ObjectOptAuthParam)

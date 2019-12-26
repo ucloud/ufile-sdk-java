@@ -18,8 +18,7 @@ import okhttp3.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 
@@ -36,6 +35,17 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
     private ProgressConfig progressConfig;
     private AtomicLong bytesWritten;
     private AtomicLong bytesWrittenCache;
+
+    /**
+     * Optional
+     * 要下载的对象的范围起始偏移量，Default = 0，若0则从0开始下载
+     */
+    private long rangeStart;
+    /**
+     * Optional
+     * 要下载的对象的范围长度，Default = 0，若0则下载整个对象
+     */
+    private long rangeEnd;
     /**
      * 流读取的buffer大小，Default = 256 KB
      */
@@ -50,7 +60,21 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
      */
     protected GetStreamApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
         super(authorizer, host, httpClient);
+        RESP_CODE_SUCCESS = 206;
         progressConfig = ProgressConfig.callbackDefault();
+    }
+
+    /**
+     * 选择要下载的对象的范围，Default = (0, whole size)
+     *
+     * @param start range起点
+     * @param end   range终点
+     * @return {@link GetStreamApi}
+     */
+    public GetStreamApi withinRange(long start, long end) {
+        this.rangeStart = start;
+        this.rangeEnd = end;
+        return this;
     }
 
     /**
@@ -96,9 +120,11 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         parameterValidat();
         bytesWritten = new AtomicLong(0);
         bytesWrittenCache = new AtomicLong(0);
+
         call = new GetRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(host)
+                .addHeader("Range", String.format("bytes=%d-%s", rangeStart, rangeEnd == 0 ? "" : rangeEnd))
                 .build(httpClient.getOkHttpClient());
     }
 
@@ -107,6 +133,13 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         if (host == null || host.isEmpty())
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'url' can not be null or empty");
+
+        if (rangeStart < 0l)
+            throw new UfileParamException("Invalid range param 'start', start must be >= 0");
+        if (rangeEnd < 0l)
+            throw new UfileParamException("Invalid range param 'end', end must be >= 0");
+        if (rangeEnd > 0 && rangeEnd <= rangeStart)
+            throw new UfileParamException("Invalid range, end must be > start");
     }
 
     private OnProgressListener onProgressListener;
@@ -156,6 +189,21 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         result.setContentLength(contentLength);
         result.setContentType(response.header("Content-Type"));
         result.seteTag(response.header("ETag").replace("\"", ""));
+
+        if (response.headers() != null) {
+            Set<String> names = response.headers().names();
+            if (names != null) {
+                Map<String, String> metadata = new HashMap<>();
+                for (String name : names) {
+                    if (name == null || !name.startsWith("X-Ufile-Meta-"))
+                        continue;
+
+                    String key = name.substring(13).toLowerCase();
+                    metadata.put(key, response.header(name, ""));
+                }
+                result.setMetadatas(metadata);
+            }
+        }
 
         InputStream is = response.body().byteStream();
         if (outputStream == null) {

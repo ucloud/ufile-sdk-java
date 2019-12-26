@@ -16,7 +16,7 @@ public class ObjectListWithDirFormatBean implements Serializable {
     private String bucketName;
     @SerializedName("Prefix")
     private String prefix;
-    @SerializedName("MaxKeys")
+    @SerializedName("Maxkeys")
     private String maxKeys;
     @SerializedName("Delimiter")
     private String delimiter;

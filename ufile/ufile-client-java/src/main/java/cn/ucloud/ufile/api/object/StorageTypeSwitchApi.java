@@ -94,8 +94,7 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseResponseBean> {
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
-        String contentType = "application/json; charset=utf-8";
-        String contentMD5 = "";
+        contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
         PutJsonRequestBuilder builder = (PutJsonRequestBuilder) new PutJsonRequestBuilder()
@@ -110,7 +109,7 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseResponseBean> {
                 .addHeader("Date", date);
 
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT,
-                bucketName, keyName, contentType, contentMD5, date).setOptional(authOptionalData));
+                bucketName, keyName, contentType, "", date).setOptional(authOptionalData));
 
         builder.addHeader("authorization", authorization);
 

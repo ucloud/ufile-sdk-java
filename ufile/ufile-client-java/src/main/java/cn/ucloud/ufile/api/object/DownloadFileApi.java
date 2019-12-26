@@ -22,10 +22,7 @@ import okhttp3.Call;
 import okhttp3.Response;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -70,14 +67,14 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
     /**
      * Optional
-     * 要下载的对象的范围起始偏移量，Default = null，若null则从0开始下载
+     * 要下载的对象的范围起始偏移量，Default = 0，若0则从0开始下载
      */
-    private Long offset;
+    private long rangeStart;
     /**
      * Optional
-     * 要下载的对象的范围长度，Default = null，若null则下载整个对象
+     * 要下载的对象的范围长度，Default = 0，若0则下载整个对象
      */
-    private Long size;
+    private long rangeEnd;
 
     /**
      * Optional
@@ -158,13 +155,13 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     /**
      * 选择要下载的对象的范围，Default = (0, whole size)
      *
-     * @param offset 起始偏移量
-     * @param size   范围长度
+     * @param start range起点
+     * @param end   range终点
      * @return {@link DownloadFileApi}
      */
-    public DownloadFileApi withinRange(long offset, long size) {
-        this.offset = new Long(offset);
-        this.size = new Long(size);
+    public DownloadFileApi withinRange(long start, long end) {
+        this.rangeStart = start;
+        this.rangeEnd = end;
         return this;
     }
 
@@ -227,6 +224,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
+        partCount = 0;
+
         File dir = new File(localPath);
         if (!dir.exists() || (dir.exists() && !dir.isDirectory()))
             dir.mkdirs();
@@ -253,18 +252,9 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
         finalFile = file;
 
-        if (offset == null || size == null) {
-            totalSize = profile.getContentLength();
-        } else {
-            if (offset.longValue() < 0l)
-                throw new UfileParamException("Invalid range param 'offset', offset must be >= 0");
-            if (size.longValue() < 0l)
-                throw new UfileParamException("Invalid range param 'size', size must be >= 0");
-            if (size.longValue() <= offset.longValue())
-                throw new UfileParamException("Invalid range, size must be > offset");
-
-            totalSize = size.longValue() - offset.longValue();
-        }
+        if (rangeEnd == 0)
+            rangeEnd = profile.getContentLength() - 1;
+        totalSize = rangeEnd - rangeStart + 1;
 
         host = new GenerateObjectPrivateUrlApi(authorizer, host, profile.getKeyName(), profile.getBucket(), expiresDuration)
                 .withAuthOptionalData(authOptionalData)
@@ -298,8 +288,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
         callList = new ArrayList<>();
         for (int i = 0; i < partCount; i++) {
-            int start = i * UfileConstants.MULTIPART_SIZE;
-            int end = ((int) Math.min(totalSize, (start + UfileConstants.MULTIPART_SIZE))) - 1;
+            long start = Math.max(i * UfileConstants.MULTIPART_SIZE, rangeStart);
+            long end = Math.min(rangeEnd, (start + UfileConstants.MULTIPART_SIZE));
             GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                     .baseUrl(host)
                     .addHeader("Range", String.format("bytes=%d-%d", start, end));
@@ -323,6 +313,15 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         if (profile == null)
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'profile' can not be null");
+
+        if (rangeStart < 0l)
+            throw new UfileParamException("Invalid range param 'start', start must be >= 0");
+        if (rangeEnd < 0l)
+            throw new UfileParamException("Invalid range param 'end', end must be >= 0");
+        if (rangeEnd > 0 && rangeEnd <= rangeStart)
+            throw new UfileParamException("Invalid range, end must be > start");
+        if (rangeEnd > (profile.getContentLength() - 1))
+            throw new UfileParamException("Invalid range, end is out of content-length");
     }
 
     private OnProgressListener onProgressListener;
@@ -387,11 +386,16 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
             if (futures == null)
                 throw new UfileClientException("Invoke futures are null!");
+
+            Map<String, String> metadatas = null;
             try {
-                for (Future<DownloadFileBean> future : futures) {
+                for (int len = futures.size(), i = len - 1; i > -1; i--) {
+                    Future<DownloadFileBean> future = futures.get(i);
                     if (future == null)
                         throw new UfileClientException("Invoke future is null!");
-                    future.get();
+                    DownloadFileBean res = future.get();
+                    if (metadatas == null && res != null && res.getMetadatas() != null)
+                        metadatas = res.getMetadatas();
                 }
             } catch (ExecutionException e) {
                 throw new UfileClientException(e.getMessage());
@@ -402,7 +406,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                     .setContentType(profile.getContentType())
                     .seteTag(etag == null ? null : etag.geteTag())
                     .setFile(finalFile)
-                    .setContentLength(finalFile.length());
+                    .setContentLength(finalFile.length())
+                    .setMetadatas(metadatas);
         } catch (IOException e) {
             throw new UfileIOException("Calculate ETag error!", e);
         } catch (InterruptedException e) {
@@ -446,11 +451,16 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
                     if (futures == null)
                         throw new UfileClientException("Invoke futures are null!");
+
+                    Map<String, String> metadatas = null;
                     try {
-                        for (Future<DownloadFileBean> future : futures) {
+                        for (int len = futures.size(), i = len - 1; i > -1; i--) {
+                            Future<DownloadFileBean> future = futures.get(i);
                             if (future == null)
                                 throw new UfileClientException("Invoke future is null!");
-                            future.get();
+                            DownloadFileBean res = future.get();
+                            if (metadatas == null && res != null && res.getMetadatas() != null)
+                                metadatas = res.getMetadatas();
                         }
                     } catch (ExecutionException e) {
                         throw new UfileClientException(e.getMessage());
@@ -463,7 +473,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                                     .setContentType(profile.getContentType())
                                     .seteTag(etag == null ? null : etag.geteTag())
                                     .setFile(finalFile)
-                                    .setContentLength(finalFile.length()));
+                                    .setContentLength(finalFile.length())
+                                    .setMetadatas(metadatas));
                         } catch (IOException e) {
                             httpCallback.onError(null,
                                     new ApiError(ApiError.ErrorType.ERROR_NORMAL_ERROR, new UfileIOException("Calculate ETag error!", e)), null);
@@ -504,7 +515,24 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                     throw new UfileHttpException(String.format("Response code = %d, need %d", response.code(), RESP_CODE_SUCCESS));
                 }
 
-                return parseHttpResponse(response);
+                DownloadFileBean result = parseHttpResponse(response);
+                if (index == 0 || index == (partCount - 1)) {
+                    if (response.headers() != null) {
+                        Set<String> names = response.headers().names();
+                        if (names != null) {
+                            Map<String, String> metadata = new HashMap<>();
+                            for (String name : names) {
+                                if (name == null || !name.startsWith("X-Ufile-Meta-"))
+                                    continue;
+
+                                String key = name.substring(13).toLowerCase();
+                                metadata.put(key, response.header(name, ""));
+                            }
+                            result.setMetadatas(metadata);
+                        }
+                    }
+                }
+                return result;
             } catch (Throwable t) {
                 throw new UfileClientException(t);
             }
@@ -528,7 +556,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(finalFile, "rwd");
-            raf.seek(start);
+            raf.seek(start - rangeStart);
 
             byte[] buffer = new byte[(int) bufferSize];
             int len = 0;

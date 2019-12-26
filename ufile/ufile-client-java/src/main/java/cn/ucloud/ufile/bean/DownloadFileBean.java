@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  *
@@ -21,6 +22,8 @@ public class DownloadFileBean implements Serializable {
     private long contentLength;
     @SerializedName("File")
     private File file;
+
+    private transient Map<String,String> metadatas;
 
     public String getContentType() {
         return contentType;
@@ -55,6 +58,15 @@ public class DownloadFileBean implements Serializable {
 
     public DownloadFileBean setFile(File file) {
         this.file = file;
+        return this;
+    }
+
+    public Map<String,String> getMetadatas() {
+        return metadatas;
+    }
+
+    public DownloadFileBean setMetadatas(Map<String,String> metadatas) {
+        this.metadatas = metadatas;
         return this;
     }
 

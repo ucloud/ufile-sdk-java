@@ -222,9 +222,9 @@ public abstract class HttpRequestBuilder<T> {
             return null;
 
         if (readTimeOut > 0 || writeTimeOut > 0 || connTimeOut > 0) {
-            readTimeOut = readTimeOut > 0 ? readTimeOut : HttpClient.DEFAULT_READ_TIMEOUT;
-            writeTimeOut = writeTimeOut > 0 ? writeTimeOut : HttpClient.DEFAULT_WRITE_TIMEOUT;
-            connTimeOut = connTimeOut > 0 ? connTimeOut : HttpClient.DEFAULT_CONNECT_TIMEOUT;
+            readTimeOut = readTimeOut > 0 ? readTimeOut : HttpClient.Config.DEFAULT_READ_TIMEOUT;
+            writeTimeOut = writeTimeOut > 0 ? writeTimeOut : HttpClient.Config.DEFAULT_WRITE_TIMEOUT;
+            connTimeOut = connTimeOut > 0 ? connTimeOut : HttpClient.Config.DEFAULT_CONNECT_TIMEOUT;
 
             return httpClient.newBuilder()
                     .readTimeout(readTimeOut, TimeUnit.MILLISECONDS)

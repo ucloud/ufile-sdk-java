@@ -20,7 +20,7 @@ import okhttp3.Response;
 
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
-import java.util.Date;
+import java.util.*;
 
 /**
  * API-Put上传流
@@ -74,6 +74,17 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
      * UFile上传回调策略
      */
     private PutPolicy putPolicy;
+
+    /**
+     * 用户自定义文件元数据
+     */
+    protected Map<String, String> metadatas;
+
+    /**
+     * 文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+     */
+    protected String storageType;
+
 
     /**
      * 构造方法
@@ -178,6 +189,53 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         return this;
     }
 
+    /**
+     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+     * 默认为null，若配置null则表示取消配置自定义数据
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param datas 自定义数据，Key：不能为null和""，并且只支持字母大小写、数字和减号分隔符"-"  {@link List <Parameter>}
+     */
+    public PutStreamApi withMetaDatas(Map<String, String> datas) {
+        if (datas == null) {
+            metadatas = null;
+            return this;
+        }
+
+        metadatas = new HashMap<>(datas);
+        return this;
+    }
+
+    /**
+     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+     * key不能为空或者""
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param data 自定义数据，Key：不能为null和""，并且只支持字母大小写、数字和减号分隔符"-"  {@link Parameter<String>}
+     */
+    public PutStreamApi addMetaData(Parameter<String> data) {
+        if (data == null)
+            return this;
+
+        if (metadatas == null)
+            metadatas = new HashMap<>();
+
+        metadatas.put(data.key, data.value);
+        return this;
+    }
+
+    /**
+     * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+     *
+     * @param storageType 文件存储类型，{@link StorageType}
+     */
+    public PutStreamApi withStorageType(String storageType) {
+        this.storageType = storageType;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileClientException {
         try {
@@ -197,6 +255,22 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
                     .mediaType(mediaType);
 
             builder.addHeader("Content-Length", String.valueOf(inputStream.available()));
+
+            if (storageType != null)
+                builder.addHeader("X-Ufile-Storage-Class", storageType);
+
+            if (metadatas != null && !metadatas.isEmpty()) {
+                Set<String> keys = metadatas.keySet();
+                if (keys != null) {
+                    for (String key : keys) {
+                        if (key == null || key.isEmpty())
+                            continue;
+
+                        String value = metadatas.get(key);
+                        builder.addHeader(new StringBuilder("X-Ufile-Meta-").append(key).toString(), value == null ? "" : value);
+                    }
+                }
+            }
 
             if (isVerifyMd5) {
                 try {

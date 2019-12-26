@@ -7,13 +7,16 @@ import cn.ucloud.ufile.bean.*;
 import cn.ucloud.ufile.bean.ObjectListWithDirFormatBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
+import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.UfileCallback;
+import cn.ucloud.ufile.http.interceptor.LogInterceptor;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
 import okhttp3.Request;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author: joshua
@@ -88,14 +91,18 @@ public class ObjectListWithDirFormatSample {
                         .withDelimiter("/")
                         .execute();
                 //遍历结果
-                if (response == null)
+                if (response == null || response.getObjectContents() == null)
                     break;
 
                 for (ObjectContentBean content : response.getObjectContents()) {
-                    JLog.D(TAG, String.format("keyname: %s", content.getKey()));
+                    if (content == null)
+                        continue;
+                    JLog.D(TAG, String.format("keyname: %s", content.toString()));
                 }
-                for (CommonPrefix commonPrefix : response.getCommonPrefixes()) {
-                    JLog.D(TAG, String.format("directory: %s", commonPrefix.getPrefix()));
+                if (response.getCommonPrefixes() != null) {
+                    for (CommonPrefix commonPrefix : response.getCommonPrefixes()) {
+                        JLog.D(TAG, String.format("directory: %s", commonPrefix.getPrefix()));
+                    }
                 }
                 //获取下一页
                 nextMarker = response.getNextMarker();

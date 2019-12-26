@@ -165,7 +165,7 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
         List<Parameter<String>> query = new ArrayList<>();
         query.add(new Parameter<>("position", String.valueOf(position)));
 
-        String contentType = mediaType.toString();
+        contentType = mediaType.toString();
         String contentMD5 = "";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 

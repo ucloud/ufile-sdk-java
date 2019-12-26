@@ -17,6 +17,8 @@ public class MultiUploadResponse implements Serializable {
     private String keyName;
     @SerializedName("FileSize")
     private int fileSize;
+    @SerializedName("ETag")
+    protected String eTag;
 
     /**
      * 上传策略-回调结果
@@ -46,6 +48,14 @@ public class MultiUploadResponse implements Serializable {
 
     public void setFileSize(int fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public String geteTag() {
+        return eTag;
+    }
+
+    public void seteTag(String eTag) {
+        this.eTag = eTag;
     }
 
     public String getCallbackRet() {

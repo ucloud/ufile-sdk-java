@@ -39,10 +39,12 @@ public class ObjectListSample {
 //                .withPrefix("")
                     /**
                      * 分页标记
+                     * 如果要拉下一页，withMarker 里要把 response.getNextMarker()  填进去，就可以拉下一页；
+                     * 如果 response.getNextMarker() 为"" 表示列表已经拉完了
+                     * 参考：https://github.com/ufilesdk-dev/elasticsearch-repository-ufile/blob/dev/src/main/java/org/elasticsearch/repository/ufile/UfileBlobStore.java，
+                     * 函数 listBlobsByPrefix
                      */
-//                .withMarker("")   //如果要拉下一页，withMarker 里要把 response.getNextMarker()  填进去，就可以拉下一页；
-                                    //如果 response.getNextMarker() 为"" 表示列表已经拉完了
-                                    //参考：https://github.com/ufilesdk-dev/elasticsearch-repository-ufile/blob/dev/src/main/java/org/elasticsearch/repository/ufile/UfileBlobStore.java，函数 listBlobsByPrefix
+//                .withMarker("")
                     /**
                      * 分页数据上限，Default = 20
                      */
@@ -81,7 +83,7 @@ public class ObjectListSample {
                 //获取下一页
                 nextMarker = response.getNextMarker();
                 JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
-            }while(nextMarker != null && nextMarker.length() != 0);
+            } while (nextMarker != null && nextMarker.length() != 0);
 
         } catch (UfileClientException e) {
             e.printStackTrace();

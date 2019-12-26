@@ -10,19 +10,21 @@ import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PutJsonRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
+import cn.ucloud.ufile.util.MetadataDirective;
+import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
 import okhttp3.Response;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Date;
+import java.util.*;
 
 /**
  * API-云端对象文件拷贝
  *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
- * @date: 2018/11/12 19:08
+ * @date: 201/11/12 19:08
  */
 public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
 
@@ -49,6 +51,16 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
      * 要复制到的目标云端对象名称
      */
     protected String dstKeyName;
+
+    /**
+     * 用户自定义文件元数据
+     */
+    protected Map<String, String> metadatas;
+
+    /**
+     * 用户自定义元数据设置方式
+     */
+    protected String metadataDirective;
 
     /**
      * 构造方法
@@ -98,14 +110,62 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
         return this;
     }
 
+    /**
+     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+     * 默认为null，若配置null则表示取消配置自定义数据
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param datas 自定义数据，Key：不能为null和""，并且只支持字母大小写、数字和减号分隔符"-"  {@link List<Parameter>}
+     */
+    public CopyObjectApi withMetaDatas(Map<String, String> datas) {
+        if (datas == null) {
+            metadatas = null;
+            return this;
+        }
+
+        metadatas = new HashMap<>(datas);
+        return this;
+    }
+
+    /**
+     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+     * key不能为空或者""
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param data 自定义数据，Key：不能为null和""，并且只支持字母大小写、数字和减号分隔符"-" {@link Parameter<String>}
+     */
+    public CopyObjectApi addMetaData(Parameter<String> data) {
+        if (data == null)
+            return this;
+
+        if (metadatas == null)
+            metadatas = new HashMap<>();
+
+        metadatas.put(data.key, data.value);
+        return this;
+    }
+
+    /**
+     * 配置用户自定义元数据设置方式
+     *
+     * @param metadataDirective 用户自定义元数据设置方式 {@link MetadataDirective}
+     */
+    public CopyObjectApi withMetadataDirective(String metadataDirective) {
+        this.metadataDirective = metadataDirective;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
-        String contentType = "application/json; charset=utf-8";
+        contentType = "application/json; charset=utf-8";
         String contentMD5 = "";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
         String xUfileCopySource = null;
+
         try {
             xUfileCopySource = new StringBuilder("/")
                     .append(URLEncoder.encode(srcBucketName, "UTF-8").replace("+", "%20"))
@@ -123,6 +183,22 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
                 .addHeader("Accpet", "*/*")
                 .addHeader("X-Ufile-Copy-Source", xUfileCopySource)
                 .addHeader("Date", date);
+
+        if (metadataDirective != null)
+            builder.addHeader("X-Ufile-Metadata-Directive", metadataDirective);
+
+        if (metadatas != null && !metadatas.isEmpty()) {
+            Set<String> keys = metadatas.keySet();
+            if (keys != null) {
+                for (String key : keys) {
+                    if (key == null || key.isEmpty())
+                        continue;
+
+                    String value = metadatas.get(key);
+                    builder.addHeader(new StringBuilder("X-Ufile-Meta-").append(key).toString(), value == null ? "" : value);
+                }
+            }
+        }
 
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT,
                 dstBucketName, dstKeyName, contentType, contentMD5, date).setOptional(authOptionalData));

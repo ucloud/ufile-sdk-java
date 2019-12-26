@@ -43,6 +43,10 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      */
     protected Call call;
     /**
+     * Request Content-Type
+     */
+    protected String contentType = "";
+    /**
      * Http API回调
      */
     protected BaseHttpCallback<T, UfileErrorBean> httpCallback;
@@ -90,7 +94,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     }
 
     /**
-     * 设置连接超时时间，Default = 10 sec {@link HttpClient}
+     * 设置连接超时时间，Default = 10 * 1000 ms {@link HttpClient.Config}
      *
      * @param connTimeOut 连接超时时间
      */
@@ -99,7 +103,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     }
 
     /**
-     * 设置读取超时时间，Default = 30 sec {@link HttpClient}
+     * 设置读取超时时间，Default = 30 * 1000 ms {@link HttpClient.Config}
      *
      * @param readTimeOut 读取超时时间
      */
@@ -108,7 +112,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     }
 
     /**
-     * 设置写入超时时间，Default = 30 sec {@link HttpClient}
+     * 设置写入超时时间，Default = 30 * 1000 ms {@link HttpClient.Config}
      *
      * @param writeTimeOut 写入超时时间
      */
@@ -117,30 +121,30 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     }
 
     /**
-     * 获取连接超时时间，Default = 10 sec {@link HttpClient}
+     * 获取连接超时时间，Default = 10 * 1000 ms {@link HttpClient.Config}
      *
      * @return 连接超时时间
      */
     public long getConnTimeOut() {
-        return connTimeOut > 0 ? connTimeOut : HttpClient.DEFAULT_CONNECT_TIMEOUT;
+        return connTimeOut > 0 ? connTimeOut : HttpClient.Config.DEFAULT_CONNECT_TIMEOUT;
     }
 
     /**
-     * 获取读取超时时间，Default = 30 sec {@link HttpClient}
+     * 获取读取超时时间，Default = 30 * 1000 ms {@link HttpClient.Config}
      *
      * @return 读取超时时间
      */
     public long getReadTimeOut() {
-        return readTimeOut > 0 ? readTimeOut : HttpClient.DEFAULT_READ_TIMEOUT;
+        return readTimeOut > 0 ? readTimeOut : HttpClient.Config.DEFAULT_READ_TIMEOUT;
     }
 
     /**
-     * 获取写入超时时间，Default = 30 sec {@link HttpClient}
+     * 获取写入超时时间，Default = 30 * 1000 ms {@link HttpClient.Config}
      *
      * @return 写入超时时间
      */
     public long getWriteTimeOut() {
-        return writeTimeOut > 0 ? writeTimeOut : HttpClient.DEFAULT_WRITE_TIMEOUT;
+        return writeTimeOut > 0 ? writeTimeOut : HttpClient.Config.DEFAULT_WRITE_TIMEOUT;
     }
 
     /**
@@ -171,8 +175,9 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
 
             return parseHttpResponse(response);
         } catch (IOException e) {
-            throw new UfileIOException("Occur IOException while sending http request, " +
-                    "you can check the file which you want to upload/download is exist or changed", e);
+            throw new UfileIOException("Occur IOException while sending http request. " +
+                    "The reason may be network timeout, " +
+                    "or the file which you want to upload/download is changed or inexistent", e);
         }
     }
 

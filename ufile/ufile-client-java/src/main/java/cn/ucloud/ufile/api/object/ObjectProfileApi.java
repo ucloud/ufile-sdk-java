@@ -11,10 +11,11 @@ import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.HeadRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
+import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
 import okhttp3.Response;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * API-获取云端对象描述信息
@@ -83,7 +84,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
-        String contentType = "application/json; charset=utf-8";
+        contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.HEAD, bucketName, keyName,
                 contentType, "", date).setOptional(authOptionalData));
@@ -120,6 +121,23 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
             result.seteTag(response.header("ETag", "").replace("\"", ""));
             result.setAcceptRanges(response.header("Accept-Ranges", ""));
             result.setLastModified(response.header("Last-Modified", ""));
+            result.setStorageType(response.header("X-Ufile-Storage-Class", ""));
+            result.setRestoreTime(response.header("X-Ufile-Restore", ""));
+
+            if (response.headers() != null) {
+                Set<String> names = response.headers().names();
+                if (names != null) {
+                    Map<String, String> metadata = new HashMap<>();
+                    for (String name : names) {
+                        if (name == null || !name.startsWith("X-Ufile-Meta-"))
+                            continue;
+
+                        String key = name.substring(13).toLowerCase();
+                        metadata.put(key, response.header(name, ""));
+                    }
+                    result.setMetadatas(metadata);
+                }
+            }
             result.setBucket(bucketName);
             result.setKeyName(keyName);
 

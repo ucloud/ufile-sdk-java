@@ -136,7 +136,7 @@ public class FileUtil {
             file.delete();
         } else {
             boolean res = file.delete();
-            JLog.T(TAG, "deleteFileCleanly--->" + file.getAbsolutePath() + "delete=" + res);
+            JLog.T(TAG, "deleteFileCleanly--->" + file.getAbsolutePath() + " delete=" + res);
         }
     }
 

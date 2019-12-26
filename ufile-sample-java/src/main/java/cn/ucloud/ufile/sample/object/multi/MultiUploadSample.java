@@ -13,9 +13,7 @@ import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.sample.Constants;
-import cn.ucloud.ufile.util.FileUtil;
-import cn.ucloud.ufile.util.JLog;
-import cn.ucloud.ufile.util.MimeTypeUtil;
+import cn.ucloud.ufile.util.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -57,6 +55,21 @@ public class MultiUploadSample {
             String mimeType = MimeTypeUtil.getMimeType(file);
             return UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .initMultiUpload(keyName, mimeType, bucketName)
+                    /**
+                     * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+                     */
+                    .withStorageType(StorageType.STANDARD)
+                    /**
+                     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+                     * 所有的自定义数据总大小不能超过 8KB。
+                     */
+//                    .withMetaDatas()
+                    /**
+                     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+                     * key不能为空或者""
+                     *
+                     */
+//                    .addMetaData(new Parameter<>("key","value"))
                     .execute();
         } catch (UfileClientException e) {
             e.printStackTrace();
@@ -166,6 +179,22 @@ public class MultiUploadSample {
                      * 配置上传回调策略
                      */
 //                .withPutPolicy(putPolicy)
+                    /**
+                     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+                     * 所有的自定义数据总大小不能超过 8KB。
+                     */
+//                    .withMetaDatas()
+                    /**
+                     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+                     * key不能为空或者""
+                     *
+                     */
+//                    .addMetaData(new Parameter<>("key","value"))
+                    /**
+                     * 配置用户自定义元数据设置方式
+                     * 具体参数配置可见 {@link MetadataDirective}
+                     */
+//                    .withMetadataDirective(MetadataDirective.UNCHANGED)
                     .execute();
             JLog.D(TAG, "finish->" + res.toString());
             return res;

@@ -123,7 +123,7 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
         if (limit != null)
             query.add(new Parameter<>("limit", String.valueOf(limit.intValue())));
 
-        String contentType = "application/json; charset=utf-8";
+        contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.GET, bucketName, "",

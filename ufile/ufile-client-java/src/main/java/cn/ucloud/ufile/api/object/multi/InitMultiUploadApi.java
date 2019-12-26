@@ -10,11 +10,13 @@ import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostJsonRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
+import cn.ucloud.ufile.util.Parameter;
+import cn.ucloud.ufile.util.StorageType;
 import com.google.gson.JsonElement;
 import okhttp3.MediaType;
 import okhttp3.Response;
 
-import java.util.Date;
+import java.util.*;
 
 /**
  * API-初始化分片上传
@@ -42,12 +44,21 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
      */
     protected MediaType mediaType;
 
-
     /**
      * Required
      * 要上传的目标Bucket
      */
     protected String bucketName;
+
+    /**
+     * 用户自定义文件元数据
+     */
+    protected Map<String, String> metadatas;
+
+    /**
+     * 文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+     */
+    protected String storageType;
 
     /**
      * 构造方法
@@ -95,6 +106,53 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
     }
 
     /**
+     * 为云端对象配置自定义数据，每次调用将会替换之前数据。
+     * 默认为null，若配置null则表示取消配置自定义数据
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param datas 自定义数据，Key：不能为null和""，并且只支持字母大小写、数字和减号分隔符"-"  {@link List<Parameter>}
+     */
+    public InitMultiUploadApi withMetaDatas(Map<String, String> datas) {
+        if (datas == null) {
+            metadatas = null;
+            return this;
+        }
+
+        metadatas = new HashMap<>(datas);
+        return this;
+    }
+
+    /**
+     * 为云端对象添加自定义数据，可直接调用，无须先调用withMetaDatas
+     * key不能为空或者""
+     * <p>
+     * 所有的自定义数据总大小不能超过 8KB。
+     *
+     * @param data 自定义数据，Key：不能为null和""，并且只支持字母大小写、数字和减号分隔符"-"  {@link Parameter<String>}
+     */
+    public InitMultiUploadApi addMetaData(Parameter<String> data) {
+        if (data == null)
+            return this;
+
+        if (metadatas == null)
+            metadatas = new HashMap<>();
+
+        metadatas.put(data.key, data.value);
+        return this;
+    }
+
+    /**
+     * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
+     *
+     * @param storageType 文件存储类型，{@link StorageType}
+     */
+    public InitMultiUploadApi withStorageType(String storageType) {
+        this.storageType = storageType;
+        return this;
+    }
+
+    /**
      * 配置签名可选参数
      *
      * @param authOptionalData 签名可选参数
@@ -109,18 +167,35 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
-        String contentType = mediaType.toString();
+        contentType = mediaType.toString();
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.POST, bucketName, keyName,
                 contentType, "", date).setOptional(authOptionalData));
 
-        PostJsonRequestBuilder builder = new PostJsonRequestBuilder();
-        call = builder.baseUrl(generateFinalHost(bucketName, keyName) + "?uploads")
+        PostJsonRequestBuilder builder = (PostJsonRequestBuilder) new PostJsonRequestBuilder()
+                .baseUrl(generateFinalHost(bucketName, keyName) + "?uploads")
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
-                .addHeader("authorization", authorization)
-                .build(httpClient.getOkHttpClient());
+                .addHeader("authorization", authorization);
+
+        if (storageType != null)
+            builder.addHeader("X-Ufile-Storage-Class", storageType);
+
+        if (metadatas != null && !metadatas.isEmpty()) {
+            Set<String> keys = metadatas.keySet();
+            if (keys != null) {
+                for (String key : keys) {
+                    if (key == null || key.isEmpty())
+                        continue;
+
+                    String value = metadatas.get(key);
+                    builder.addHeader(new StringBuilder("X-Ufile-Meta-").append(key).toString(), value == null ? "" : value);
+                }
+            }
+        }
+
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

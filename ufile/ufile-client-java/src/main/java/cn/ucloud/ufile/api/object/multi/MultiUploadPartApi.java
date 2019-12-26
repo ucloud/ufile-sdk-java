@@ -42,6 +42,14 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
      */
     private byte[] buffer;
     /**
+     * buffer[] 偏移量
+     */
+    private int offset;
+    /**
+     * buffer[] 读取长度
+     */
+    private int length;
+    /**
      * Required
      * 该分片的序号
      */
@@ -87,8 +95,23 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
      * @return {@link MultiUploadPartApi}
      */
     public MultiUploadPartApi from(byte[] buffer, int partIndex) {
+        return from(buffer, 0, buffer == null ? 0 : buffer.length, partIndex);
+    }
+
+    /**
+     * 配置分片的数据和序号
+     *
+     * @param buffer    分片数据
+     * @param offset    分片数据偏移量
+     * @param length    分片数据长度
+     * @param partIndex 分片序号(从0开始)
+     * @return {@link MultiUploadPartApi}
+     */
+    public MultiUploadPartApi from(byte[] buffer, int offset, int length, int partIndex) {
         this.buffer = buffer;
         this.partIndex = partIndex;
+        this.offset = offset;
+        this.length = length;
         return this;
     }
 
@@ -132,7 +155,7 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
         query.add(new Parameter<>("uploadId", info.getUploadId()));
         query.add(new Parameter<>("partNumber", String.valueOf(partIndex)));
 
-        String contentType = MediaType.parse(info.getMimeType()).toString();
+        contentType = MediaType.parse(info.getMimeType()).toString();
         String contentMD5 = "";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
@@ -140,7 +163,7 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
         builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
-                .addHeader("Content-Length", String.valueOf(buffer.length))
+                .addHeader("Content-Length", String.valueOf(length))
                 .addHeader("Date", date)
                 .mediaType(MediaType.parse(info.getMimeType()));
 
@@ -157,7 +180,7 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
                 contentType, contentMD5, date).setOptional(authOptionalData));
         builder.addHeader("authorization", authorization);
 
-        builder.params(new ByteArrayInputStream(buffer));
+        builder.params(new ByteArrayInputStream(buffer, offset, length));
         builder.setProgressConfig(progressConfig);
 
         call = builder.build(httpClient.getOkHttpClient());
@@ -172,6 +195,19 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
         if (buffer == null || buffer.length == 0)
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'buffer' can not be null or empty");
+
+        int len = buffer.length;
+        if (offset < 0 || offset > (len - 1))
+            throw new UfileParamException(
+                    String.format("The offset you set %d, is out of data.length range[0,%d)", offset, len));
+
+        if (!((offset + length) > 0))
+            throw new UfileParamException(
+                    String.format("The offset + length you set (%d + %d), is < 1", offset, length));
+
+        if ((offset + length) > len)
+            throw new UfileParamException(
+                    String.format("The offset + length you set (%d + %d), is > data.length %d", offset, length, len));
 
         if (partIndex < 0)
             throw new UfileParamException(
