@@ -3,7 +3,7 @@ package cn.ucloud.ufile.sample.object;
 import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
@@ -35,7 +35,7 @@ public class UploadHitSample {
 
     public static void uploadHitFile(File file, String nameAs, String toBucket) {
         try {
-            BaseResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+            BaseObjectResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .uploadHit(file)
                     .nameAs(nameAs)
                     .toBucket(toBucket)
@@ -53,10 +53,10 @@ public class UploadHitSample {
                 .uploadHit(file)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
-                .executeAsync(new UfileCallback<BaseResponseBean>() {
+                .executeAsync(new UfileCallback<BaseObjectResponseBean>() {
 
                     @Override
-                    public void onResponse(BaseResponseBean response) {
+                    public void onResponse(BaseObjectResponseBean response) {
                         JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
                     }
 
@@ -71,7 +71,7 @@ public class UploadHitSample {
 
     public static void uploadHitStream(InputStream stream, String nameAs, String toBucket) {
         try {
-            BaseResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+            BaseObjectResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .uploadHit(stream)
                     .nameAs(nameAs)
                     .toBucket(toBucket)
@@ -89,10 +89,10 @@ public class UploadHitSample {
                 .uploadHit(stream)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
-                .executeAsync(new UfileCallback<BaseResponseBean>() {
+                .executeAsync(new UfileCallback<BaseObjectResponseBean>() {
 
                     @Override
-                    public void onResponse(BaseResponseBean response) {
+                    public void onResponse(BaseObjectResponseBean response) {
                         JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
                     }
 

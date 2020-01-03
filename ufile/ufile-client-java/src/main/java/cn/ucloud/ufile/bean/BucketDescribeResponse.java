@@ -1,7 +1,7 @@
 package cn.ucloud.ufile.bean;
 
 import com.google.gson.annotations.SerializedName;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseBucketResponseBean;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/28 15:25
  */
-public class BucketDescribeResponse extends BaseResponseBean {
+public class BucketDescribeResponse extends BaseBucketResponseBean {
     @SerializedName("DataSet")
     private List<BucketInfoBean> bucketInfoList;
 

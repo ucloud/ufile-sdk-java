@@ -4,7 +4,7 @@ import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileCallback;
@@ -34,7 +34,7 @@ public class SwitchStorageTypeSample {
 
     public static void switchStorageType(String bucketName, String keyName, String storageType) {
         try {
-            BaseResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+            BaseObjectResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .switchStorageType(bucketName, keyName)
                     .turnTypeTo(storageType)
                     .execute();
@@ -50,10 +50,10 @@ public class SwitchStorageTypeSample {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .switchStorageType(bucketName, keyName)
                 .turnTypeTo(storageType)
-                .executeAsync(new UfileCallback<BaseResponseBean>() {
+                .executeAsync(new UfileCallback<BaseObjectResponseBean>() {
 
                     @Override
-                    public void onResponse(BaseResponseBean response) {
+                    public void onResponse(BaseObjectResponseBean response) {
                         JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
                     }
 

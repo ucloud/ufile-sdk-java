@@ -239,9 +239,11 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
 
     @Override
     public MultiUploadPartState parseHttpResponse(Response response) throws UfileServerException, UfileClientException {
-        MultiUploadPartState result = super.parseHttpResponse(response);
-        if (result != null && result.getRetCode() == 0)
-            result.seteTag(response.header("ETag").replace("\"", ""));
+        MultiUploadPartState result = new MultiUploadPartState();
+        String eTag = response.header("ETag", null);
+        eTag = eTag == null ? null : eTag.replace("\"", "");
+        result.seteTag(eTag);
+        
         if (result.getPartIndex() == -1)
             result.setPartIndex(partIndex);
 

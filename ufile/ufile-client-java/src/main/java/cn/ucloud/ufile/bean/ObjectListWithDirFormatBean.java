@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.bean;
 
+import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/21 15:41
  */
-public class ObjectListWithDirFormatBean implements Serializable {
+public class ObjectListWithDirFormatBean extends BaseResponseBean {
     @SerializedName("Name")
     private String bucketName;
     @SerializedName("Prefix")

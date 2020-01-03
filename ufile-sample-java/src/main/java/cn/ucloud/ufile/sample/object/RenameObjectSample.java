@@ -4,7 +4,7 @@ import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.bean.UfileErrorBean;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.UfileCallback;
@@ -32,7 +32,7 @@ public class RenameObjectSample {
 
     public static void renameObject(String bucketName, String keyName, String newKeyName, boolean isForceToCover) {
         try {
-            BaseResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+            BaseObjectResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .renameObject(bucketName, keyName)
                     .isRenamedTo(newKeyName)
                     /**
@@ -56,10 +56,10 @@ public class RenameObjectSample {
                  * 如果已存在同名文件，值为true则覆盖，否则操作失败；请求中若不携带该参数，默认不覆盖
                  */
 //                    .isForcedToCover(isForceToCover)
-                .executeAsync(new UfileCallback<BaseResponseBean>() {
+                .executeAsync(new UfileCallback<BaseObjectResponseBean>() {
 
                     @Override
-                    public void onResponse(BaseResponseBean response) {
+                    public void onResponse(BaseObjectResponseBean response) {
                         JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
                     }
 

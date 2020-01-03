@@ -3,7 +3,7 @@ package cn.ucloud.ufile.api.object.multi;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
@@ -24,7 +24,7 @@ import java.util.List;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/12 19:08
  */
-public class AbortMultiUploadApi extends UfileObjectApi<BaseResponseBean> {
+public class AbortMultiUploadApi extends UfileObjectApi<BaseObjectResponseBean> {
     /**
      * Required
      * 分片上传初始化状态

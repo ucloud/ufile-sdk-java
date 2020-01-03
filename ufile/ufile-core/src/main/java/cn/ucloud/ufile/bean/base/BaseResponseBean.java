@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Response 基础类
@@ -13,58 +14,14 @@ import java.io.Serializable;
  * @date: 2018/11/15 16:26
  */
 public class BaseResponseBean implements Serializable {
-    /**
-     * 返回状态码, 正常返回 0
-     */
-    @SerializedName("RetCode")
-    protected int retCode;
-    /**
-     * 请求动作，部分API可能为空
-     */
-    @SerializedName("Action")
-    protected String action;
-    /**
-     * 返回消息，部分API可能为空
-     */
-    @SerializedName("Message")
-    protected String message;
+    protected transient Map<String,String> headers;
 
-    /**
-     * 上传策略-回调结果
-     */
-    @SerializedName("callbackRet")
-    protected String callbackRet;
-
-    public int getRetCode() {
-        return retCode;
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 
-    public void setRetCode(int retCode) {
-        this.retCode = retCode;
-    }
-
-    public String getAction() {
-        return action;
-    }
-
-    public void setAction(String action) {
-        this.action = action;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getCallbackRet() {
-        return callbackRet;
-    }
-
-    public void setCallbackRet(String callbackRet) {
-        this.callbackRet = callbackRet;
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
     }
 
     @Override
