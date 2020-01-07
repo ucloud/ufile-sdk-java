@@ -1,6 +1,6 @@
 package cn.ucloud.ufile.bean;
 
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/15 16:52
  */
-public class AppendObjectResultBean extends BaseResponseBean {
+public class AppendObjectResultBean extends BaseObjectResponseBean {
     @SerializedName("ETag")
     private String eTag;
 

@@ -1,8 +1,8 @@
 package cn.ucloud.ufile.api.object.multi;
 
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
 
 /**
  * 上传分片数据状态
@@ -11,7 +11,7 @@ import cn.ucloud.ufile.bean.base.BaseResponseBean;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/15 16:52
  */
-public class MultiUploadPartState extends BaseResponseBean {
+public class MultiUploadPartState extends BaseObjectResponseBean {
     /**
      * ETag
      */

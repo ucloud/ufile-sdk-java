@@ -1,9 +1,9 @@
 package cn.ucloud.ufile.bean;
 
+import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -11,7 +11,7 @@ import java.util.Map;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/20 15:57
  */
-public class ObjectProfile implements Serializable {
+public class ObjectProfile extends BaseResponseBean {
     @SerializedName("Content-Type")
     private String contentType;
     @SerializedName("Content-Length")
@@ -20,6 +20,8 @@ public class ObjectProfile implements Serializable {
     private String eTag;
     @SerializedName("Accept-Ranges")
     private String acceptRanges;
+    @SerializedName("X-Ufile-Create-Time")
+    private String createTime;
     @SerializedName("Last-Modified")
     private String lastModified;
     @SerializedName("Vary")
@@ -70,6 +72,14 @@ public class ObjectProfile implements Serializable {
 
     public void setAcceptRanges(String acceptRanges) {
         this.acceptRanges = acceptRanges;
+    }
+
+    public String getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
     public String getLastModified() {

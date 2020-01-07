@@ -3,7 +3,7 @@ package cn.ucloud.ufile.sample.object;
 import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.ApiError;
 import cn.ucloud.ufile.api.object.ObjectConfig;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
@@ -30,7 +30,7 @@ public class DeleteObjectSample {
 
     public static void execute(String keyName, String bucketName) {
         try {
-            BaseResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+            BaseObjectResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .deleteObject(keyName, bucketName)
                     .execute();
             JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
@@ -44,10 +44,10 @@ public class DeleteObjectSample {
     public static void executeAsync(String keyName, String bucketName) {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .deleteObject(keyName, bucketName)
-                .executeAsync(new UfileCallback<BaseResponseBean>() {
+                .executeAsync(new UfileCallback<BaseObjectResponseBean>() {
 
                     @Override
-                    public void onResponse(BaseResponseBean response) {
+                    public void onResponse(BaseObjectResponseBean response) {
                         JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
                     }
 

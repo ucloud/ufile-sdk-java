@@ -193,14 +193,17 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         if (response.headers() != null) {
             Set<String> names = response.headers().names();
             if (names != null) {
+                Map<String, String> headers = new HashMap<>();
                 Map<String, String> metadata = new HashMap<>();
                 for (String name : names) {
+                    headers.put(name, response.header(name, null));
                     if (name == null || !name.startsWith("X-Ufile-Meta-"))
                         continue;
 
                     String key = name.substring(13).toLowerCase();
                     metadata.put(key, response.header(name, ""));
                 }
+                result.setHeaders(headers);
                 result.setMetadatas(metadata);
             }
         }

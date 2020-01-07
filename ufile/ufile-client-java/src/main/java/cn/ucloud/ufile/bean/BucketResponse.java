@@ -1,7 +1,7 @@
 package cn.ucloud.ufile.bean;
 
 import com.google.gson.annotations.SerializedName;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseBucketResponseBean;
 
 /**
  *
@@ -9,7 +9,7 @@ import cn.ucloud.ufile.bean.base.BaseResponseBean;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/15 16:52
  */
-public class BucketResponse extends BaseResponseBean {
+public class BucketResponse extends BaseBucketResponseBean {
     @SerializedName("BucketName")
     private String bucketName;
 

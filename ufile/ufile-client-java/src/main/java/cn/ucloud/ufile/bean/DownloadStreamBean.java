@@ -1,10 +1,10 @@
 package cn.ucloud.ufile.bean;
 
+import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -13,7 +13,7 @@ import java.util.Map;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/15 16:52
  */
-public class DownloadStreamBean implements Serializable {
+public class DownloadStreamBean extends BaseResponseBean {
     @SerializedName("ETag")
     private String eTag;
     @SerializedName("Content-Type")

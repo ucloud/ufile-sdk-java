@@ -2,23 +2,19 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
-import cn.ucloud.ufile.exception.UfileClientException;
-import cn.ucloud.ufile.exception.UfileIOException;
-import cn.ucloud.ufile.exception.UfileParamException;
-import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
+import cn.ucloud.ufile.exception.*;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostJsonRequestBuilder;
 import cn.ucloud.ufile.util.*;
 import com.google.gson.JsonElement;
+import okhttp3.Response;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * API-流秒传
@@ -27,7 +23,7 @@ import java.util.List;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/12 19:08
  */
-public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
+public class UploadStreamHitApi extends UfileObjectApi<BaseObjectResponseBean> {
     /**
      * Required
      * 云端对象名称
@@ -170,4 +166,21 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseResponseBean> {
         }
     }
 
+    @Override
+    public BaseObjectResponseBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
+        BaseObjectResponseBean result = super.parseHttpResponse(response);
+
+        if (response.headers() != null) {
+            Set<String> names = response.headers().names();
+            if (names != null) {
+                Map<String, String> headers = new HashMap<>();
+                for (String name : names) {
+                    headers.put(name, response.header(name, null));
+                }
+                result.setHeaders(headers);
+            }
+        }
+
+        return result;
+    }
 }

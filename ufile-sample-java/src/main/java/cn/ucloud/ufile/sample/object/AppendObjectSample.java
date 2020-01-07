@@ -11,8 +11,8 @@ import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.http.UfileCallback;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
+import cn.ucloud.ufile.util.MimeTypeUtil;
 import okhttp3.Request;
-
 
 /**
  * @author: joshua
@@ -25,8 +25,8 @@ public class AppendObjectSample {
 
     public static void main(String[] args) {
         byte[] appendData = new byte[]{0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00};
-        String mimeType = "";
         String keyName = "";
+        String mimeType = MimeTypeUtil.getMimeType(keyName);
         String bucketName = "";
         long posistion = 0;
         appendObject(appendData, mimeType, bucketName, keyName, posistion);
@@ -59,7 +59,7 @@ public class AppendObjectSample {
                         }
                     })
                     .execute();
-            JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+            JLog.D(TAG, String.format("[res]: %s", (response == null ? "null" : response.toString())));
         } catch (UfileClientException e) {
             e.printStackTrace();
         } catch (UfileServerException e) {

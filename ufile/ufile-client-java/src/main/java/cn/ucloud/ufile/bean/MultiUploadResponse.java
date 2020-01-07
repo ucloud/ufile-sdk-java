@@ -1,16 +1,15 @@
 package cn.ucloud.ufile.bean;
 
+import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-
-import java.io.Serializable;
 
 /**
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/21 17:30
  */
-public class MultiUploadResponse implements Serializable {
+public class MultiUploadResponse extends BaseResponseBean {
     @SerializedName("Bucket")
     private String bucket;
     @SerializedName("Key")

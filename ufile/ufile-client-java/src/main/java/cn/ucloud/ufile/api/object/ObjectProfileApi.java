@@ -11,6 +11,7 @@ import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.HeadRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
+import cn.ucloud.ufile.util.JLog;
 import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
 import okhttp3.Response;
@@ -120,6 +121,7 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
             result.setContentType(response.header("Content-Type", ""));
             result.seteTag(response.header("ETag", "").replace("\"", ""));
             result.setAcceptRanges(response.header("Accept-Ranges", ""));
+            result.setCreateTime(response.header("X-Ufile-Create-Time", ""));
             result.setLastModified(response.header("Last-Modified", ""));
             result.setStorageType(response.header("X-Ufile-Storage-Class", ""));
             result.setRestoreTime(response.header("X-Ufile-Restore", ""));
@@ -127,14 +129,17 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
             if (response.headers() != null) {
                 Set<String> names = response.headers().names();
                 if (names != null) {
+                    Map<String, String> headers = new HashMap<>();
                     Map<String, String> metadata = new HashMap<>();
                     for (String name : names) {
+                        headers.put(name, response.header(name, null));
                         if (name == null || !name.startsWith("X-Ufile-Meta-"))
                             continue;
 
                         String key = name.substring(13).toLowerCase();
                         metadata.put(key, response.header(name, ""));
                     }
+                    result.setHeaders(headers);
                     result.setMetadatas(metadata);
                 }
             }

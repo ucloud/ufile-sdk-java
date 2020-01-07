@@ -178,6 +178,18 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
     public ObjectListWithDirFormatBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
         ObjectListWithDirFormatBean result = super.parseHttpResponse(response);
         if (result != null) {
+
+            if (response.headers() != null) {
+                Set<String> names = response.headers().names();
+                if (names != null) {
+                    Map<String, String> headers = new HashMap<>();
+                    for (String name : names) {
+                        headers.put(name, response.header(name, null));
+                    }
+                    result.setHeaders(headers);
+                }
+            }
+
             List<ObjectContentBean> contents = result.getObjectContents();
             if (contents != null && !contents.isEmpty()) {
                 for (ObjectContentBean content : contents) {

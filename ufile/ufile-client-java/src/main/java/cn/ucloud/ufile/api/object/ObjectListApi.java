@@ -6,15 +6,15 @@ import cn.ucloud.ufile.bean.ObjectListBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
+import okhttp3.Response;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * API-获取云端对象列表
@@ -137,6 +137,24 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
                 .addHeader("Date", date)
                 .addHeader("authorization", authorization)
                 .build(httpClient.getOkHttpClient());
+    }
+
+    @Override
+    public ObjectListBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
+        ObjectListBean result = super.parseHttpResponse(response);
+
+        if (response.headers() != null) {
+            Set<String> names = response.headers().names();
+            if (names != null) {
+                Map<String, String> headers = new HashMap<>();
+                for (String name : names) {
+                    headers.put(name, response.header(name, null));
+                }
+                result.setHeaders(headers);
+            }
+        }
+
+        return result;
     }
 
     @Override

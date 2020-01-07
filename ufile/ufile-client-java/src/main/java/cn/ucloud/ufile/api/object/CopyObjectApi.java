@@ -229,10 +229,22 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
 
     @Override
     public CopyObjectResultBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
-        CopyObjectResultBean res = super.parseHttpResponse(response);
-        if (res != null && res.geteTag() != null) {
-            res.seteTag(res.geteTag().replace("\"", ""));
+        CopyObjectResultBean result = super.parseHttpResponse(response);
+        String eTag = response.header("ETag", null);
+        eTag = eTag == null ? null : eTag.replace("\"", "");
+        result.seteTag(eTag);
+
+        if (response.headers() != null) {
+            Set<String> names = response.headers().names();
+            if (names != null) {
+                Map<String, String> headers = new HashMap<>();
+                for (String name : names) {
+                    headers.put(name, response.header(name, null));
+                }
+                result.setHeaders(headers);
+            }
         }
-        return res;
+
+        return result;
     }
 }

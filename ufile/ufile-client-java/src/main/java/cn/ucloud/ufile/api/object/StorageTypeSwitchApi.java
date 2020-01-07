@@ -2,20 +2,20 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
+import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
+import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PutJsonRequestBuilder;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
 import cn.ucloud.ufile.util.StorageType;
 import com.google.gson.JsonElement;
+import okhttp3.Response;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * API-云端对象文件转换存储类型
@@ -24,7 +24,7 @@ import java.util.List;
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/12 19:08
  */
-public class StorageTypeSwitchApi extends UfileObjectApi<BaseResponseBean> {
+public class StorageTypeSwitchApi extends UfileObjectApi<BaseObjectResponseBean> {
 
     /**
      * Required
@@ -129,5 +129,23 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseResponseBean> {
         if (storageType == null || storageType.isEmpty())
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'storageType' can not be null or empty");
+    }
+
+    @Override
+    public BaseObjectResponseBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
+        BaseObjectResponseBean result = super.parseHttpResponse(response);
+
+        if (response.headers() != null) {
+            Set<String> names = response.headers().names();
+            if (names != null) {
+                Map<String, String> headers = new HashMap<>();
+                for (String name : names) {
+                    headers.put(name, response.header(name, null));
+                }
+                result.setHeaders(headers);
+            }
+        }
+
+        return result;
     }
 }
