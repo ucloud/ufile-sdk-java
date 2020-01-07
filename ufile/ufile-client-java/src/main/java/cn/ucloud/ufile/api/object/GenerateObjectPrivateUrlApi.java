@@ -44,6 +44,11 @@ public class GenerateObjectPrivateUrlApi {
     private long expiresDuration;
 
     /**
+     * Ufile 文件下载链接所需的Content-Disposition: attachment文件名
+     */
+    private String attachmentFileName;
+
+    /**
      * 用户可选签名参数
      */
     private JsonElement authOptionalData;
@@ -63,6 +68,25 @@ public class GenerateObjectPrivateUrlApi {
         this.keyName = keyName;
         this.bucketName = bucketName;
         this.expiresDuration = expiresDuration;
+    }
+
+    /**
+     * 使用Content-Disposition: attachment，并配置attachment的文件名
+     * @param attachmentFileName Content-Disposition: attachment的文件名
+     * @return
+     */
+    public GenerateObjectPrivateUrlApi withAttachment(String attachmentFileName) {
+        this.attachmentFileName = attachmentFileName;
+        return this;
+    }
+
+    /**
+     * 使用Content-Disposition: attachment，并且文件名默认为keyName
+     * @return
+     */
+    public GenerateObjectPrivateUrlApi withAttachment() {
+        this.attachmentFileName = keyName;
+        return this;
     }
 
 
@@ -96,10 +120,21 @@ public class GenerateObjectPrivateUrlApi {
         GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                 .baseUrl(generateFinalHost(bucketName, keyName));
 
-        return builder.addParam(new Parameter("UCloudPublicKey", authorizer.getPublicKey()))
+        builder.addParam(new Parameter("UCloudPublicKey", authorizer.getPublicKey()))
                 .addParam(new Parameter("Signature", signature))
-                .addParam(new Parameter("Expires", String.valueOf(expiresTime)))
-                .generateGetUrl(builder.getBaseUrl(), builder.getParams());
+                .addParam(new Parameter("Expires", String.valueOf(expiresTime)));
+
+        if (attachmentFileName != null && !attachmentFileName.isEmpty()) {
+            try {
+                attachmentFileName = URLEncoder.encode(attachmentFileName, "UTF-8").replace("+", "%20");
+                builder.addParam(new Parameter("ufileattname", attachmentFileName));
+            } catch (UnsupportedEncodingException e) {
+                throw new UfileClientException("Occur error during URLEncode attachmentFileName", e);
+            }
+        }
+
+
+        return builder.generateGetUrl(builder.getBaseUrl(), builder.getParams());
     }
 
     public interface CreatePrivateUrlCallback {
@@ -122,20 +157,7 @@ public class GenerateObjectPrivateUrlApi {
             @Override
             public void run() {
                 try {
-                    parameterValidat();
-                    long expiresTime = System.currentTimeMillis() / 1000 + expiresDuration;
-
-                    String signature = authorizer.authorizePrivateUrl(
-                            (ObjectDownloadAuthParam) new ObjectDownloadAuthParam(HttpMethod.GET, bucketName, keyName, expiresTime)
-                                    .setOptional(authOptionalData));
-
-                    GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
-                            .baseUrl(generateFinalHost(bucketName, keyName));
-
-                    String url = builder.addParam(new Parameter("UCloudPublicKey", authorizer.getPublicKey()))
-                            .addParam(new Parameter("Signature", signature))
-                            .addParam(new Parameter("Expires", String.valueOf(expiresTime)))
-                            .generateGetUrl(builder.getBaseUrl(), builder.getParams());
+                    String url = createUrl();
                     if (callback != null)
                         callback.onSuccess(url);
                 } catch (UfileClientException e) {
@@ -154,8 +176,8 @@ public class GenerateObjectPrivateUrlApi {
             return String.format("%s/%s", host, keyName);
 
         try {
-            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+","%20");
-            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+","%20");
+            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+", "%20");
+            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+", "%20");
             return String.format("http://%s.%s/%s", bucketName, host, keyName);
         } catch (UnsupportedEncodingException e) {
             throw new UfileClientException("Occur error during URLEncode bucketName and keyName");

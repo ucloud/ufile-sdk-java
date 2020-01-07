@@ -43,6 +43,14 @@ public class GetObjectSample {
         try {
             String url = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .getDownloadUrlFromPrivateBucket(keyName, bucketName, expiresDuration)
+                    /**
+                     * 使用Content-Disposition: attachment，并且默认文件名为KeyName
+                     */
+//                    .withAttachment()
+                    /**
+                     * 使用Content-Disposition: attachment，并且配置文件名
+                     */
+//                    .withAttachment("filename")
                     .createUrl();
             getStream(url, localDir, saveName);
         } catch (UfileParamException e) {
