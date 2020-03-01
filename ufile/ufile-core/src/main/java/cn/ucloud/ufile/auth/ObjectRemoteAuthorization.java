@@ -42,19 +42,19 @@ public abstract class ObjectRemoteAuthorization extends ObjectAuthorization {
     }
 
     public static class ApiConfig {
-        private String objectOptAuthServer;
-        private String objectDownloadAuthServer;
+        private final String objectOptAuthServer;
+        private final String objectDownloadAuthServer;
 
         public ApiConfig(String objectOptAuthServer, String objectDownloadAuthServer) {
             this.objectOptAuthServer = objectOptAuthServer;
             this.objectDownloadAuthServer = objectDownloadAuthServer;
         }
 
-        protected String getObjectOptAuthServer() {
+        public String getObjectOptAuthServer() {
             return objectOptAuthServer;
         }
 
-        protected String getObjectDownloadAuthServer() {
+        public String getObjectDownloadAuthServer() {
             return objectDownloadAuthServer;
         }
     }
