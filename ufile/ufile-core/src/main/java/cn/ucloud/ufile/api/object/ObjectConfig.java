@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.api.object;
 
+import cn.ucloud.ufile.util.UfileProtocol;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import cn.ucloud.ufile.exception.UfileFileException;
@@ -33,13 +34,19 @@ public class ObjectConfig {
     @SerializedName("CustomHost")
     private String customHost;
 
+    private UfileProtocol protocol = UfileProtocol.PROTOCOL_HTTPS;
+
     public ObjectConfig(String region, String proxySuffix) {
         this.region = region;
         this.proxySuffix = proxySuffix;
     }
 
     public ObjectConfig(String customHost) {
-        this.customHost = customHost;
+        if (customHost.startsWith("http")) {
+            this.customHost = customHost;
+        } else {
+            this.customHost = new StringBuilder(UfileProtocol.PROTOCOL_HTTP.getValue()).append(customHost).toString();
+        }
     }
 
     /**
@@ -97,14 +104,20 @@ public class ObjectConfig {
         this.customHost = customHost;
     }
 
-    public String host() {
+    public ObjectConfig withProtocol(UfileProtocol protocol) {
+        this.protocol = protocol;
+        return this;
+    }
+
+    public UfileProtocol getProtocol() {
+        return protocol;
+    }
+
+    public boolean isCustomDomain() {
         if (customHost == null || customHost.length() == 0)
-            return String.format("%s.%s", region, proxySuffix);
+            return false;
 
-        if (customHost.startsWith("http"))
-            return customHost;
-
-        return String.format("http://%s", customHost);
+        return true;
     }
 
     /**

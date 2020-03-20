@@ -28,7 +28,7 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
     /**
      * UCloud Ufile Bucket 域名
      */
-    protected static final String UFILE_BUCKET_API_HOST = "http://api.ucloud.cn";
+    protected static final String UFILE_BUCKET_API_HOST = "https://api.ucloud.cn";
 
     /**
      * Bucket API 请求动作描述

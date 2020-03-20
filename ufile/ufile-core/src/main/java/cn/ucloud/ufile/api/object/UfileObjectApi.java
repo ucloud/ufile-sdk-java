@@ -20,17 +20,19 @@ import java.net.URLEncoder;
  */
 public abstract class UfileObjectApi<T> extends UfileApi<T> {
     protected ObjectAuthorizer authorizer;
+    protected ObjectConfig objectConfig;
 
     /**
      * 构造方法
      *
-     * @param authorizer Object授权器
-     * @param host       API域名
-     * @param httpClient Http客户端
+     * @param authorizer   Object授权器
+     * @param objectConfig ObjectConfig {@link ObjectConfig}
+     * @param httpClient   Http客户端
      */
-    public UfileObjectApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
-        super(httpClient, host);
+    public UfileObjectApi(ObjectAuthorizer authorizer, ObjectConfig objectConfig, HttpClient httpClient) {
+        super(httpClient, null);
         this.authorizer = authorizer;
+        this.objectConfig = objectConfig;
     }
 
     /**
@@ -41,19 +43,27 @@ public abstract class UfileObjectApi<T> extends UfileApi<T> {
      * @return API域名
      */
     protected String generateFinalHost(String bucketName, String keyName) throws UfileClientException {
-        if (host == null || host.length() == 0)
-            return host;
+        if (objectConfig == null)
+            return null;
 
-        if (host.startsWith("http"))
-            return String.format("%s/%s", host, keyName);
-
-        try {
-            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+", "%20");
-            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+", "%20");
-            return String.format("http://%s.%s/%s", bucketName, host, keyName);
-        } catch (UnsupportedEncodingException e) {
-            throw new UfileClientException("Occur error during URLEncode bucketName and keyName", e);
+        if (objectConfig.isCustomDomain()) {
+            host = String.format("%s/%s", objectConfig.getCustomHost(), keyName);
+        } else {
+            try {
+                bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+", "%20");
+                String region = URLEncoder.encode(objectConfig.getRegion(), "UTF-8")
+                        .replace("+", "%20");
+                String proxySuffix = URLEncoder.encode(objectConfig.getProxySuffix(), "UTF-8")
+                        .replace("+", "%20");
+                keyName = URLEncoder.encode(keyName, "UTF-8").replace("+", "%20");
+                host = new StringBuilder(objectConfig.getProtocol().getValue())
+                        .append(String.format("%s.%s.%s/%s", bucketName, region, proxySuffix, keyName)).toString();
+            } catch (UnsupportedEncodingException e) {
+                throw new UfileClientException("Occur error during URLEncode bucketName and keyName", e);
+            }
         }
+
+        return host;
     }
 
     protected String readResponseBody(Response response) {

@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.api.object.multi;
 
+import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
@@ -67,12 +68,12 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
     /**
      * 构造方法
      *
-     * @param authorizer Object授权器
-     * @param host       API域名
-     * @param httpClient Http客户端
+     * @param authorizer   Object授权器
+     * @param objectConfig ObjectConfig {@link ObjectConfig}
+     * @param httpClient   Http客户端
      */
-    public MultiUploadPartApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
-        super(authorizer, host, httpClient);
+    public MultiUploadPartApi(ObjectAuthorizer authorizer, ObjectConfig objectConfig, HttpClient httpClient) {
+        super(authorizer, objectConfig, httpClient);
         progressConfig = ProgressConfig.callbackDefault();
     }
 
@@ -243,7 +244,7 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
         String eTag = response.header("ETag", null);
         eTag = eTag == null ? null : eTag.replace("\"", "");
         result.seteTag(eTag);
-        
+
         if (result.getPartIndex() == -1)
             result.setPartIndex(partIndex);
 

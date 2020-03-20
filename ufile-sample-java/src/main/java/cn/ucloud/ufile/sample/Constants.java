@@ -3,7 +3,6 @@ package cn.ucloud.ufile.sample;
 import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.auth.*;
 import cn.ucloud.ufile.http.HttpClient;
-import cn.ucloud.ufile.http.interceptor.LogInterceptor;
 import cn.ucloud.ufile.util.JLog;
 
 import java.util.concurrent.Executors;

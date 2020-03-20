@@ -1,5 +1,6 @@
 package cn.ucloud.ufile.api.object.multi;
 
+import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.api.object.policy.PutPolicy;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
@@ -62,12 +63,12 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
     /**
      * 构造方法
      *
-     * @param authorizer Object授权器
-     * @param host       API域名
-     * @param httpClient Http客户端
+     * @param authorizer   Object授权器
+     * @param objectConfig ObjectConfig {@link ObjectConfig}
+     * @param httpClient   Http客户端
      */
-    public FinishMultiUploadApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
-        super(authorizer, host, httpClient);
+    public FinishMultiUploadApi(ObjectAuthorizer authorizer, ObjectConfig objectConfig, HttpClient httpClient) {
+        super(authorizer, objectConfig, httpClient);
     }
 
     /**

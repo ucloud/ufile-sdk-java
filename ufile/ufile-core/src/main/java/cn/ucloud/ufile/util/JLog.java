@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -250,10 +251,10 @@ public class JLog {
         public static final String FORMATTER_DAY = "yy_MM_dd";
         public static final String FORMATTER_SECOND = "yy-MM-dd HH:mm:ss";
 
-        public static SimpleDateFormat sSecondFormat = new SimpleDateFormat(FORMATTER_SECOND);
+        public static SimpleDateFormat sSecondFormat = new SimpleDateFormat(FORMATTER_SECOND, Locale.CHINA);
 
         public static String getFormattedDay() {
-            return new SimpleDateFormat(FORMATTER_DAY).format(new Date());
+            return new SimpleDateFormat(FORMATTER_DAY, Locale.CHINA).format(new Date());
         }
 
         public static String getFormattedSecond() {

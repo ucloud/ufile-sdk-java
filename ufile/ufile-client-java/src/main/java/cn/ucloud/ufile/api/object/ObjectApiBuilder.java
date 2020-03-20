@@ -26,14 +26,14 @@ import java.util.List;
 public class ObjectApiBuilder {
     protected UfileClient client;
     protected ObjectAuthorizer authorizer;
-    protected String host;
+    protected ObjectConfig objectConfig;
 
-    public ObjectApiBuilder(UfileClient client, ObjectAuthorizer authorizer, String host) {
+    public ObjectApiBuilder(UfileClient client, ObjectAuthorizer authorizer, ObjectConfig objectConfig) {
         this.client = client;
         this.authorizer = authorizer;
         if (authorizer instanceof ObjectRemoteAuthorization)
             ((ObjectRemoteAuthorization) authorizer).setHttpClient(client.getHttpClient());
-        this.host = host;
+        this.objectConfig = objectConfig;
     }
 
     /**
@@ -45,7 +45,7 @@ public class ObjectApiBuilder {
      * @throws UfileRequiredParamNotFoundException
      */
     public GenerateObjectPublicUrlApi getDownloadUrlFromPublicBucket(String keyName, String bucketName) {
-        return new GenerateObjectPublicUrlApi(host, keyName, bucketName);
+        return new GenerateObjectPublicUrlApi(objectConfig, keyName, bucketName);
     }
 
     /**
@@ -60,7 +60,7 @@ public class ObjectApiBuilder {
      * @throws UfileAuthorizationException
      */
     public GenerateObjectPrivateUrlApi getDownloadUrlFromPrivateBucket(String keyName, String bucketName, int expiresDuration) {
-        return new GenerateObjectPrivateUrlApi(authorizer, host, keyName, bucketName, expiresDuration);
+        return new GenerateObjectPrivateUrlApi(authorizer, objectConfig, keyName, bucketName, expiresDuration);
     }
 
     /**
@@ -71,7 +71,7 @@ public class ObjectApiBuilder {
      * @return {@link GetFileApi}
      */
     public GetFileApi getFile(String downloadUrl) {
-        return new GetFileApi(authorizer, downloadUrl, client.getHttpClient());
+        return new GetFileApi(authorizer, new ObjectConfig(downloadUrl), client.getHttpClient());
     }
 
     /**
@@ -82,7 +82,7 @@ public class ObjectApiBuilder {
      * @return {@link GetStreamApi}
      */
     public GetStreamApi getStream(String downloadUrl) {
-        return new GetStreamApi(authorizer, downloadUrl, client.getHttpClient());
+        return new GetStreamApi(authorizer, new ObjectConfig(downloadUrl), client.getHttpClient());
     }
 
     /**
@@ -93,7 +93,7 @@ public class ObjectApiBuilder {
      * @return {@link PutFileApi}
      */
     public PutFileApi putObject(File file, String mimeType) {
-        return new PutFileApi(authorizer, host, client.getHttpClient())
+        return new PutFileApi(authorizer, objectConfig, client.getHttpClient())
                 .from(file, mimeType);
     }
 
@@ -105,7 +105,7 @@ public class ObjectApiBuilder {
      * @return {@link PutStreamApi}
      */
     public PutStreamApi putObject(InputStream inputStream, String mimeType) {
-        return new PutStreamApi(authorizer, host, client.getHttpClient())
+        return new PutStreamApi(authorizer, objectConfig, client.getHttpClient())
                 .from(inputStream, mimeType);
     }
 
@@ -117,7 +117,7 @@ public class ObjectApiBuilder {
      * @return
      */
     public AppendObjectApi appendObject(byte[] appendData, String mimeType) {
-        return new AppendObjectApi(authorizer, host, client.getHttpClient())
+        return new AppendObjectApi(authorizer, objectConfig, client.getHttpClient())
                 .from(appendData, mimeType);
     }
 
@@ -128,7 +128,7 @@ public class ObjectApiBuilder {
      * @return {@link UploadFileHitApi}
      */
     public UploadFileHitApi uploadHit(File file) {
-        return new UploadFileHitApi(authorizer, host, client.getHttpClient())
+        return new UploadFileHitApi(authorizer, objectConfig, client.getHttpClient())
                 .from(file);
     }
 
@@ -139,7 +139,7 @@ public class ObjectApiBuilder {
      * @return {@link UploadStreamHitApi}
      */
     public UploadStreamHitApi uploadHit(InputStream inputStream) {
-        return new UploadStreamHitApi(authorizer, host, client.getHttpClient())
+        return new UploadStreamHitApi(authorizer, objectConfig, client.getHttpClient())
                 .from(inputStream);
     }
 
@@ -151,7 +151,7 @@ public class ObjectApiBuilder {
      * @return {@link DeleteObjectApi}
      */
     public DeleteObjectApi deleteObject(String keyName, String bucketName) {
-        return new DeleteObjectApi(authorizer, host, client.getHttpClient())
+        return new DeleteObjectApi(authorizer, objectConfig, client.getHttpClient())
                 .keyName(keyName)
                 .atBucket(bucketName);
     }
@@ -164,7 +164,7 @@ public class ObjectApiBuilder {
      * @return {@link ObjectProfileApi}
      */
     public ObjectProfileApi objectProfile(String keyName, String bucketName) {
-        return new ObjectProfileApi(authorizer, host, client.getHttpClient())
+        return new ObjectProfileApi(authorizer, objectConfig, client.getHttpClient())
                 .which(keyName)
                 .atBucket(bucketName);
     }
@@ -176,7 +176,7 @@ public class ObjectApiBuilder {
      * @return {@link ObjectListApi}
      */
     public ObjectListApi objectList(String bucketName) {
-        return new ObjectListApi(authorizer, host, client.getHttpClient())
+        return new ObjectListApi(authorizer, objectConfig, client.getHttpClient())
                 .atBucket(bucketName);
     }
 
@@ -187,7 +187,7 @@ public class ObjectApiBuilder {
      * @return {@link ObjectListWithDirFormatApi}
      */
     public ObjectListWithDirFormatApi objectListWithDirFormat(String bucketName) {
-        return new ObjectListWithDirFormatApi(authorizer, host, client.getHttpClient())
+        return new ObjectListWithDirFormatApi(authorizer, objectConfig, client.getHttpClient())
                 .atBucket(bucketName);
     }
 
@@ -201,7 +201,7 @@ public class ObjectApiBuilder {
      * @apiNote 分片上传必须首先执行本API，后续上传API均需要本API的返回{@link MultiUploadInfo}
      */
     public InitMultiUploadApi initMultiUpload(String keyName, String mimeType, String bucketName) {
-        return new InitMultiUploadApi(authorizer, host, client.getHttpClient())
+        return new InitMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
                 .nameAs(keyName)
                 .withMimeType(mimeType)
                 .toBucket(bucketName);
@@ -216,7 +216,7 @@ public class ObjectApiBuilder {
      * @return {@link MultiUploadPartApi}
      */
     public MultiUploadPartApi multiUploadPart(MultiUploadInfo state, byte[] part, int partIndex) {
-        return new MultiUploadPartApi(authorizer, host, client.getHttpClient())
+        return new MultiUploadPartApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state)
                 .from(part, partIndex);
     }
@@ -232,7 +232,7 @@ public class ObjectApiBuilder {
      * @return {@link MultiUploadPartApi}
      */
     public MultiUploadPartApi multiUploadPart(MultiUploadInfo state, byte[] part, int offset, int length, int partIndex) {
-        return new MultiUploadPartApi(authorizer, host, client.getHttpClient())
+        return new MultiUploadPartApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state)
                 .from(part, offset, length, partIndex);
     }
@@ -245,7 +245,7 @@ public class ObjectApiBuilder {
      * @apiNote 分片上传初始化成功后，若上传分片时，任一分片上传失败，须调用本API进行中断处理
      */
     public AbortMultiUploadApi abortMultiUpload(MultiUploadInfo state) {
-        return new AbortMultiUploadApi(authorizer, host, client.getHttpClient())
+        return new AbortMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state);
     }
 
@@ -258,7 +258,7 @@ public class ObjectApiBuilder {
      * @apiNote 分片上传初始化成功后，若上传分片时，任一分片上传失败，须调用本API进行中断处理
      */
     public FinishMultiUploadApi finishMultiUpload(MultiUploadInfo state, List<MultiUploadPartState> partStates) {
-        return new FinishMultiUploadApi(authorizer, host, client.getHttpClient())
+        return new FinishMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state, partStates);
     }
 
@@ -269,7 +269,7 @@ public class ObjectApiBuilder {
      * @return {@link DownloadFileApi}
      */
     public DownloadFileApi downloadFile(ObjectProfile profile) {
-        return new DownloadFileApi(authorizer, host, client.getHttpClient()).which(profile);
+        return new DownloadFileApi(authorizer, objectConfig, client.getHttpClient()).which(profile);
     }
 
     /**
@@ -281,7 +281,7 @@ public class ObjectApiBuilder {
      * @return {@link ObjectRestoreApi}
      */
     public ObjectRestoreApi objectRestore(String keyName, String bucketName) {
-        return new ObjectRestoreApi(authorizer, host, client.getHttpClient())
+        return new ObjectRestoreApi(authorizer, objectConfig, client.getHttpClient())
                 .which(keyName)
                 .atBucket(bucketName);
     }
@@ -295,7 +295,7 @@ public class ObjectApiBuilder {
      * @return {@link CopyObjectApi}
      */
     public CopyObjectApi copyObject(String srcBucket, String srcKeyName) {
-        return new CopyObjectApi(authorizer, host, client.getHttpClient())
+        return new CopyObjectApi(authorizer, objectConfig, client.getHttpClient())
                 .from(srcBucket, srcKeyName);
     }
 
@@ -307,7 +307,7 @@ public class ObjectApiBuilder {
      * @return {@link RenameObjectApi}
      */
     public RenameObjectApi renameObject(String bucketName, String keyName) {
-        return new RenameObjectApi(authorizer, host, client.getHttpClient())
+        return new RenameObjectApi(authorizer, objectConfig, client.getHttpClient())
                 .which(bucketName, keyName);
     }
 
@@ -319,7 +319,7 @@ public class ObjectApiBuilder {
      * @return {@link StorageTypeSwitchApi}
      */
     public StorageTypeSwitchApi switchStorageType(String bucketName, String keyName) {
-        return new StorageTypeSwitchApi(authorizer, host, client.getHttpClient())
+        return new StorageTypeSwitchApi(authorizer, objectConfig, client.getHttpClient())
                 .which(bucketName, keyName);
     }
 

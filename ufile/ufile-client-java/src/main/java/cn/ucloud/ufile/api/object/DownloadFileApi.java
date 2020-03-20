@@ -118,12 +118,12 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     /**
      * 构造方法
      *
-     * @param authorizer Object授权器
-     * @param host       API域名
-     * @param httpClient Http客户端
+     * @param authorizer   Object授权器
+     * @param objectConfig ObjectConfig {@link ObjectConfig}
+     * @param httpClient   Http客户端
      */
-    protected DownloadFileApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
-        super(authorizer, host, httpClient);
+    protected DownloadFileApi(ObjectAuthorizer authorizer, ObjectConfig objectConfig, HttpClient httpClient) {
+        super(authorizer, objectConfig, httpClient);
         RESP_CODE_SUCCESS = 206;
         progressConfig = ProgressConfig.callbackDefault();
     }
@@ -256,7 +256,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             rangeEnd = profile.getContentLength() - 1;
         totalSize = rangeEnd - rangeStart + 1;
 
-        host = new GenerateObjectPrivateUrlApi(authorizer, host, profile.getKeyName(), profile.getBucket(), expiresDuration)
+        host = new GenerateObjectPrivateUrlApi(authorizer, objectConfig, profile.getKeyName(), profile.getBucket(), expiresDuration)
                 .withAuthOptionalData(authOptionalData)
                 .createUrl();
 
