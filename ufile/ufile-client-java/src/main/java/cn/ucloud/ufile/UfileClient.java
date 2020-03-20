@@ -142,6 +142,6 @@ public class UfileClient {
      * @return Object相关API构造器 {@link ObjectApiBuilder}
      */
     public synchronized static ObjectApiBuilder object(ObjectAuthorizer authorizer, ObjectConfig config) {
-        return new ObjectApiBuilder(createClient(), authorizer, config.host());
+        return new ObjectApiBuilder(createClient(), authorizer, config);
     }
 }

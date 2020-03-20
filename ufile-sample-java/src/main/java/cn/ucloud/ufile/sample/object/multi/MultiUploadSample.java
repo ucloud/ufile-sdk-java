@@ -9,7 +9,6 @@ import cn.ucloud.ufile.api.object.policy.PutPolicy;
 import cn.ucloud.ufile.api.object.policy.PutPolicyForCallback;
 import cn.ucloud.ufile.bean.MultiUploadResponse;
 import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
-import cn.ucloud.ufile.bean.base.BaseResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.OnProgressListener;

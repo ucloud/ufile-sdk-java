@@ -17,7 +17,7 @@ import java.net.URLEncoder;
  * @date: 2018/11/16 12:00
  */
 public class GenerateObjectPublicUrlApi {
-    private String host;
+    private ObjectConfig objectConfig;
     /**
      * Required
      * 云端对象名称
@@ -37,18 +37,19 @@ public class GenerateObjectPublicUrlApi {
     /**
      * 构造方法
      *
-     * @param host       API域名
-     * @param keyName    对象名称
-     * @param bucketName bucket名称
+     * @param objectConfig ObjectConfig {@link ObjectConfig}
+     * @param keyName      对象名称
+     * @param bucketName   bucket名称
      */
-    protected GenerateObjectPublicUrlApi(String host, String keyName, String bucketName) {
-        this.host = host;
+    protected GenerateObjectPublicUrlApi(ObjectConfig objectConfig, String keyName, String bucketName) {
+        this.objectConfig = objectConfig;
         this.keyName = keyName;
         this.bucketName = bucketName;
     }
 
     /**
      * 使用Content-Disposition: attachment，并配置attachment的文件名
+     *
      * @param attachmentFileName Content-Disposition: attachment的文件名
      * @return
      */
@@ -59,6 +60,7 @@ public class GenerateObjectPublicUrlApi {
 
     /**
      * 使用Content-Disposition: attachment，并且文件名默认为keyName
+     *
      * @return
      */
     public GenerateObjectPublicUrlApi withAttachment() {
@@ -90,18 +92,23 @@ public class GenerateObjectPublicUrlApi {
     }
 
     private String generateFinalHost(String bucketName, String keyName) throws UfileClientException {
-        if (host == null || host.length() == 0)
-            return host;
+        if (objectConfig == null)
+            return null;
 
-        if (host.startsWith("http"))
-            return String.format("%s/%s", host, keyName);
+        if (objectConfig.isCustomDomain())
+            return String.format("%s/%s", objectConfig.getCustomHost(), keyName);
 
         try {
-            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+","%20");
-            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+","%20");
-            return String.format("http://%s.%s/%s", bucketName, host, keyName);
+            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+", "%20");
+            String region = URLEncoder.encode(objectConfig.getRegion(), "UTF-8")
+                    .replace("+", "%20");
+            String proxySuffix = URLEncoder.encode(objectConfig.getProxySuffix(), "UTF-8")
+                    .replace("+", "%20");
+            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+", "%20");
+            return new StringBuilder(objectConfig.getProtocol().getValue())
+                    .append(String.format("%s.%s.%s/%s", bucketName, region, proxySuffix, keyName)).toString();
         } catch (UnsupportedEncodingException e) {
-            throw new UfileClientException("Occur error during URLEncode bucketName and keyName");
+            throw new UfileClientException("Occur error during URLEncode bucketName and keyName", e);
         }
     }
 

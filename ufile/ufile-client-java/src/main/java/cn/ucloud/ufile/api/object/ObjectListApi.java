@@ -49,12 +49,12 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
     /**
      * 构造方法
      *
-     * @param authorizer Object授权器
-     * @param host       API域名
-     * @param httpClient Http客户端
+     * @param authorizer   Object授权器
+     * @param objectConfig ObjectConfig {@link ObjectConfig}
+     * @param httpClient   Http客户端
      */
-    protected ObjectListApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
-        super(authorizer, host, httpClient);
+    protected ObjectListApi(ObjectAuthorizer authorizer, ObjectConfig objectConfig, HttpClient httpClient) {
+        super(authorizer, objectConfig, httpClient);
     }
 
     /**

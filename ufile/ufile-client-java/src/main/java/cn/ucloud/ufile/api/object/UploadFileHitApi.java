@@ -43,12 +43,12 @@ public class UploadFileHitApi extends UfileObjectApi<BaseObjectResponseBean> {
     /**
      * 构造方法
      *
-     * @param authorizer Object授权器
-     * @param host       API域名
-     * @param httpClient Http客户端
+     * @param authorizer   Object授权器
+     * @param objectConfig ObjectConfig {@link ObjectConfig}
+     * @param httpClient   Http客户端
      */
-    protected UploadFileHitApi(ObjectAuthorizer authorizer, String host, HttpClient httpClient) {
-        super(authorizer, host, httpClient);
+    protected UploadFileHitApi(ObjectAuthorizer authorizer, ObjectConfig objectConfig, HttpClient httpClient) {
+        super(authorizer, objectConfig, httpClient);
     }
 
     /**

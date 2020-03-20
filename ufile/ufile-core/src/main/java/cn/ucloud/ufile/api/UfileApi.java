@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 /**
  * Ufile API请求基类
@@ -53,7 +54,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     /**
      * Ufile Http API指定的Date格式
      */
-    protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+    protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.CHINA);
 
     /**
      * 成功时的Http response code
