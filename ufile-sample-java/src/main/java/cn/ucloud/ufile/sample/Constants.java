@@ -43,8 +43,8 @@ public class Constants {
      * 请修改下面的公私钥
      */
     public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
-            "UcloudPublicKey",
-            "UcloudPrivateKey");
+            System.getenv("UcloudPublicKey"),
+            System.getenv("UcloudPrivateKey"));
 
     /**
      * 远程Object相关API的签名器

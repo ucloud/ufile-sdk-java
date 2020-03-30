@@ -196,17 +196,20 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
                     if (content == null || content.getJsonUserMeta() == null)
                         continue;
 
-                    JsonObject json = content.getJsonUserMeta();
-                    Set<String> keys = json.keySet();
-                    if (keys != null) {
-                        Map<String, String> metadata = new HashMap<>();
-                        for (String name : keys) {
-                            if (name == null || name.isEmpty())
-                                continue;
+                    JsonElement json = content.getJsonUserMeta();
+                    if (json != null && json instanceof JsonObject) {
+                       JsonObject jsonObj= (JsonObject) json;
+                        Set<String> keys = jsonObj.keySet();
+                        if (keys != null) {
+                            Map<String, String> metadata = new HashMap<>();
+                            for (String name : keys) {
+                                if (name == null || name.isEmpty())
+                                    continue;
 
-                            metadata.put(name.toLowerCase(), json.get(name).getAsString());
+                                metadata.put(name.toLowerCase(), jsonObj.get(name).getAsString());
+                            }
+                            content.setUserMeta(metadata);
                         }
-                        content.setUserMeta(metadata);
                     }
                 }
             }

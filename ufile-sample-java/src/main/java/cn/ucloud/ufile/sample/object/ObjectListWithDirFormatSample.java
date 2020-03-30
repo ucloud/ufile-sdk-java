@@ -28,7 +28,7 @@ public class ObjectListWithDirFormatSample {
     private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
-        String bucketName = "";
+        String bucketName = "new-bucket";
 
         execute_list_all(bucketName);
     }
@@ -93,6 +93,8 @@ public class ObjectListWithDirFormatSample {
                 //遍历结果
                 if (response == null || response.getObjectContents() == null)
                     break;
+
+                JLog.D(TAG, "[response-demo]:" + response.toString());
 
                 for (ObjectContentBean content : response.getObjectContents()) {
                     if (content == null)

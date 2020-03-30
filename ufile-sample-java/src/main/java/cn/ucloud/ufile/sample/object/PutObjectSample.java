@@ -27,16 +27,16 @@ import java.io.*;
  */
 public class PutObjectSample {
     private static final String TAG = "PutObjectSample";
-    private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
+    private static ObjectConfig config = new ObjectConfig("cn-bj", "ufileos.com");
 
     public static void main(String[] args) {
         InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
         // 如果上传File，则文件的MimeType可以使用MimeTypeUtil.getMimeType(File)来获取，MimeTypeUtil可能支持的type类型不全，用户可以按需自行填写
-        File file = new File("");
-        String keyName = "";
+        File file = new File("/Users/joshua/Downloads/test.jpg");
+        String keyName = file.getName();
         String mimeType = MimeTypeUtil.getMimeType(keyName);
-        String bucketName = "";
-        putStream(is, mimeType, keyName, bucketName);
+        String bucketName = "test-bkt";
+        putFile(file, mimeType, keyName, bucketName);
     }
 
     public static void putFile(File file, String mimeType, String nameAs, String toBucket) {

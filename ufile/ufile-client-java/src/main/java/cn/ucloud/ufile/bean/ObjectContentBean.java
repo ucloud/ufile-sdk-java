@@ -1,7 +1,7 @@
 package cn.ucloud.ufile.bean;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -30,7 +30,7 @@ public class ObjectContentBean implements Serializable {
     @SerializedName("CreateTime")
     private Long createTime;
     @SerializedName("UserMeta")
-    private JsonObject jsonUserMeta;
+    private JsonElement jsonUserMeta;
     private transient Map<String, String> userMeta;
 
     public String getBucketName() {
@@ -97,7 +97,7 @@ public class ObjectContentBean implements Serializable {
         this.createTime = createTime;
     }
 
-    public JsonObject getJsonUserMeta() {
+    public JsonElement getJsonUserMeta() {
         return jsonUserMeta;
     }
 
