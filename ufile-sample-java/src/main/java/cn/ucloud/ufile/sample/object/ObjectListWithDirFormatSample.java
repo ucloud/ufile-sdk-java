@@ -7,16 +7,13 @@ import cn.ucloud.ufile.bean.*;
 import cn.ucloud.ufile.bean.ObjectListWithDirFormatBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
-import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.UfileCallback;
-import cn.ucloud.ufile.http.interceptor.LogInterceptor;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.JLog;
 import okhttp3.Request;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author: joshua
@@ -28,7 +25,7 @@ public class ObjectListWithDirFormatSample {
     private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
-        String bucketName = "new-bucket";
+        String bucketName = "";
 
         execute_list_all(bucketName);
     }
@@ -93,8 +90,6 @@ public class ObjectListWithDirFormatSample {
                 //遍历结果
                 if (response == null || response.getObjectContents() == null)
                     break;
-
-                JLog.D(TAG, "[response-demo]:" + response.toString());
 
                 for (ObjectContentBean content : response.getObjectContents()) {
                     if (content == null)

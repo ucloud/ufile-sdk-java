@@ -33,13 +33,13 @@ public class GetObjectSample {
     private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
-        String keyName = "jdk-8u192-macosx-x64.dmg";
-        String bucketName = "new-bucket";
+        String keyName = "";
+        String bucketName = "";
         //  5 * 60秒 --> 5分钟后过期
         int expiresDuration = 5 * 60;
 
-        String localDir = "/Users/joshua/MyResource/FileDetachTest/ftp";
-        String saveName = keyName;
+        String localDir = "";
+        String saveName = "";
         try {
             String url = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .getDownloadUrlFromPrivateBucket(keyName, bucketName, expiresDuration)
