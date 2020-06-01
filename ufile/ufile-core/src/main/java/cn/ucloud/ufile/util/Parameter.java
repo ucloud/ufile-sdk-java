@@ -1,7 +1,6 @@
 package cn.ucloud.ufile.util;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/8 15:04

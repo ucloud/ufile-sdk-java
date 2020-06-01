@@ -35,11 +35,12 @@ public class GetObjectSample {
     public static void main(String[] args) {
         String keyName = "";
         String bucketName = "";
+        String localDir = "";
+        String saveName = "";
+
         //  5 * 60秒 --> 5分钟后过期
         int expiresDuration = 5 * 60;
 
-        String localDir = "";
-        String saveName = "";
         try {
             String url = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .getDownloadUrlFromPrivateBucket(keyName, bucketName, expiresDuration)
@@ -51,6 +52,11 @@ public class GetObjectSample {
                      * 使用Content-Disposition: attachment，并且配置文件名
                      */
 //                    .withAttachment("filename")
+                    /**
+                     * 图片处理服务
+                     * https://docs.ucloud.cn/ufile/service/pic
+                     */
+//                    .withIopCmd("iopcmd=rotate&degree=90")
                     .createUrl();
             getStream(url, localDir, saveName);
         } catch (UfileParamException e) {
@@ -69,6 +75,10 @@ public class GetObjectSample {
             DownloadFileBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .getFile(url)
                     .saveAt(localDir, saveName)
+                    /**
+                     * 选择要下载的对象的范围，Default = [0, whole size]
+                     */
+//              .withinRange(0, 0)
                     /**
                      * 是否覆盖本地已有文件, Default = true;
                      */
@@ -103,6 +113,10 @@ public class GetObjectSample {
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .getFile(url)
                 .saveAt(localDir, saveName)
+                /**
+                 * 选择要下载的对象的范围，Default = [0, whole size]
+                 */
+//              .withinRange(0, 0)
                 /**
                  * 是否覆盖本地已有文件, Default = true;
                  */
@@ -142,6 +156,10 @@ public class GetObjectSample {
 
             DownloadStreamBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .getStream(url)
+                    /**
+                     * 选择要下载的对象的范围，Default = [0, whole size]
+                     */
+//                  .withinRange(0, 0)
                     /**
                      * 重定向流
                      *
@@ -189,6 +207,10 @@ public class GetObjectSample {
 
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                 .getStream(url)
+                /**
+                 * 选择要下载的对象的范围，Default = [0, whole size]
+                 */
+//              .withinRange(0, 0)
                 /**
                  * 重定向流
                  *

@@ -153,7 +153,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     /**
-     * 选择要下载的对象的范围，Default = (0, whole size)
+     * 选择要下载的对象的范围，Default = [0, whole size]
      *
      * @param start range起点
      * @param end   range终点
@@ -509,11 +509,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 if (response == null)
                     throw new UfileHttpException("Response is null");
 
-                if (response.code() != RESP_CODE_SUCCESS) {
-                    if (response.code() / 100 != 2)
-                        throw new UfileHttpException(parseErrorResponse(response).toString());
-                    throw new UfileHttpException(String.format("Response code = %d, need %d", response.code(), RESP_CODE_SUCCESS));
-                }
+                if (response.code() / 100 != 2)
+                    throw new UfileHttpException(parseErrorResponse(response).toString());
 
                 DownloadFileBean result = parseHttpResponse(response);
                 if (index == 0 || index == (partCount - 1)) {

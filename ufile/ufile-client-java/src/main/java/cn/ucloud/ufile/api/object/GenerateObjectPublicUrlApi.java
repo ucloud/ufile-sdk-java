@@ -8,6 +8,7 @@ import cn.ucloud.ufile.util.Parameter;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 
 /**
  * API-生成公共下载URL
@@ -33,6 +34,11 @@ public class GenerateObjectPublicUrlApi {
      * Ufile 文件下载链接所需的Content-Disposition: attachment文件名
      */
     private String attachmentFileName;
+
+    /**
+     * 图片处理服务
+     */
+    protected String iopCmd;
 
     /**
      * 构造方法
@@ -69,6 +75,17 @@ public class GenerateObjectPublicUrlApi {
     }
 
     /**
+     * 针对图片文件的操作参数
+     *
+     * @param iopCmd 请参考 https://docs.ucloud.cn/ufile/service/pic
+     * @return {@link GenerateObjectPublicUrlApi}
+     */
+    public GenerateObjectPublicUrlApi withIopCmd(String iopCmd) {
+        this.iopCmd = iopCmd;
+        return this;
+    }
+
+    /**
      * 生成下载URL
      *
      * @return 下载URL
@@ -88,7 +105,17 @@ public class GenerateObjectPublicUrlApi {
             }
         }
 
-        return builder.generateGetUrl(builder.getBaseUrl(), builder.getParams());
+        String url = builder.generateGetUrl(builder.getBaseUrl(), builder.getParams());
+        if (iopCmd != null && !iopCmd.isEmpty()) {
+            List<Parameter<String>> params = builder.getParams();
+            if (params == null || params.isEmpty()) {
+                url = String.format("%s?%s", url, iopCmd);
+            } else {
+                url = String.format("%s&%s", url, iopCmd);
+            }
+        }
+
+        return url;
     }
 
     private String generateFinalHost(String bucketName, String keyName) throws UfileClientException {

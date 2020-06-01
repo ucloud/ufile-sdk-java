@@ -7,7 +7,7 @@
     <groupId>cn.ucloud.ufile</groupId>
     <artifactId>ufile</artifactId>
     <packaging>pom</packaging>
-    <version>2.4.4</version>
+    <version>2.5.0</version>
 
     <modules>
         <module>ufile-core</module>

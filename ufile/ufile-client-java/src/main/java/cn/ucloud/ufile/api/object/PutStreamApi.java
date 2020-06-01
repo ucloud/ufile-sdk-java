@@ -85,6 +85,11 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
      */
     protected String storageType;
 
+    /**
+     * 图片处理服务
+     */
+    protected String iopCmd;
+
 
     /**
      * 构造方法
@@ -133,6 +138,18 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         this.bucketName = bucketName;
         return this;
     }
+
+    /**
+     * 针对图片文件的操作参数
+     *
+     * @param iopCmd 请参考 https://docs.ucloud.cn/ufile/service/pic
+     * @return {@link PutStreamApi}
+     */
+    public PutStreamApi withIopCmd(String iopCmd) {
+        this.iopCmd = iopCmd;
+        return this;
+    }
+
 
     /**
      * 设置是否需要MD5校验
@@ -245,10 +262,13 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
             String contentMD5 = "";
             String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
+            String url = generateFinalHost(bucketName, keyName);
+            if (iopCmd != null && !iopCmd.isEmpty())
+                url = String.format("%s?%s", url, iopCmd);
             PutStreamRequestBuilder builder = (PutStreamRequestBuilder) new PutStreamRequestBuilder(onProgressListener)
                     .setBufferSize(bufferSize)
                     .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
-                    .baseUrl(generateFinalHost(bucketName, keyName))
+                    .baseUrl(url)
                     .addHeader("Content-Type", contentType)
                     .addHeader("Accpet", "*/*")
                     .addHeader("Date", date)

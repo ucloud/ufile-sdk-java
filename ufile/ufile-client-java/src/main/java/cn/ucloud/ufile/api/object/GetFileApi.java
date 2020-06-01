@@ -72,7 +72,7 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
      */
     protected GetFileApi(ObjectAuthorizer authorizer, ObjectConfig objectConfig, HttpClient httpClient) {
         super(authorizer, objectConfig, httpClient);
-        RESP_CODE_SUCCESS = 206;
+        RESP_CODE_SUCCESS = 200;
         host = objectConfig.getCustomHost();
         progressConfig = ProgressConfig.callbackDefault();
     }
@@ -102,7 +102,7 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
     }
 
     /**
-     * 选择要下载的对象的范围，Default = (0, whole size)
+     * 选择要下载的对象的范围，Default = [0, whole size]
      *
      * @param start range起点
      * @param end   range终点
@@ -216,7 +216,8 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         long contentLength = response.body().contentLength();
         result.setContentLength(contentLength);
         result.setContentType(response.header("Content-Type"));
-        result.seteTag(response.header("ETag").replace("\"", ""));
+        result.seteTag(response.header("ETag") == null ?
+                null : response.header("ETag").replace("\"", ""));
 
         if (response.headers() != null) {
             Set<String> names = response.headers().names();

@@ -34,8 +34,8 @@ public class PutObjectSample {
         // 如果上传File，则文件的MimeType可以使用MimeTypeUtil.getMimeType(File)来获取，MimeTypeUtil可能支持的type类型不全，用户可以按需自行填写
         File file = new File("");
         String keyName = "";
-        String mimeType = MimeTypeUtil.getMimeType(keyName);
         String bucketName = "";
+        String mimeType = MimeTypeUtil.getMimeType(keyName);
         putStream(is, mimeType, keyName, bucketName);
     }
 
@@ -57,6 +57,11 @@ public class PutObjectSample {
                      * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
                      */
                     .withStorageType(StorageType.STANDARD)
+                    /**
+                     * 图片处理服务
+                     * https://docs.ucloud.cn/ufile/service/pic
+                     */
+//                    .withIopCmd("iopcmd=rotate&degree=90")
                     /**
                      * 为云端对象配置自定义数据，每次调用将会替换之前数据。
                      * 所有的自定义数据总大小不能超过 8KB。
@@ -119,6 +124,11 @@ public class PutObjectSample {
                  * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
                  */
                 .withStorageType(StorageType.STANDARD)
+                /**
+                 * 图片处理服务
+                 * https://docs.ucloud.cn/ufile/service/pic
+                 */
+//                    .withIopCmd("iopcmd=rotate&degree=90")
                 /**
                  * 为云端对象配置自定义数据，每次调用将会替换之前数据。
                  * 所有的自定义数据总大小不能超过 8KB。
@@ -185,6 +195,11 @@ public class PutObjectSample {
                      */
                     .withStorageType(StorageType.STANDARD)
                     /**
+                     * 图片处理服务
+                     * https://docs.ucloud.cn/ufile/service/pic
+                     */
+//                    .withIopCmd("iopcmd=rotate&degree=90")
+                    /**
                      * 为云端对象配置自定义数据，每次调用将会替换之前数据。
                      * 所有的自定义数据总大小不能超过 8KB。
                      */
@@ -246,6 +261,11 @@ public class PutObjectSample {
                  * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
                  */
                 .withStorageType(StorageType.STANDARD)
+                /**
+                 * 图片处理服务
+                 * https://docs.ucloud.cn/ufile/service/pic
+                 */
+//                    .withIopCmd("iopcmd=rotate&degree=90")
                 /**
                  * 为云端对象配置自定义数据，每次调用将会替换之前数据。
                  * 所有的自定义数据总大小不能超过 8KB。
