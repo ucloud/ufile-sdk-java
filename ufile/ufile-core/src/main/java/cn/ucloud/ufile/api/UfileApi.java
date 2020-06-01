@@ -171,7 +171,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             if (response == null)
                 throw new UfileHttpException("Response is null");
 
-            if (response.code() != RESP_CODE_SUCCESS)
+            if (response.code() / 100 != 2)
                 throw new UfileServerException(parseErrorResponse(response));
 
             return parseHttpResponse(response);
@@ -218,7 +218,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             return;
         }
 
-        if (response.code() != RESP_CODE_SUCCESS) {
+        if (response.code() / 100 != 2) {
             if (httpCallback != null) {
                 UfileErrorBean e = null;
                 try {

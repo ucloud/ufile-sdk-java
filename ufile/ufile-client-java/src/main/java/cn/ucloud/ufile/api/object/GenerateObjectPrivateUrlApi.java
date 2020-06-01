@@ -14,6 +14,7 @@ import com.google.gson.JsonElement;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.List;
 
 
 /**
@@ -54,6 +55,11 @@ public class GenerateObjectPrivateUrlApi {
     private JsonElement authOptionalData;
 
     /**
+     * 图片处理服务
+     */
+    protected String iopCmd;
+
+    /**
      * 构造方法
      *
      * @param authorizer      Object授权器
@@ -89,6 +95,17 @@ public class GenerateObjectPrivateUrlApi {
      */
     public GenerateObjectPrivateUrlApi withAttachment() {
         this.attachmentFileName = keyName;
+        return this;
+    }
+
+    /**
+     * 针对图片文件的操作参数
+     *
+     * @param iopCmd 请参考 https://docs.ucloud.cn/ufile/service/pic
+     * @return {@link GenerateObjectPrivateUrlApi}
+     */
+    public GenerateObjectPrivateUrlApi withIopCmd(String iopCmd) {
+        this.iopCmd = iopCmd;
         return this;
     }
 
@@ -137,7 +154,17 @@ public class GenerateObjectPrivateUrlApi {
         }
 
 
-        return builder.generateGetUrl(builder.getBaseUrl(), builder.getParams());
+        String url = builder.generateGetUrl(builder.getBaseUrl(), builder.getParams());
+        if (iopCmd != null && !iopCmd.isEmpty()) {
+            List<Parameter<String>> params = builder.getParams();
+            if (params == null || params.isEmpty()) {
+                url = String.format("%s?%s", url, iopCmd);
+            } else {
+                url = String.format("%s&%s", url, iopCmd);
+            }
+        }
+
+        return url;
     }
 
     public interface CreatePrivateUrlCallback {

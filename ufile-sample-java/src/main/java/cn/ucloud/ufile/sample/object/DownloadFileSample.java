@@ -46,7 +46,7 @@ public class DownloadFileSample {
                     .downloadFile(profile)
                     .saveAt(localDir, saveName)
                     /**
-                     * 选择要下载的对象的范围，Default = (0, whole size)
+                     * 选择要下载的对象的范围，Default = [0, whole size]
                      */
 //              .withinRange(0, 0)
                     /**

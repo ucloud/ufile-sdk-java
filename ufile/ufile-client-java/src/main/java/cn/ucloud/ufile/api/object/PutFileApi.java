@@ -86,6 +86,11 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
     protected String storageType;
 
     /**
+     * 图片处理服务
+     */
+    protected String iopCmd;
+
+    /**
      * 构造方法
      *
      * @param authorizer   Object授权器
@@ -130,6 +135,17 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
      */
     public PutFileApi toBucket(String bucketName) {
         this.bucketName = bucketName;
+        return this;
+    }
+
+    /**
+     * 针对图片文件的操作参数
+     *
+     * @param iopCmd 请参考 https://docs.ucloud.cn/ufile/service/pic
+     * @return {@link PutFileApi}
+     */
+    public PutFileApi withIopCmd(String iopCmd) {
+        this.iopCmd = iopCmd;
         return this;
     }
 
@@ -251,10 +267,13 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
         String contentMD5 = "";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
+        String url = generateFinalHost(bucketName, keyName);
+        if (iopCmd != null && !iopCmd.isEmpty())
+            url = String.format("%s?%s", url, iopCmd);
         PutFileRequestBuilder builder = (PutFileRequestBuilder) new PutFileRequestBuilder(onProgressListener)
                 .setBufferSize(bufferSize)
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
-                .baseUrl(generateFinalHost(bucketName, keyName))
+                .baseUrl(url)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Content-Length", String.valueOf(file.length()))
