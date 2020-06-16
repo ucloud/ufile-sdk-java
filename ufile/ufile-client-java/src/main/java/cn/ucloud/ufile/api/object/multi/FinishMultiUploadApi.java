@@ -10,6 +10,7 @@ import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.*;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PostStringRequestBuilder;
+import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.MetadataDirective;
 import cn.ucloud.ufile.util.Parameter;
@@ -241,14 +242,18 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
     public MultiUploadResponse parseHttpResponse(Response response) throws UfileServerException, UfileClientException {
         MultiUploadResponse result = null;
 
-        if (putPolicy != null) {
-            result = new MultiUploadResponse();
-            result.setCallbackRet(readResponseBody(response));
-        } else {
-            result = super.parseHttpResponse(response);
-            String eTag = response.header("ETag");
-            eTag = eTag == null ? null : eTag.replace("\"", "");
-            result.seteTag(eTag);
+        try {
+            if (putPolicy != null) {
+                result = new MultiUploadResponse();
+                result.setCallbackRet(readResponseBody(response));
+            } else {
+                result = super.parseHttpResponse(response);
+                String eTag = response.header("ETag");
+                eTag = eTag == null ? null : eTag.replace("\"", "");
+                result.seteTag(eTag);
+            }
+        } finally {
+            FileUtil.close(response.body());
         }
 
         return result;
@@ -257,20 +262,23 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
     @Override
     public UfileErrorBean parseErrorResponse(Response response) throws UfileClientException {
         UfileErrorBean errorBean = null;
-        if (putPolicy != null) {
-            String content = readResponseBody(response);
-            response.body().close();
-            try {
-                errorBean = new Gson().fromJson((content == null || content.length() == 0) ? "{}" : content, UfileErrorBean.class);
-            } catch (Exception e) {
-                errorBean = new UfileErrorBean();
+        try {
+            if (putPolicy != null) {
+                String content = readResponseBody(response);
+                try {
+                    errorBean = new Gson().fromJson((content == null || content.length() == 0) ? "{}" : content, UfileErrorBean.class);
+                } catch (Exception e) {
+                    errorBean = new UfileErrorBean();
+                }
+                errorBean.setResponseCode(response.code());
+                errorBean.setxSessionId(response.header("X-SessionId"));
+                errorBean.setCallbackRet(content);
+                return errorBean;
+            } else {
+                errorBean = super.parseErrorResponse(response);
             }
-            errorBean.setResponseCode(response.code());
-            errorBean.setxSessionId(response.header("X-SessionId"));
-            errorBean.setCallbackRet(content);
-            return errorBean;
-        } else {
-            errorBean = super.parseErrorResponse(response);
+        } finally {
+            FileUtil.close(response.body());
         }
         return errorBean;
     }

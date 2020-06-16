@@ -248,22 +248,26 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
 
     @Override
     public AppendObjectResultBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
-        AppendObjectResultBean result = new AppendObjectResultBean();
-        String eTag = response.header("ETag", null);
-        eTag = eTag == null ? null : eTag.replace("\"", "");
-        result.seteTag(eTag);
+        try {
+            AppendObjectResultBean result = new AppendObjectResultBean();
+            String eTag = response.header("ETag", null);
+            eTag = eTag == null ? null : eTag.replace("\"", "");
+            result.seteTag(eTag);
 
-        if (response.headers() != null) {
-            Set<String> names = response.headers().names();
-            if (names != null) {
-                Map<String, String> headers = new HashMap<>();
-                for (String name : names) {
-                    headers.put(name, response.header(name, null));
+            if (response.headers() != null) {
+                Set<String> names = response.headers().names();
+                if (names != null) {
+                    Map<String, String> headers = new HashMap<>();
+                    for (String name : names) {
+                        headers.put(name, response.header(name, null));
+                    }
+                    result.setHeaders(headers);
                 }
-                result.setHeaders(headers);
             }
-        }
 
-        return result;
+            return result;
+        } finally {
+            FileUtil.close(response.body());
+        }
     }
 }

@@ -10,6 +10,7 @@ import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.HeadRequestBuilder;
+import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.JLog;
 import cn.ucloud.ufile.util.Parameter;
@@ -113,62 +114,71 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
 
     @Override
     public ObjectProfile parseHttpResponse(Response response) throws UfileServerException {
-        ObjectProfile result = new ObjectProfile();
-        int code = response.code();
+        try {
+            ObjectProfile result = new ObjectProfile();
+            int code = response.code();
 
-        if (code == RESP_CODE_SUCCESS) {
-            result.setContentLength(Long.parseLong(response.header("Content-Length", "0")));
-            result.setContentType(response.header("Content-Type", ""));
-            result.seteTag(response.header("ETag", "").replace("\"", ""));
-            result.setAcceptRanges(response.header("Accept-Ranges", ""));
-            result.setCreateTime(response.header("X-Ufile-Create-Time", ""));
-            result.setLastModified(response.header("Last-Modified", ""));
-            result.setStorageType(response.header("X-Ufile-Storage-Class", ""));
-            result.setRestoreTime(response.header("X-Ufile-Restore", ""));
+            if (code == RESP_CODE_SUCCESS) {
+                result.setContentLength(Long.parseLong(response.header("Content-Length", "0")));
+                result.setContentType(response.header("Content-Type", ""));
+                result.seteTag(response.header("ETag", "").replace("\"", ""));
+                result.setAcceptRanges(response.header("Accept-Ranges", ""));
+                result.setCreateTime(response.header("X-Ufile-Create-Time", ""));
+                result.setLastModified(response.header("Last-Modified", ""));
+                result.setStorageType(response.header("X-Ufile-Storage-Class", ""));
+                result.setRestoreTime(response.header("X-Ufile-Restore", ""));
 
-            if (response.headers() != null) {
-                Set<String> names = response.headers().names();
-                if (names != null) {
-                    Map<String, String> headers = new HashMap<>();
-                    Map<String, String> metadata = new HashMap<>();
-                    for (String name : names) {
-                        headers.put(name, response.header(name, null));
-                        if (name == null || !name.startsWith("X-Ufile-Meta-"))
-                            continue;
+                if (response.headers() != null) {
+                    Set<String> names = response.headers().names();
+                    if (names != null) {
+                        Map<String, String> headers = new HashMap<>();
+                        Map<String, String> metadata = new HashMap<>();
+                        for (String name : names) {
+                            headers.put(name, response.header(name, null));
+                            if (name == null || !name.startsWith("X-Ufile-Meta-"))
+                                continue;
 
-                        String key = name.substring(13).toLowerCase();
-                        metadata.put(key, response.header(name, ""));
+                            String key = name.substring(13).toLowerCase();
+                            metadata.put(key, response.header(name, ""));
+                        }
+                        result.setHeaders(headers);
+                        result.setMetadatas(metadata);
                     }
-                    result.setHeaders(headers);
-                    result.setMetadatas(metadata);
                 }
-            }
-            result.setBucket(bucketName);
-            result.setKeyName(keyName);
+                result.setBucket(bucketName);
+                result.setKeyName(keyName);
 
-            return result;
-        } else {
-            throw new UfileServerException(parseErrorResponse(response));
+                return result;
+            } else {
+                throw new UfileServerException(parseErrorResponse(response));
+            }
+        } finally {
+            FileUtil.close(response.body());
         }
     }
 
     @Override
     public UfileErrorBean parseErrorResponse(Response response) {
-        UfileErrorBean errorBean = new UfileErrorBean();
-        errorBean.setxSessionId(response.header("X-SessionId"));
-        int code = response.code();
-        errorBean.setResponseCode(code);
-        switch (code) {
-            case 404: {
-                errorBean.setErrMsg(String.format("The object '%s' is not existed in the bucket '%s'", keyName, bucketName));
-                break;
-            }
-            default: {
-                errorBean.setErrMsg(String.format("Http Error: Response-Code is %d", code));
-                break;
-            }
-        }
+        try {
+            UfileErrorBean errorBean = new UfileErrorBean();
+            errorBean.setxSessionId(response.header("X-SessionId"));
+            int code = response.code();
 
-        return errorBean;
+            errorBean.setResponseCode(code);
+            switch (code) {
+                case 404: {
+                    errorBean.setErrMsg(String.format("The object '%s' is not existed in the bucket '%s'", keyName, bucketName));
+                    break;
+                }
+                default: {
+                    errorBean.setErrMsg(String.format("Http Error: Response-Code is %d", code));
+                    break;
+                }
+            }
+
+            return errorBean;
+        } finally {
+            FileUtil.close(response.body());
+        }
     }
 }

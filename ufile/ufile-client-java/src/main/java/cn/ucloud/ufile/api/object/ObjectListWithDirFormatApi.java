@@ -10,6 +10,7 @@ import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
+import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
@@ -176,44 +177,48 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
 
     @Override
     public ObjectListWithDirFormatBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
-        ObjectListWithDirFormatBean result = super.parseHttpResponse(response);
-        if (result != null) {
-
-            if (response.headers() != null) {
-                Set<String> names = response.headers().names();
-                if (names != null) {
-                    Map<String, String> headers = new HashMap<>();
-                    for (String name : names) {
-                        headers.put(name, response.header(name, null));
+        try {
+            ObjectListWithDirFormatBean result = super.parseHttpResponse(response);
+            if (result != null) {
+                if (response.headers() != null) {
+                    Set<String> names = response.headers().names();
+                    if (names != null) {
+                        Map<String, String> headers = new HashMap<>();
+                        for (String name : names) {
+                            headers.put(name, response.header(name, null));
+                        }
+                        result.setHeaders(headers);
                     }
-                    result.setHeaders(headers);
                 }
-            }
 
-            List<ObjectContentBean> contents = result.getObjectContents();
-            if (contents != null && !contents.isEmpty()) {
-                for (ObjectContentBean content : contents) {
-                    if (content == null || content.getJsonUserMeta() == null)
-                        continue;
+                List<ObjectContentBean> contents = result.getObjectContents();
+                if (contents != null && !contents.isEmpty()) {
+                    for (ObjectContentBean content : contents) {
+                        if (content == null || content.getJsonUserMeta() == null)
+                            continue;
 
-                    JsonElement json = content.getJsonUserMeta();
-                    if (json != null && json instanceof JsonObject) {
-                       JsonObject jsonObj= (JsonObject) json;
-                        Set<String> keys = jsonObj.keySet();
-                        if (keys != null) {
-                            Map<String, String> metadata = new HashMap<>();
-                            for (String name : keys) {
-                                if (name == null || name.isEmpty())
-                                    continue;
+                        JsonElement json = content.getJsonUserMeta();
+                        if (json != null && json instanceof JsonObject) {
+                            JsonObject jsonObj = (JsonObject) json;
+                            Set<String> keys = jsonObj.keySet();
+                            if (keys != null) {
+                                Map<String, String> metadata = new HashMap<>();
+                                for (String name : keys) {
+                                    if (name == null || name.isEmpty())
+                                        continue;
 
-                                metadata.put(name.toLowerCase(), jsonObj.get(name).getAsString());
+                                    metadata.put(name.toLowerCase(), jsonObj.get(name).getAsString());
+                                }
+                                content.setUserMeta(metadata);
                             }
-                            content.setUserMeta(metadata);
                         }
                     }
                 }
             }
+
+            return result;
+        } finally {
+            FileUtil.close(response.body());
         }
-        return result;
     }
 }

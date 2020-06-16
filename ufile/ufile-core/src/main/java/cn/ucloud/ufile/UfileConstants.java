@@ -6,7 +6,7 @@ package cn.ucloud.ufile;
  * @date: 2018/11/22 15:00
  */
 public class UfileConstants {
-    public static final String SDK_VERSION = "2.5.0";
+    public static final String SDK_VERSION = "2.5.1";
     /**
      * 默认分片大小（4MB）
      */
@@ -14,5 +14,5 @@ public class UfileConstants {
     /**
      * 默认buffer大小（256KB）
      */
-    public static final int DEFAULT_BUFFER_SIZE = 256 << 10;
+    public static final int DEFAULT_BUFFER_SIZE = 512 << 10;
 }

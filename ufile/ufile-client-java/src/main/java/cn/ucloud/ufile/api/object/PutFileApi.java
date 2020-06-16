@@ -361,47 +361,54 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
 
     @Override
     public PutObjectResultBean parseHttpResponse(Response response) {
-        PutObjectResultBean result = new PutObjectResultBean();
-        String eTag = response.header("ETag", null);
-        eTag = eTag == null ? null : eTag.replace("\"", "");
-        result.seteTag(eTag);
+        try {
+            PutObjectResultBean result = new PutObjectResultBean();
+            String eTag = response.header("ETag", null);
+            eTag = eTag == null ? null : eTag.replace("\"", "");
+            result.seteTag(eTag);
 
-        if (putPolicy != null) {
-            result.setCallbackRet(readResponseBody(response));
-        }
-
-        if (response.headers() != null) {
-            Set<String> names = response.headers().names();
-            if (names != null) {
-                Map<String, String> headers = new HashMap<>();
-                for (String name : names) {
-                    headers.put(name, response.header(name, null));
-                }
-                result.setHeaders(headers);
+            if (putPolicy != null) {
+                result.setCallbackRet(readResponseBody(response));
             }
-        }
 
-        return result;
+            if (response.headers() != null) {
+                Set<String> names = response.headers().names();
+                if (names != null) {
+                    Map<String, String> headers = new HashMap<>();
+                    for (String name : names) {
+                        headers.put(name, response.header(name, null));
+                    }
+                    result.setHeaders(headers);
+                }
+            }
+
+            return result;
+        } finally {
+            FileUtil.close(response.body());
+        }
     }
 
     @Override
     public UfileErrorBean parseErrorResponse(Response response) throws UfileClientException {
-        UfileErrorBean errorBean = null;
-        if (putPolicy != null) {
-            String content = readResponseBody(response);
-            response.body().close();
-            try {
-                errorBean = new Gson().fromJson((content == null || content.length() == 0) ? "{}" : content, UfileErrorBean.class);
-            } catch (Exception e) {
-                errorBean = new UfileErrorBean();
+        try {
+            UfileErrorBean errorBean = null;
+            if (putPolicy != null) {
+                String content = readResponseBody(response);
+                try {
+                    errorBean = new Gson().fromJson((content == null || content.length() == 0) ? "{}" : content, UfileErrorBean.class);
+                } catch (Exception e) {
+                    errorBean = new UfileErrorBean();
+                }
+                errorBean.setResponseCode(response.code());
+                errorBean.setxSessionId(response.header("X-SessionId"));
+                errorBean.setCallbackRet(content);
+                return errorBean;
+            } else {
+                errorBean = super.parseErrorResponse(response);
             }
-            errorBean.setResponseCode(response.code());
-            errorBean.setxSessionId(response.header("X-SessionId"));
-            errorBean.setCallbackRet(content);
             return errorBean;
-        } else {
-            errorBean = super.parseErrorResponse(response);
+        } finally {
+            FileUtil.close(response.body());
         }
-        return errorBean;
     }
 }

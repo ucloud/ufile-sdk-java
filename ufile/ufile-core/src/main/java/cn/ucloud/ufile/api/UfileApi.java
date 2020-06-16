@@ -268,11 +268,12 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
         try {
             Type type = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
             String content = response.body().string();
-            response.body().close();
             content = (content == null || content.length() == 0) ? "{}" : content;
             return new Gson().fromJson(content, type);
         } catch (IOException e) {
             throw new UfileIOException("Occur IOException while parsing response data", e);
+        } finally {
+            response.body().close();
         }
     }
 
@@ -287,7 +288,6 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     public UfileErrorBean parseErrorResponse(Response response) throws UfileClientException {
         try {
             String content = response.body().string();
-            response.body().close();
             content = (content == null || content.length() == 0) ? "{}" : content;
             UfileErrorBean errorBean = new Gson().fromJson(content, UfileErrorBean.class);
             errorBean.setResponseCode(response.code());
@@ -295,6 +295,8 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
             return errorBean;
         } catch (IOException e) {
             throw new UfileIOException("Occur IOException while parsing error data", e);
+        } finally {
+            response.body().close();
         }
     }
 }

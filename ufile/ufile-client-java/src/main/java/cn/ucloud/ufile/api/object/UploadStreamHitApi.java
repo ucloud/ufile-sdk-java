@@ -168,19 +168,23 @@ public class UploadStreamHitApi extends UfileObjectApi<BaseObjectResponseBean> {
 
     @Override
     public BaseObjectResponseBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
-        BaseObjectResponseBean result = super.parseHttpResponse(response);
+        try {
+            BaseObjectResponseBean result = super.parseHttpResponse(response);
 
-        if (response.headers() != null) {
-            Set<String> names = response.headers().names();
-            if (names != null) {
-                Map<String, String> headers = new HashMap<>();
-                for (String name : names) {
-                    headers.put(name, response.header(name, null));
+            if (response.headers() != null) {
+                Set<String> names = response.headers().names();
+                if (names != null) {
+                    Map<String, String> headers = new HashMap<>();
+                    for (String name : names) {
+                        headers.put(name, response.header(name, null));
+                    }
+                    result.setHeaders(headers);
                 }
-                result.setHeaders(headers);
             }
-        }
 
-        return result;
+            return result;
+        } finally {
+            FileUtil.close(response.body());
+        }
     }
 }

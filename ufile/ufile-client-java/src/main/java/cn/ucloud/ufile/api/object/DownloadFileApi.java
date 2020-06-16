@@ -541,20 +541,22 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
     @Override
     public DownloadFileBean parseHttpResponse(Response response) throws UfileIOException, NumberFormatException {
-        DownloadFileBean result = new DownloadFileBean();
-        result.setContentLength(response.body().contentLength());
-        result.setContentType(response.header("Content-Type"));
-        String range = response.header("Content-Range", "");
-        range = range.replace("bytes", "");
-        String[] rangeArr = range.split("-");
-        long start = Long.parseLong(rangeArr[0].trim());
-        rangeArr = rangeArr[1].trim().split("/");
-        long total = Long.parseLong(rangeArr[1].trim());
-        JLog.T(TAG, "[Content-Range]:" + range + " [start]:" + start + " [total]:" + total);
-
-        InputStream is = response.body().byteStream();
+        InputStream is = null;
         RandomAccessFile raf = null;
+        DownloadFileBean result = new DownloadFileBean();
         try {
+            result.setContentLength(response.body().contentLength());
+            result.setContentType(response.header("Content-Type"));
+            String range = response.header("Content-Range", "");
+            range = range.replace("bytes", "");
+            String[] rangeArr = range.split("-");
+            long start = Long.parseLong(rangeArr[0].trim());
+            rangeArr = rangeArr[1].trim().split("/");
+            long total = Long.parseLong(rangeArr[1].trim());
+            JLog.T(TAG, "[Content-Range]:" + range + " [start]:" + start + " [total]:" + total);
+
+            is = response.body().byteStream();
+
             raf = new RandomAccessFile(finalFile, "rwd");
             raf.seek(start - rangeStart);
 
@@ -581,9 +583,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         } catch (IOException e) {
             throw new UfileIOException("Occur IOException while IO stream");
         } finally {
-            FileUtil.close(raf, is);
+            FileUtil.close(raf, is, response.body());
         }
-
         return result;
     }
 }

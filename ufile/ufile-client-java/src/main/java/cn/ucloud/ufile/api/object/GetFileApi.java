@@ -212,85 +212,86 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
 
     @Override
     public DownloadFileBean parseHttpResponse(Response response) throws UfileIOException {
+        InputStream is = null;
+        FileOutputStream fos = null;
         DownloadFileBean result = new DownloadFileBean();
         long contentLength = response.body().contentLength();
-        result.setContentLength(contentLength);
-        result.setContentType(response.header("Content-Type"));
-        result.seteTag(response.header("ETag") == null ?
-                null : response.header("ETag").replace("\"", ""));
+        try {
+            result.setContentLength(contentLength);
+            result.setContentType(response.header("Content-Type"));
+            result.seteTag(response.header("ETag") == null ?
+                    null : response.header("ETag").replace("\"", ""));
 
-        if (response.headers() != null) {
-            Set<String> names = response.headers().names();
-            if (names != null) {
-                Map<String, String> headers = new HashMap<>();
-                Map<String, String> metadata = new HashMap<>();
-                for (String name : names) {
-                    headers.put(name, response.header(name, null));
-                    if (name == null || !name.startsWith("X-Ufile-Meta-"))
-                        continue;
+            if (response.headers() != null) {
+                Set<String> names = response.headers().names();
+                if (names != null) {
+                    Map<String, String> headers = new HashMap<>();
+                    Map<String, String> metadata = new HashMap<>();
+                    for (String name : names) {
+                        headers.put(name, response.header(name, null));
+                        if (name == null || !name.startsWith("X-Ufile-Meta-"))
+                            continue;
 
-                    String key = name.substring(13).toLowerCase();
-                    metadata.put(key, response.header(name, ""));
-                }
-                result.setHeaders(headers);
-                result.setMetadatas(metadata);
-            }
-        }
-
-        if (onProgressListener != null) {
-            switch (progressConfig.type) {
-                case PROGRESS_INTERVAL_TIME: {
-                    // progressIntervalType是按时间周期回调，则自动做 0 ~ progressInterval 的合法化赋值，progressInterval置0，即实时回调读写进度
-                    progressConfig.interval = Math.max(0, progressConfig.interval);
-                    progressTimer = new Timer();
-                    progressTask = new ProgressTask(contentLength);
-                    progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
-                    break;
-                }
-                case PROGRESS_INTERVAL_PERCENT: {
-                    // progressIntervalType是按百分比回调，则若progressInterval<0 | >100，progressInterval置0，即实时回调读写进度
-                    if (progressConfig.interval < 0 || progressConfig.interval > 100)
-                        progressConfig.interval = 0l;
-                    else
-                        progressConfig.interval = (long) (progressConfig.interval / 100.f * contentLength);
-                    break;
-                }
-                case PROGRESS_INTERVAL_BUFFER: {
-                    // progressIntervalType是按读写的buffer size回调，则自动做 0 ~ totalSize-1 的合法化赋值，progressInterval置0，即实时回调读写进度
-                    progressConfig.interval = Math.max(0, Math.min(contentLength - 1, progressConfig.interval));
-                    break;
+                        String key = name.substring(13).toLowerCase();
+                        metadata.put(key, response.header(name, ""));
+                    }
+                    result.setHeaders(headers);
+                    result.setMetadatas(metadata);
                 }
             }
-        }
 
-        File dir = new File(localPath);
-        if (!dir.exists() || (dir.exists() && !dir.isDirectory()))
-            dir.mkdirs();
-
-        String absPath = localPath + (localPath.endsWith(File.separator) ? "" : File.separator) + saveName;
-
-        File file = new File(absPath);
-
-        if (file.exists() && file.isFile())
-            if (isCover) {
-                FileUtil.deleteFileCleanly(file);
-                file = new File(absPath);
-            } else {
-                int i = 1;
-                boolean isExist = true;
-                while (isExist) {
-                    String tmpPath = absPath + String.format("-%d", i++);
-                    file = new File(tmpPath);
-                    if (!file.exists() || file.isDirectory()) {
-                        isExist = false;
-                        absPath = tmpPath;
+            if (onProgressListener != null) {
+                switch (progressConfig.type) {
+                    case PROGRESS_INTERVAL_TIME: {
+                        // progressIntervalType是按时间周期回调，则自动做 0 ~ progressInterval 的合法化赋值，progressInterval置0，即实时回调读写进度
+                        progressConfig.interval = Math.max(0, progressConfig.interval);
+                        progressTimer = new Timer();
+                        progressTask = new ProgressTask(contentLength);
+                        progressTimer.scheduleAtFixedRate(progressTask, progressConfig.interval, progressConfig.interval);
+                        break;
+                    }
+                    case PROGRESS_INTERVAL_PERCENT: {
+                        // progressIntervalType是按百分比回调，则若progressInterval<0 | >100，progressInterval置0，即实时回调读写进度
+                        if (progressConfig.interval < 0 || progressConfig.interval > 100)
+                            progressConfig.interval = 0l;
+                        else
+                            progressConfig.interval = (long) (progressConfig.interval / 100.f * contentLength);
+                        break;
+                    }
+                    case PROGRESS_INTERVAL_BUFFER: {
+                        // progressIntervalType是按读写的buffer size回调，则自动做 0 ~ totalSize-1 的合法化赋值，progressInterval置0，即实时回调读写进度
+                        progressConfig.interval = Math.max(0, Math.min(contentLength - 1, progressConfig.interval));
+                        break;
                     }
                 }
             }
 
-        InputStream is = response.body().byteStream();
-        FileOutputStream fos = null;
-        try {
+            File dir = new File(localPath);
+            if (!dir.exists() || (dir.exists() && !dir.isDirectory()))
+                dir.mkdirs();
+
+            String absPath = localPath + (localPath.endsWith(File.separator) ? "" : File.separator) + saveName;
+
+            File file = new File(absPath);
+
+            if (file.exists() && file.isFile())
+                if (isCover) {
+                    FileUtil.deleteFileCleanly(file);
+                    file = new File(absPath);
+                } else {
+                    int i = 1;
+                    boolean isExist = true;
+                    while (isExist) {
+                        String tmpPath = absPath + String.format("-%d", i++);
+                        file = new File(tmpPath);
+                        if (!file.exists() || file.isDirectory()) {
+                            isExist = false;
+                            absPath = tmpPath;
+                        }
+                    }
+                }
+
+            is = response.body().byteStream();
             fos = new FileOutputStream(file);
             byte[] buffer = new byte[(int) bufferSize];
             int len = 0;
@@ -313,6 +314,8 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
                 bytesWrittenCache.set(0);
                 onProgressListener.onProgress(written, contentLength);
             }
+
+            result.setFile(file);
         } catch (IOException e) {
             throw new UfileIOException("Occur IOException while IO stream");
         } finally {
@@ -327,10 +330,8 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
                         onProgressListener.onProgress(bytesWritten.get(), contentLength);
                     }
             }
-            FileUtil.close(fos, is);
+            FileUtil.close(fos, is, response.body());
         }
-
-        result.setFile(file);
 
         return result;
     }

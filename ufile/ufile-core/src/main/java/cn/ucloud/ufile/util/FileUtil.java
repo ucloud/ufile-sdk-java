@@ -140,17 +140,17 @@ public class FileUtil {
         }
     }
 
-    public static void close(Closeable... closeable) {
+    public static void close(AutoCloseable... closeable) {
         if (closeable == null)
             return;
 
-        for (Closeable c : closeable) {
+        for (AutoCloseable c : closeable) {
             if (c == null)
                 continue;
 
             try {
                 c.close();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
