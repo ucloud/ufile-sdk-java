@@ -1,9 +1,12 @@
 package cn.ucloud.ufile.auth;
 
 import cn.ucloud.ufile.http.request.PostJsonRequestBuilder;
+import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.util.JLog;
 import com.google.gson.JsonObject;
 import okhttp3.Call;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import java.io.IOException;
 
@@ -46,14 +49,17 @@ public final class UfileObjectRemoteAuthorization extends ObjectRemoteAuthorizat
                 .addHeader("Content-Type", "application/json; charset=utf-8")
                 .params(json)
                 .build(httpClient.getOkHttpClient());
-
+        Response response = null;
         try {
-            String signautre = call.execute().body().string();
+            response = call.execute();
+            String signautre = response.body().string();
             JLog.D(TAG, signautre);
             return signautre;
         } catch (IOException e) {
             e.printStackTrace();
             return "";
+        } finally {
+            FileUtil.close(response.body());
         }
     }
 
@@ -73,13 +79,17 @@ public final class UfileObjectRemoteAuthorization extends ObjectRemoteAuthorizat
                 .params(json)
                 .build(httpClient.getOkHttpClient());
 
+        Response response = null;
         try {
-            String signautre = call.execute().body().string();
+            response = call.execute();
+            String signautre = response.body().string();
             JLog.D(TAG, signautre);
             return signautre;
         } catch (IOException e) {
             e.printStackTrace();
             return "";
+        } finally {
+            FileUtil.close(response.body());
         }
     }
 }

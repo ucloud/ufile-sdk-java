@@ -213,6 +213,7 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         InputStream is = response.body().byteStream();
         if (outputStream == null) {
             result.setInputStream(is);
+            FileUtil.close(response.body());
         } else {
             if (onProgressListener != null) {
                 switch (progressConfig.type) {
@@ -241,7 +242,7 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
             }
 
             try {
-                byte[] buffer = new byte[(int) bufferSize];
+                byte[] buffer = new byte[bufferSize];
                 int len = 0;
                 while ((len = is.read(buffer)) > 0) {
                     outputStream.write(buffer, 0, len);
@@ -275,7 +276,7 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
                             onProgressListener.onProgress(bytesWritten.get(), contentLength);
                         }
                 }
-                FileUtil.close(outputStream, is);
+                FileUtil.close(outputStream, is, response.body());
             }
         }
 

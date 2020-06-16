@@ -1,6 +1,8 @@
 package cn.ucloud.ufile.api.object.multi;
 
+import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.api.object.ObjectConfig;
+import cn.ucloud.ufile.api.object.PutStreamApi;
 import cn.ucloud.ufile.api.object.UfileObjectApi;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
@@ -59,6 +61,11 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
      * 是否需要上传MD5校验码
      */
     private boolean isVerifyMd5 = true;
+
+    /**
+     * 流写入的buffer大小，Default = 256 KB
+     */
+    private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
 
     /**
      * 进度回调配置
@@ -128,6 +135,17 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
     }
 
     /**
+     * 设置流读写的Buffer大小，默认 256 KB
+     *
+     * @param bufferSize Buffer大小
+     * @return {@link MultiUploadPartApi}
+     */
+    public MultiUploadPartApi setBufferSize(int bufferSize) {
+        this.bufferSize = bufferSize;
+        return this;
+    }
+
+    /**
      * 配置进度回调间隔
      *
      * @param config 进度回调设置，{@link ProgressConfig}
@@ -160,7 +178,8 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
         String contentMD5 = "";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
-        PutStreamRequestBuilder builder = new PutStreamRequestBuilder(onProgressListener);
+        PutStreamRequestBuilder builder = new PutStreamRequestBuilder(onProgressListener)
+                .setBufferSize(bufferSize);
         builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
@@ -240,14 +259,18 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
 
     @Override
     public MultiUploadPartState parseHttpResponse(Response response) throws UfileServerException, UfileClientException {
-        MultiUploadPartState result = new MultiUploadPartState();
-        String eTag = response.header("ETag", null);
-        eTag = eTag == null ? null : eTag.replace("\"", "");
-        result.seteTag(eTag);
+        try {
+            MultiUploadPartState result = new MultiUploadPartState();
+            String eTag = response.header("ETag", null);
+            eTag = eTag == null ? null : eTag.replace("\"", "");
+            result.seteTag(eTag);
 
-        if (result.getPartIndex() == -1)
-            result.setPartIndex(partIndex);
+            if (result.getPartIndex() == -1)
+                result.setPartIndex(partIndex);
 
-        return result;
+            return result;
+        } finally {
+            FileUtil.close(response.body());
+        }
     }
 }

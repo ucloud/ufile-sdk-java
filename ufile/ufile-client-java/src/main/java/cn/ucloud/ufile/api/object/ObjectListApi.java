@@ -9,6 +9,7 @@ import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
+import cn.ucloud.ufile.util.FileUtil;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
@@ -141,20 +142,24 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
 
     @Override
     public ObjectListBean parseHttpResponse(Response response) throws UfileClientException, UfileServerException {
-        ObjectListBean result = super.parseHttpResponse(response);
+        try {
+            ObjectListBean result = super.parseHttpResponse(response);
 
-        if (response.headers() != null) {
-            Set<String> names = response.headers().names();
-            if (names != null) {
-                Map<String, String> headers = new HashMap<>();
-                for (String name : names) {
-                    headers.put(name, response.header(name, null));
+            if (response.headers() != null) {
+                Set<String> names = response.headers().names();
+                if (names != null) {
+                    Map<String, String> headers = new HashMap<>();
+                    for (String name : names) {
+                        headers.put(name, response.header(name, null));
+                    }
+                    result.setHeaders(headers);
                 }
-                result.setHeaders(headers);
             }
-        }
 
-        return result;
+            return result;
+        } finally {
+            FileUtil.close(response.body());
+        }
     }
 
     @Override
