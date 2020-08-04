@@ -9,15 +9,11 @@ import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.request.PutJsonRequestBuilder;
-import cn.ucloud.ufile.util.FileUtil;
-import cn.ucloud.ufile.util.HttpMethod;
-import cn.ucloud.ufile.util.MetadataDirective;
-import cn.ucloud.ufile.util.Parameter;
+import cn.ucloud.ufile.util.*;
 import com.google.gson.JsonElement;
 import okhttp3.Response;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -169,9 +165,8 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
 
         try {
             xUfileCopySource = new StringBuilder("/")
-                    .append(URLEncoder.encode(srcBucketName, "UTF-8").replace("+", "%20"))
-                    .append("/")
-                    .append(URLEncoder.encode(srcKeyName, "UTF-8").replace("+", "%20"))
+                    .append(Encoder.urlEncode(srcBucketName, "UTF-8")).append("/")
+                    .append(Encoder.urlEncode(srcKeyName, "UTF-8"))
                     .toString();
         } catch (UnsupportedEncodingException e) {
             throw new UfileClientException("Occur error during URLEncode srcBucketName and srcKeyName", e);

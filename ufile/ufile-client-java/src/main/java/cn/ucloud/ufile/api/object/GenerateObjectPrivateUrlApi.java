@@ -8,6 +8,7 @@ import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.http.request.GetRequestBuilder;
+import cn.ucloud.ufile.util.Encoder;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.Parameter;
 import com.google.gson.JsonElement;
@@ -146,7 +147,7 @@ public class GenerateObjectPrivateUrlApi {
 
         if (attachmentFileName != null && !attachmentFileName.isEmpty()) {
             try {
-                attachmentFileName = URLEncoder.encode(attachmentFileName, "UTF-8").replace("+", "%20");
+                attachmentFileName = Encoder.urlEncode(attachmentFileName, "UTF-8");
                 builder.addParam(new Parameter("ufileattname", attachmentFileName));
             } catch (UnsupportedEncodingException e) {
                 throw new UfileClientException("Occur error during URLEncode attachmentFileName", e);
@@ -206,12 +207,10 @@ public class GenerateObjectPrivateUrlApi {
             return String.format("%s/%s", objectConfig.getCustomHost(), keyName);
 
         try {
-            bucketName = URLEncoder.encode(bucketName, "UTF-8").replace("+", "%20");
-            String region = URLEncoder.encode(objectConfig.getRegion(), "UTF-8")
-                    .replace("+", "%20");
-            String proxySuffix = URLEncoder.encode(objectConfig.getProxySuffix(), "UTF-8")
-                    .replace("+", "%20");
-            keyName = URLEncoder.encode(keyName, "UTF-8").replace("+", "%20");
+            bucketName = Encoder.urlEncode(bucketName, "UTF-8");
+            String region = Encoder.urlEncode(objectConfig.getRegion(), "UTF-8");
+            String proxySuffix = Encoder.urlEncode(objectConfig.getProxySuffix(), "UTF-8");
+            keyName = Encoder.urlEncode(keyName, "UTF-8");
             return new StringBuilder(objectConfig.getProtocol().getValue())
                     .append(String.format("%s.%s.%s/%s", bucketName, region, proxySuffix, keyName)).toString();
         } catch (UnsupportedEncodingException e) {

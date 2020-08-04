@@ -1,6 +1,7 @@
 package cn.ucloud.ufile.util;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -68,5 +69,12 @@ public class Encoder {
         }
 
         return md5.digest();
+    }
+
+    public static String urlEncode(String src, String enc) throws UnsupportedEncodingException {
+        if (src == null || src.isEmpty())
+            return "";
+
+        return URLEncoder.encode(src, enc).replace("+", "%20");
     }
 }

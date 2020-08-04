@@ -2,6 +2,7 @@ package cn.ucloud.ufile.http.request;
 
 import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.http.HttpClient;
+import cn.ucloud.ufile.util.Encoder;
 import cn.ucloud.ufile.util.Parameter;
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -138,9 +139,9 @@ public abstract class HttpRequestBuilder<T> {
         StringBuffer queryBuffer = new StringBuffer();
         for (Parameter<String> param : query) {
             try {
-                queryBuffer.append(URLEncoder.encode(param.key, "UTF-8").replace("+","%20"))
+                queryBuffer.append(Encoder.urlEncode(param.key, "UTF-8"))
                         .append("=")
-                        .append(URLEncoder.encode(param.value, "UTF-8").replace("+","%20"))
+                        .append(Encoder.urlEncode(param.value, "UTF-8"))
                         .append("&");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -167,9 +168,9 @@ public abstract class HttpRequestBuilder<T> {
         StringBuffer queryBuffer = new StringBuffer();
         for (String key : query.keySet()) {
             try {
-                queryBuffer.append(URLEncoder.encode(key, "UTF-8").replace("+","%20"))
+                queryBuffer.append(Encoder.urlEncode(key, "UTF-8"))
                         .append("=")
-                        .append(URLEncoder.encode(query.get(key), "UTF-8").replace("+","%20"))
+                        .append(Encoder.urlEncode(query.get(key), "UTF-8"))
                         .append("&");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
