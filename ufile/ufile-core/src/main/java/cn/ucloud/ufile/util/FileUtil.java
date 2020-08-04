@@ -2,11 +2,12 @@ package cn.ucloud.ufile.util;
 
 
 import java.io.*;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 /**
- *
  * @author: joshua
  * @E-mail: joshua.yin@ucloud.cn
  * @date: 2018/11/11 22:55
@@ -82,6 +83,25 @@ public class FileUtil {
         return res;
     }
 
+    public static String readFileContent(InputStream is) throws IOException {
+        InputStreamReader isr = null;
+        BufferedReader br = null;
+        StringBuffer res = new StringBuffer();
+        try {
+            isr = new InputStreamReader(is, Charset.defaultCharset());
+            br = new BufferedReader(isr);
+
+            String buffer = null;
+            while ((buffer = br.readLine()) != null) {
+                res.append(buffer);
+            }
+        } finally {
+            close(br, isr, is);
+        }
+
+        return res.toString();
+    }
+
     public static String readSmallFileStringContent(File file) throws IOException {
         if (file == null || !file.exists() || !file.isFile())
             return null;
@@ -95,7 +115,6 @@ public class FileUtil {
             String buffer = null;
             int line = 0;
             while ((buffer = br.readLine()) != null) {
-                System.out.println("line:" + (line++) + " content:" + buffer);
                 res.append(buffer.trim());
             }
         } finally {
