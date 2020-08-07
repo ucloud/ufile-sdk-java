@@ -63,7 +63,15 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
 
     private ProgressConfig progressConfig;
 
-    private ByteArrayOutputStream cacheOutputStream;
+    /**
+     * 上传流的数据长度
+     */
+    private long contentLength = 0L;
+
+    /**
+     * 上传流的md5，若withVerifyMd5，则必须填写
+     */
+    private String contentMD5;
 
     /**
      * 流写入的buffer大小，Default = 256 KB
@@ -117,12 +125,14 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
     /**
      * 设置要上传的流和MIME类型
      *
-     * @param inputStream 输入流
-     * @param mimeType    MIME类型
+     * @param inputStream   输入流
+     * @param contentLength 输入流的数据长度，bytesLength
+     * @param mimeType      MIME类型
      * @return {@link PutStreamApi}
      */
-    public PutStreamApi from(InputStream inputStream, String mimeType) {
+    public PutStreamApi from(InputStream inputStream, long contentLength, String mimeType) {
         this.inputStream = inputStream;
+        this.contentLength = contentLength;
         this.mimeType = mimeType;
         this.mediaType = MediaType.parse(mimeType);
         return this;
@@ -150,15 +160,16 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         return this;
     }
 
-
     /**
      * 设置是否需要MD5校验
      *
      * @param isVerifyMd5 是否校验MD5
+     * @param contentMD5  数据的MD5值，若 isVerifyMd5 = true，则必须填写非空的 contentMD5
      * @return {@link PutStreamApi}
      */
-    public PutStreamApi withVerifyMd5(boolean isVerifyMd5) {
+    public PutStreamApi withVerifyMd5(boolean isVerifyMd5, String contentMD5) {
         this.isVerifyMd5 = isVerifyMd5;
+        this.contentMD5 = contentMD5;
         return this;
     }
 
@@ -259,7 +270,6 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
             parameterValidat();
 
             String contentType = mediaType.toString();
-            String contentMD5 = "";
             String date = dateFormat.format(new Date(System.currentTimeMillis()));
 
             String url = generateFinalHost(bucketName, keyName);
@@ -274,7 +284,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
                     .addHeader("Date", date)
                     .mediaType(mediaType);
 
-            builder.addHeader("Content-Length", String.valueOf(inputStream.available()));
+            builder.addHeader("Content-Length", String.valueOf(contentLength));
 
             if (storageType != null)
                 builder.addHeader("X-Ufile-Storage-Class", storageType);
@@ -292,15 +302,10 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
                 }
             }
 
+            if (contentMD5 == null)
+                contentMD5 = "";
             if (isVerifyMd5) {
-                try {
-                    backupStream();
-                    contentMD5 = HexFormatter.formatByteArray2HexString(Encoder.md5(new ByteArrayInputStream(cacheOutputStream.toByteArray())), false);
-                    builder.addHeader("Content-MD5", contentMD5);
-                    inputStream = new ByteArrayInputStream(cacheOutputStream.toByteArray());
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                }
+                builder.addHeader("Content-MD5", contentMD5);
             }
 
             String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, bucketName, keyName,
@@ -311,11 +316,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
             builder.params(inputStream);
             builder.setProgressConfig(progressConfig);
 
-            FileUtil.close(cacheOutputStream);
-
             call = builder.build(httpClient.getOkHttpClient());
-        } catch (IOException e) {
-            throw new UfileIOException(e.getMessage());
         } catch (UfileClientException e) {
             throw e;
         }
@@ -342,23 +343,6 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         if (bucketName == null || bucketName.isEmpty())
             throw new UfileRequiredParamNotFoundException(
                     "The required param 'bucketName' can not be null or empty");
-    }
-
-    private void backupStream() {
-        cacheOutputStream = new ByteArrayOutputStream();
-        byte[] buff = new byte[128 << 10];
-        int len = 0;
-        try {
-            while ((len = inputStream.read(buff)) > 0) {
-                cacheOutputStream.write(buff, 0, len);
-            }
-
-            cacheOutputStream.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            FileUtil.close(inputStream);
-        }
     }
 
     private OnProgressListener onProgressListener;

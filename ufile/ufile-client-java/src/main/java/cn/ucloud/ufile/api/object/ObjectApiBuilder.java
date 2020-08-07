@@ -100,13 +100,14 @@ public class ObjectApiBuilder {
     /**
      * put 流
      *
-     * @param inputStream 输入流
-     * @param mimeType    mime类型
+     * @param inputStream   输入流
+     * @param contentLength 输入流的数据长度，bytesLength
+     * @param mimeType      mime类型
      * @return {@link PutStreamApi}
      */
-    public PutStreamApi putObject(InputStream inputStream, String mimeType) {
+    public PutStreamApi putObject(InputStream inputStream, long contentLength, String mimeType) {
         return new PutStreamApi(authorizer, objectConfig, client.getHttpClient())
-                .from(inputStream, mimeType);
+                .from(inputStream, contentLength, mimeType);
     }
 
     /**

@@ -29,14 +29,14 @@ public class PutObjectSample {
     private static final String TAG = "PutObjectSample";
     private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
         // 如果上传File，则文件的MimeType可以使用MimeTypeUtil.getMimeType(File)来获取，MimeTypeUtil可能支持的type类型不全，用户可以按需自行填写
         File file = new File("");
         String keyName = "";
         String bucketName = "";
         String mimeType = MimeTypeUtil.getMimeType(keyName);
-        putStream(is, mimeType, keyName, bucketName);
+        putStream(new FileInputStream(file), file.length(), mimeType, keyName, bucketName);
     }
 
     public static void putFile(File file, String mimeType, String nameAs, String toBucket) {
@@ -176,7 +176,7 @@ public class PutObjectSample {
                 });
     }
 
-    public static void putStream(InputStream stream, String mimeType, String nameAs, String toBucket) {
+    public static void putStream(InputStream stream, long contentLength, String mimeType, String nameAs, String toBucket) {
         try {
             /**
              * 上传回调策略
@@ -187,7 +187,7 @@ public class PutObjectSample {
                     .addCallbackBody(new PolicyParam("key", "value"))
                     .build();
             PutObjectResultBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                    .putObject(stream, mimeType)
+                    .putObject(stream, contentLength, mimeType)
                     .nameAs(nameAs)
                     .toBucket(toBucket)
                     /**
@@ -244,7 +244,7 @@ public class PutObjectSample {
         }
     }
 
-    public static void putStreamAsync(InputStream stream, String mimeType, String nameAs, String toBucket) throws UfileClientException {
+    public static void putStreamAsync(InputStream stream, long contentLength, String mimeType, String nameAs, String toBucket) throws UfileClientException {
         /**
          * 上传回调策略
          * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
@@ -254,7 +254,7 @@ public class PutObjectSample {
                 .addCallbackBody(new PolicyParam("key", "value"))
                 .build();
         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                .putObject(stream, mimeType)
+                .putObject(stream, contentLength, mimeType)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
                 /**
