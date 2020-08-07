@@ -213,7 +213,6 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         InputStream is = response.body().byteStream();
         if (outputStream == null) {
             result.setInputStream(is);
-            FileUtil.close(response.body());
         } else {
             if (onProgressListener != null) {
                 switch (progressConfig.type) {
