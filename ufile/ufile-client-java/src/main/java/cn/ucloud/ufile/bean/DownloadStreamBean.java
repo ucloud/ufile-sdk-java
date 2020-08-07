@@ -20,10 +20,12 @@ public class DownloadStreamBean extends BaseResponseBean {
     private String contentType;
     @SerializedName("Content-Length")
     private long contentLength;
+    @SerializedName("Content-MD5")
+    private String contentMD5;
     @SerializedName("InputStream")
     private InputStream inputStream;
 
-    private transient Map<String,String> metadatas;
+    private transient Map<String, String> metadatas;
 
     public String getContentType() {
         return contentType;
@@ -61,11 +63,20 @@ public class DownloadStreamBean extends BaseResponseBean {
         return this;
     }
 
-    public Map<String,String> getMetadatas() {
+    public String getContentMD5() {
+        return contentMD5;
+    }
+
+    public DownloadStreamBean setContentMD5(String contentMD5) {
+        this.contentMD5 = contentMD5;
+        return this;
+    }
+
+    public Map<String, String> getMetadatas() {
         return metadatas;
     }
 
-    public void setMetadatas(Map<String,String> metadatas) {
+    public void setMetadatas(Map<String, String> metadatas) {
         this.metadatas = metadatas;
     }
 

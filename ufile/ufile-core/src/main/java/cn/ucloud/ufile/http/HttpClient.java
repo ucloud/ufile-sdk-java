@@ -20,12 +20,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class HttpClient {
     protected String TAG = getClass().getSimpleName();
-    @Deprecated
-    public static final long DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
-    @Deprecated
-    public static final long DEFAULT_WRITE_TIMEOUT = 30 * 1000;
-    @Deprecated
-    public static final long DEFAULT_READ_TIMEOUT = 30 * 1000;
 
     /**
      * 原始OkHttpClient，全局保持唯一一个，从而保证性能开销
@@ -219,17 +213,6 @@ public class HttpClient {
         }
 
         mOkHttpClient = builder.build();
-    }
-
-
-    /**
-     * 获取 HttpClient异步线程池
-     *
-     * @return HttpClient异步线程池
-     */
-    @Deprecated
-    public synchronized ExecutorService getExecutorService() {
-        return this.mOkHttpClient.dispatcher().executorService();
     }
 
     public Config getConfig() {

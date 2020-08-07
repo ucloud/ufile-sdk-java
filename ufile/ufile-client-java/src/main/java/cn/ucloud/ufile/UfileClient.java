@@ -84,15 +84,6 @@ public class UfileClient {
     }
 
     /**
-     * 设置HttpClient异步线程池
-     *
-     * @param executorService HttpClient异步线程池
-     */
-    @Deprecated
-    public static void setExecutorService(ExecutorService executorService) {
-    }
-
-    /**
      * 配置并构建UfileClient
      * 必须在调用bucket()和object()之前调用，否则无效
      *
@@ -101,18 +92,6 @@ public class UfileClient {
      */
     public synchronized static UfileClient configure(Config config) {
         return createClient(config);
-    }
-
-    /**
-     * 获取HttpClient异步线程池
-     *
-     * @return HttpClient异步线程池
-     */
-    @Deprecated
-    public static ExecutorService getExecutorService() {
-        if (mInstance == null)
-            return null;
-        return mInstance.httpClient.getExecutorService();
     }
 
     /**

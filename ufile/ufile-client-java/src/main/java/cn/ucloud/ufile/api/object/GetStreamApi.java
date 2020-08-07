@@ -189,6 +189,7 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         long contentLength = response.body().contentLength();
         result.setContentLength(contentLength);
         result.setContentType(response.header("Content-Type"));
+        result.setContentMD5(response.header("Content-MD5"));
         result.seteTag(response.header("ETag") == null ?
                 null : response.header("ETag").replace("\"", ""));
 
@@ -213,7 +214,6 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         InputStream is = response.body().byteStream();
         if (outputStream == null) {
             result.setInputStream(is);
-            FileUtil.close(response.body());
         } else {
             if (onProgressListener != null) {
                 switch (progressConfig.type) {
