@@ -1,4 +1,4 @@
-# UCloud Ufile SDK for Java
+# UCloud US3 (原名UFile) SDK for Java
 
 [![](https://img.shields.io/github/release/ucloud/ufile-sdk-java.svg)](https://github.com/ucloud/ufile-sdk-java)
 [![](https://img.shields.io/github/last-commit/ucloud/ufile-sdk-java.svg)](https://github.com/ucloud/ufile-sdk-java)
