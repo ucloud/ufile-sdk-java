@@ -269,6 +269,7 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
                     errorBean = new Gson().fromJson((content == null || content.length() == 0) ? "{}" : content, UfileErrorBean.class);
                 } catch (Exception e) {
                     errorBean = new UfileErrorBean();
+                    errorBean.setErrMsg(content);
                 }
                 errorBean.setResponseCode(response.code());
                 errorBean.setxSessionId(response.header("X-SessionId"));
