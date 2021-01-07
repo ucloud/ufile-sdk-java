@@ -11,6 +11,7 @@ import cn.ucloud.ufile.http.BaseHttpCallback;
 import cn.ucloud.ufile.http.HttpClient;
 import cn.ucloud.ufile.http.response.ResponseParser;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -288,8 +289,14 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     public UfileErrorBean parseErrorResponse(Response response) throws UfileClientException {
         try {
             String content = response.body().string();
-            content = (content == null || content.length() == 0) ? "{}" : content;
-            UfileErrorBean errorBean = new Gson().fromJson(content, UfileErrorBean.class);
+            content = (content == null || content.length() == 0) ? "" : content;
+            UfileErrorBean errorBean = null;
+            try {
+                errorBean = new Gson().fromJson(content, UfileErrorBean.class);
+            } catch (JsonParseException e) {
+                errorBean = new UfileErrorBean();
+                errorBean.setErrMsg(content);
+            }
             errorBean.setResponseCode(response.code());
             errorBean.setxSessionId(response.header("X-SessionId"));
             return errorBean;
