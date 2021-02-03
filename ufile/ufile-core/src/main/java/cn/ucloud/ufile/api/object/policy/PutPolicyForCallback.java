@@ -20,8 +20,8 @@ public final class PutPolicyForCallback extends PutPolicy {
 
     private PutPolicyForCallback(String policyContent, String policy) throws UfileClientException {
         super(policy);
-        JLog.D(TAG, "[PutPolicyContent]:" + policyContent);
         this.policyContent = policyContent;
+        JLog.D(TAG, "[PutPolicyContent]:" + policyContent);
     }
 
     public String getPolicyContent() {
@@ -30,6 +30,7 @@ public final class PutPolicyForCallback extends PutPolicy {
 
     public static class Builder extends PutPolicy.Builder<PutPolicyForCallback> {
         private String callbackUrl;
+        private String callbackBodyType;
         private List<PolicyParam> callbackBody;
 
         public Builder(String callbackUrl) {
@@ -37,8 +38,13 @@ public final class PutPolicyForCallback extends PutPolicy {
         }
 
         public Builder(String callbackUrl, List<PolicyParam> callbackBody) {
+            this(callbackUrl, callbackBody, null);
+        }
+
+        public Builder(String callbackUrl, List<PolicyParam> callbackBody, String callbackBodyType) {
             this.callbackUrl = callbackUrl;
             this.callbackBody = callbackBody;
+            this.callbackBodyType = callbackBodyType;
         }
 
         public Builder setCallbackUrl(String callbackUrl) {
@@ -48,6 +54,11 @@ public final class PutPolicyForCallback extends PutPolicy {
 
         public Builder setCallbackBody(List<PolicyParam> callbackBody) {
             this.callbackBody = callbackBody;
+            return this;
+        }
+
+        public Builder setCallbackBodyType(String callbackBodyType) {
+            this.callbackBodyType = callbackBodyType;
             return this;
         }
 
@@ -70,26 +81,46 @@ public final class PutPolicyForCallback extends PutPolicy {
             return callbackBody;
         }
 
+        public String getCallbackBodyType() {
+            return callbackBodyType;
+        }
+
         public PutPolicyForCallback build() throws UfileClientException {
             if (callbackUrl == null || callbackUrl.isEmpty())
                 throw new UfileClientException("callbackUrl can not be null or empty in PutPolicyForCallback");
 
             JsonObject json = new JsonObject();
             json.addProperty("callbackUrl", callbackUrl);
+            if (callbackBodyType != null && !callbackBodyType.isEmpty())
+                json.addProperty("callbackBodyType", callbackBodyType);
+
             StringBuilder sb = new StringBuilder();
             if (callbackBody != null) {
-                for (int i = 0, len = callbackBody.size(); i < len; i++, sb.append(i < len ? "&" : "")) {
-                    PolicyParam param = callbackBody.get(i);
-                    if (param == null)
-                        continue;
+                if (callbackBodyType != null && callbackBodyType.startsWith("application/json")) {
+                    JsonObject body = new JsonObject();
+                    for (int i = 0, len = callbackBody.size(); i < len; i++) {
+                        PolicyParam param = callbackBody.get(i);
+                        if (param == null || param.key == null)
+                            continue;
 
-                    String str = param.format();
-                    if (str == null)
-                        continue;
+                        body.addProperty(param.key, param.value);
+                    }
+                    sb.append(body.toString());
+                } else {
+                    for (int i = 0, len = callbackBody.size(); i < len; i++, sb.append(i < len ? "&" : "")) {
+                        PolicyParam param = callbackBody.get(i);
+                        if (param == null)
+                            continue;
 
-                    sb.append(str);
+                        String str = param.format();
+                        if (str == null)
+                            continue;
+
+                        sb.append(str);
+                    }
                 }
             }
+
             json.addProperty("callbackBody", sb.toString());
             String policy = json.toString();
 
