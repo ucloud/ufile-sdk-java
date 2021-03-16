@@ -1,7 +1,8 @@
 *.DS_Store
 out
-target
+target/
 .gradle
 .idea
-build
+build/
 *.iml
+class/
