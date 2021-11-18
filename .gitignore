@@ -1,8 +1,10 @@
 *.DS_Store
 out
-target/
+target
 .gradle
 .idea
-build/
+build
 *.iml
-classes/
+.classpath
+.project
+.settings/

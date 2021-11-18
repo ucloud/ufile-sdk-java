@@ -1,4 +1,4 @@
-# UCloud Ufile SDK for Java
+# UCloud US3 (原名UFile) SDK for Java
 
 [![](https://img.shields.io/github/release/ucloud/ufile-sdk-java.svg)](https://github.com/ucloud/ufile-sdk-java)
 [![](https://img.shields.io/github/last-commit/ucloud/ufile-sdk-java.svg)](https://github.com/ucloud/ufile-sdk-java)
@@ -43,7 +43,7 @@
 ## 快速入门
 
 - 基本说明：
-    - 所有Ufile所有API均包含同步执行(execute)和异步执行(executeAsync)两种执行方式。
+    - 所有API均包含同步执行(execute)和异步执行(executeAsync)两种执行方式。
     
     - 同步执行会返回指定的业务结果类，若执行出错则会抛出UfileException为父类的异常；
     
