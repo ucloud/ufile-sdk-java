@@ -89,7 +89,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     /**
      * 分片数量
      */
-    private int partCount = 0;
+    private long partCount = 0;
     /**
      * 分片任务集
      */
@@ -224,7 +224,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
     protected void prepareData() throws UfileClientException {
         parameterValidat();
 
-        partCount = 0;
+        partCount = 0L;
 
         File dir = new File(localPath);
         if (!dir.exists() || (dir.exists() && !dir.isDirectory()))
@@ -260,7 +260,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 .withAuthOptionalData(authOptionalData)
                 .createUrl();
 
-        partCount = (int) Math.ceil(totalSize * 1.d / UfileConstants.MULTIPART_SIZE);
+        partCount = (long) Math.ceil(totalSize * 1.d / UfileConstants.MULTIPART_SIZE);
+        JLog.E(TAG, "[partCount]:" + partCount);
 
         switch (progressConfig.type) {
             case PROGRESS_INTERVAL_TIME: {
@@ -287,9 +288,10 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         bytesWrittenCache = new AtomicLong(0);
 
         callList = new ArrayList<>();
-        for (int i = 0; i < partCount; i++) {
+        for (long i = 0L; i < partCount; i++) {
             long start = Math.max(i * UfileConstants.MULTIPART_SIZE, rangeStart);
             long end = Math.min(rangeEnd, (start + UfileConstants.MULTIPART_SIZE));
+            JLog.E(TAG, "[range]:" + String.format("bytes=%d-%d", start, end));
             GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                     .baseUrl(host)
                     .addHeader("Range", String.format("bytes=%d-%d", start, end));
@@ -495,9 +497,9 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
 
     private class DownloadCallable implements Callable<DownloadFileBean> {
         private Call call;
-        private int index;
+        private long index;
 
-        public DownloadCallable(Call call, int index) {
+        public DownloadCallable(Call call, long index) {
             this.call = call;
             this.index = index;
         }
