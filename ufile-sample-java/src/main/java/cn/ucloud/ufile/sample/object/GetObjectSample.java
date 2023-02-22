@@ -247,4 +247,44 @@ public class GetObjectSample {
                     }
                 });
     }
+
+    public static void getFileWithReferer(String url, String localDir, String saveName) {
+        try {
+            DownloadFileBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                    .getFile(url)
+                    .saveAt(localDir, saveName)
+                    /**
+                     * 选择要下载的对象的范围，Default = [0, whole size]
+                     */
+    //              .withinRange(0, 0)
+                    /**
+                     * 是否覆盖本地已有文件, Default = true;
+                     */
+    //                .withCoverage(false)
+                    /**
+                     * 指定progress callback的间隔
+                     */
+    //                .withProgressConfig(ProgressConfig.callbackWithPercent(10))
+                    /**
+                     * 配置读写流Buffer的大小, Default = 256 KB, MIN = 4 KB, MAX = 4 MB
+                     */
+    //                    .setBufferSize(4 << 20)
+                    /**
+                     * 配置进度监听
+                     */
+                    .setOnProgressListener(new OnProgressListener() {
+                        @Override
+                        public void onProgress(long bytesWritten, long contentLength) {
+                            JLog.D(TAG, String.format("[progress] = %d%% - [%d/%d]", (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
+                        }
+                    })
+                    .setReferer("input your referer")
+                    .execute();
+            JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
+        } catch (UfileClientException e) {
+            e.printStackTrace();
+        } catch (UfileServerException e) {
+            e.printStackTrace();
+        }
+    }
 }
