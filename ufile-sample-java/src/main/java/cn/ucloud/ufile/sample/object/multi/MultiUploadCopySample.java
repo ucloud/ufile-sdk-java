@@ -2,45 +2,62 @@ package cn.ucloud.ufile.sample.object.multi;
 
 import cn.ucloud.ufile.UfileClient;
 import cn.ucloud.ufile.api.object.ObjectConfig;
-import cn.ucloud.ufile.api.object.multi.MultiUploadPartState;
 import cn.ucloud.ufile.api.object.multi.MultiUploadInfo;
+import cn.ucloud.ufile.api.object.multi.MultiUploadPartState;
 import cn.ucloud.ufile.api.object.policy.PolicyParam;
 import cn.ucloud.ufile.api.object.policy.PutPolicy;
 import cn.ucloud.ufile.api.object.policy.PutPolicyForCallback;
 import cn.ucloud.ufile.bean.MultiUploadResponse;
 import cn.ucloud.ufile.bean.base.BaseObjectResponseBean;
 import cn.ucloud.ufile.exception.UfileClientException;
+import cn.ucloud.ufile.exception.UfileFileException;
 import cn.ucloud.ufile.exception.UfileServerException;
-import cn.ucloud.ufile.http.OnProgressListener;
 import cn.ucloud.ufile.sample.Constants;
 import cn.ucloud.ufile.util.*;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static cn.ucloud.ufile.UfileConstants.MULTIPART_SIZE;
+
 /**
- * @author: joshua
- * @E-mail: joshua.yin@ucloud.cn
- * @date: 2018-12-11 14:32
+ * @author: kenny
+ * @E-mail: kenny.wang@ucloud.cn
+ * @date: 2023-06-28 10:52
  */
-public class MultiUploadSample {
-    private static final String TAG = "MultiUploadSample";
+public class MultiUploadCopySample {
+    private static final String TAG = "MultiUploadCopySample";
     private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
     public static void main(String[] args) {
-        File file = new File("");
-        String keyName = file.getName();
+        String filePath = "";
+        File file = new File(filePath);
+        String keyName = "";
         String bucketName = "";
+        String sourceBucketName = "";
+        String sourceObjectName = "";
+
+        String mimeType = "";
+        try {
+            mimeType = MimeTypeUtil.getMimeType(file);
+        } catch (UfileFileException e) {
+            e.printStackTrace();
+        }
+        System.out.println(mimeType);
+
+        List<Range> fileRanges = generateFileRanges(filePath);
+        for (Range range : fileRanges) {
+            System.out.println("Range: " + range.getStart() + ", " + range.getEnd());
+        }
 
         // 先初始化分片上传请求
-        MultiUploadInfo state = initMultiUpload(file, keyName, bucketName);
+        MultiUploadInfo state = initMultiUpload(mimeType, keyName, bucketName);
         JLog.D(TAG, String.format("[init state] = %s", (state == null ? "null" : state.toString())));
         if (state == null)
             return;
 
-        List<MultiUploadPartState> partStates = multiUpload(file, state);
+        List<MultiUploadPartState> partStates = multiUploadCopy(state, sourceBucketName, sourceObjectName, fileRanges);
         // 若上传分片结果列表为空，则失败，需中断上传操作。否则完成上传
         if (partStates == null || partStates.isEmpty())
             abortMultiUpload(state);
@@ -48,10 +65,31 @@ public class MultiUploadSample {
             finishMultiUpload(state, partStates);
     }
 
-    public static MultiUploadInfo initMultiUpload(File file, String keyName, String bucketName) {
+    public static List<Range> generateFileRanges(String filePath) {
+        List<Range> fileRanges = new ArrayList<>();
+        File file = new File(filePath);
+        long fileSize = file.length();
+        int numChunks = (int) Math.ceil((double) fileSize / MULTIPART_SIZE);
+
+        long start = 0;
+        long end = MULTIPART_SIZE - 1;
+        for (int i = 0; i < numChunks; i++) {
+            if (i == numChunks - 1) {
+                // 最后一个分块可能大小小于 MULTIPART_SIZE
+                end = fileSize - 1;
+            }
+            Range range = new Range(start, end);
+            fileRanges.add(range);
+
+            start += MULTIPART_SIZE;
+            end += MULTIPART_SIZE;
+        }
+        return fileRanges;
+    }
+
+    public static MultiUploadInfo initMultiUpload(String mimeType, String keyName, String bucketName) {
         try {
             // MimeTypeUtil可能支持的type类型不全，用户可以按需自行填写
-            String mimeType = MimeTypeUtil.getMimeType(file);
             return UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .initMultiUpload(keyName, mimeType, bucketName)
                     /**
@@ -70,83 +108,42 @@ public class MultiUploadSample {
                      */
 //                    .addMetaData(new Parameter<>("key","value"))
                     .execute();
-        } catch (UfileClientException e) {
-            e.printStackTrace();
-        } catch (UfileServerException e) {
+        } catch (UfileClientException | UfileServerException e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
-    public static List<MultiUploadPartState> multiUpload(File file, MultiUploadInfo state) {
+    public static List<MultiUploadPartState> multiUploadCopy(MultiUploadInfo state, String sbn, String son, List<Range> fileRanges) {
         List<MultiUploadPartState> partStates = null;
-        byte[] buffer = new byte[state.getBlkSize()];
-        InputStream is = null;
-        try {
-            is = new FileInputStream(file);
-            int len = 0;
-            int count = 0;
-
-            partStates = new ArrayList<>();
-            // 将数据根据state中指定的大小进行分片
-            while ((len = is.read(buffer)) > 0) {
-                final int index = count++;
-                byte[] sendData = Arrays.copyOf(buffer, len);
-                int uploadCount = 0;
-
-                // 可支持重试3次上传
-                while (uploadCount < 3) {
-                    try {
-                        MultiUploadPartState partState = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
-                                .multiUploadPart(state, sendData, index)
-                                /**
-                                 * 指定progress callback的间隔
-                                 */
-//                                .withProgressConfig(ProgressConfig.callbackWithPercent(50))
-                                /**
-                                 * 配置进度监听
-                                 */
-                                .setOnProgressListener(new OnProgressListener() {
-                                    @Override
-                                    public void onProgress(long bytesWritten, long contentLength) {
-                                        JLog.D(TAG, String.format("[index] = %d\t[progress] = %d%% - [%d/%d]", index,
-                                                (int) (bytesWritten * 1.f / contentLength * 100), bytesWritten, contentLength));
-                                    }
-                                })
-                                .execute();
-                        if (partState == null) {
-                            uploadCount++;
-                            continue;
-                        }
-
-                        partStates.add(partState);
-                        break;
-                    } catch (UfileClientException e) {
-                        e.printStackTrace();
-                        // 尝试次数+1
+        partStates = new ArrayList<>();
+        for (int i = 0; i < fileRanges.size(); i++) {
+            Range fileRange = fileRanges.get(i);
+            int uploadCount = 0;
+            int tryCount = 1;
+            while (uploadCount < tryCount) {
+                try {
+                    MultiUploadPartState partState = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
+                            .multiUploadCopyPart(state, i, sbn, son, fileRange.getStart(), fileRange.getEnd())
+                            .execute();
+                    if (partState == null) {
                         uploadCount++;
-                    } catch (UfileServerException e) {
-                        e.printStackTrace();
-                        // 尝试次数+1
-                        uploadCount++;
+                        continue;
                     }
+
+                    partStates.add(partState);
+                    break;
+                } catch (UfileClientException | UfileServerException e) {
+                    e.printStackTrace();
+                    // 尝试次数+1
+                    uploadCount++;
                 }
-
-                if (uploadCount == 3)
-                    return null;
             }
-
-            return partStates;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            FileUtil.close(is);
+            if (uploadCount == tryCount)
+                return null;
         }
-
-        return null;
+        return partStates;
     }
 
     public static void abortMultiUpload(MultiUploadInfo info) {
@@ -205,4 +202,23 @@ public class MultiUploadSample {
         return null;
     }
 
+}
+
+
+class Range {
+    private long start;
+    private long end;
+
+    public Range(long start, long end) {
+        this.start = start;
+        this.end = end;
+    }
+
+    public long getStart() {
+        return start;
+    }
+
+    public long getEnd() {
+        return end;
+    }
 }

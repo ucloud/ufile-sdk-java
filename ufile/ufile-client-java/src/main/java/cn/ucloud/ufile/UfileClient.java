@@ -7,8 +7,6 @@ import cn.ucloud.ufile.api.object.ObjectConfig;
 import cn.ucloud.ufile.api.object.ObjectApiBuilder;
 import cn.ucloud.ufile.http.HttpClient;
 
-import java.util.concurrent.ExecutorService;
-
 /**
  * Ufile SDK
  *

@@ -24,6 +24,16 @@ public class ObjectOptAuthParam extends ObjectBaseAuthParam {
     private String date;
 
     /**
+     * X-UFile-Copy-Source
+     */
+    private String xUFileCopySource;
+
+    /**
+     * X-UFile-Copy-Source-Range
+     */
+    private String xUFileCopySourceRange;
+
+    /**
      * 上传策略
      */
     private PutPolicy putPolicy;
@@ -37,6 +47,15 @@ public class ObjectOptAuthParam extends ObjectBaseAuthParam {
         this.contentType = contentType;
         this.contentMD5 = contentMD5;
         this.date = date;
+    }
+
+    public ObjectOptAuthParam(HttpMethod method, String bucket, String keyName, String contentType, String contentMD5, String date, String xUFileCopySource, String xUFileCopySourceRange) {
+        super(method, bucket, keyName);
+        this.contentType = contentType;
+        this.contentMD5 = contentMD5;
+        this.date = date;
+        this.xUFileCopySource = xUFileCopySource;
+        this.xUFileCopySourceRange = xUFileCopySourceRange;
     }
 
     public String getContentType() {
@@ -72,6 +91,24 @@ public class ObjectOptAuthParam extends ObjectBaseAuthParam {
 
     public ObjectOptAuthParam setPutPolicy(PutPolicy putPolicy) {
         this.putPolicy = putPolicy;
+        return this;
+    }
+
+    public String getXUFileCopySource() {
+        return xUFileCopySource;
+    }
+
+    public ObjectOptAuthParam setXUFileCopySource(String xUFileCopySource) {
+        this.xUFileCopySource = xUFileCopySource;
+        return this;
+    }
+
+    public String getXUFileCopySourceRange() {
+        return xUFileCopySourceRange;
+    }
+
+    public ObjectOptAuthParam setXUFileCopySourceRange(String xUFileCopySourceRange) {
+        this.xUFileCopySourceRange = xUFileCopySourceRange;
         return this;
     }
 }

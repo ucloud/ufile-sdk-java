@@ -123,28 +123,6 @@ public class ObjectApiBuilder {
     }
 
     /**
-     * 文件秒传
-     *
-     * @param file 本地文件
-     * @return {@link UploadFileHitApi}
-     */
-    public UploadFileHitApi uploadHit(File file) {
-        return new UploadFileHitApi(authorizer, objectConfig, client.getHttpClient())
-                .from(file);
-    }
-
-    /**
-     * 流秒传
-     *
-     * @param inputStream 输入流
-     * @return {@link UploadStreamHitApi}
-     */
-    public UploadStreamHitApi uploadHit(InputStream inputStream) {
-        return new UploadStreamHitApi(authorizer, objectConfig, client.getHttpClient())
-                .from(inputStream);
-    }
-
-    /**
      * 删除云端文件
      *
      * @param keyName    云端文件名
@@ -239,6 +217,23 @@ public class ObjectApiBuilder {
     }
 
     /**
+     * 分片上传-上传拷贝
+     *
+     * @param state            initMultiUpload 返回的response
+     * @param partIndex        分片序号(从0开始)
+     * @param sourceBucketName 文件源BucketName
+     * @param sourceObjectName 文件源ObjectName
+     * @param rangeStart       Range开始的Index
+     * @param rangeEnd         Range结束的Index
+     * @return {@link MultiUploadPartApi}
+     */
+    public UploadCopyPartApi multiUploadCopyPart(MultiUploadInfo state, int partIndex, String sourceBucketName, String sourceObjectName, long rangeStart, long rangeEnd) {
+        return new UploadCopyPartApi(authorizer, objectConfig, client.getHttpClient())
+                .which(state)
+                .from(partIndex, sourceBucketName, sourceObjectName, rangeStart, rangeEnd);
+    }
+
+    /**
      * 分片上传-中断上传
      *
      * @param state initMultiUpload 返回的response
@@ -298,18 +293,6 @@ public class ObjectApiBuilder {
     public CopyObjectApi copyObject(String srcBucket, String srcKeyName) {
         return new CopyObjectApi(authorizer, objectConfig, client.getHttpClient())
                 .from(srcBucket, srcKeyName);
-    }
-
-    /**
-     * 重命名云端对象文件
-     *
-     * @param bucketName 需要重命名的对象所在bucket
-     * @param keyName    需要重命名的对象名称
-     * @return {@link RenameObjectApi}
-     */
-    public RenameObjectApi renameObject(String bucketName, String keyName) {
-        return new RenameObjectApi(authorizer, objectConfig, client.getHttpClient())
-                .which(bucketName, keyName);
     }
 
     /**
