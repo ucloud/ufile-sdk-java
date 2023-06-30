@@ -48,6 +48,8 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
         String contentType = param.getContentType();
         String contentMD5 = param.getContentMD5();
         String date = param.getDate();
+        String xUFileCopySource = param.getXUFileCopySource();
+        String xUFileCopySourceRange = param.getXUFileCopySourceRange();
 
         if (method == null)
             throw new UfileAuthorizationException("Param 'method' can not be null!");
@@ -59,12 +61,16 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
         contentType = contentType == null ? "" : contentType;
         contentMD5 = contentMD5 == null ? "" : contentMD5;
         date = date == null ? "" : date;
+        xUFileCopySource = xUFileCopySource == null ? "" : "x-ufile-copy-source:" + xUFileCopySource + "\n";
+        xUFileCopySourceRange = xUFileCopySourceRange == null ? "" : "x-ufile-copy-source-range:" + xUFileCopySourceRange + "\n";
 
         StringBuffer signData = new StringBuffer();
         signData.append(method.getName() + "\n");
         signData.append(contentMD5 + "\n");
         signData.append(contentType + "\n");
         signData.append(date + "\n");
+        signData.append(xUFileCopySource);
+        signData.append(xUFileCopySourceRange);
         signData.append("/" + bucket);
         signData.append("/" + keyName);
         if (param.getPutPolicy() != null && param.getPutPolicy().getPolicy() != null)
