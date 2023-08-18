@@ -261,7 +261,6 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                 .createUrl();
 
         partCount = (long) Math.ceil(totalSize * 1.d / UfileConstants.MULTIPART_SIZE);
-        JLog.E(TAG, "[partCount]:" + partCount);
 
         switch (progressConfig.type) {
             case PROGRESS_INTERVAL_TIME: {
@@ -291,7 +290,6 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         for (long i = 0L; i < partCount; i++) {
             long start = Math.max(i * UfileConstants.MULTIPART_SIZE, rangeStart);
             long end = Math.min(rangeEnd, (start + UfileConstants.MULTIPART_SIZE));
-            JLog.E(TAG, "[range]:" + String.format("bytes=%d-%d", start, end));
             GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                     .baseUrl(host)
                     .addHeader("Range", String.format("bytes=%d-%d", start, end));
