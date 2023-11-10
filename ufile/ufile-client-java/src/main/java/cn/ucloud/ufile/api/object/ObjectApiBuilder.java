@@ -148,6 +148,18 @@ public class ObjectApiBuilder {
                 .atBucket(bucketName);
     }
 
+
+    /**
+     * 获取分片上传parts信息
+     * @param uploadId 空间名
+     * @param bucketName 空间名
+     * @return {@link ObjectListApi}
+     */
+    public MultiUploadListPartsInfoApi multiUploadListPartsInfo(String uploadId, String bucketName) {
+        return new MultiUploadListPartsInfoApi(authorizer, objectConfig, client.getHttpClient()).setUploadId(uploadId)
+                .atBucket(bucketName);
+    }
+
     /**
      * 获取文件列表
      *
