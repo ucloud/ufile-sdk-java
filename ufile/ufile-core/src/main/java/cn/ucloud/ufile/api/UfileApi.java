@@ -118,7 +118,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     /**
      * 设置写入超时时间，Default = 30 * 1000 ms {@link HttpClient.Config}
      *
-     * @param writeTimeOut 写入超时时间
+     * @param writeTimeOut 写入超时时间（包与包超时间隔）
      */
     public void setWriteTimeOut(long writeTimeOut) {
         this.writeTimeOut = writeTimeOut;
@@ -127,7 +127,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     /**
      * 设置请求超时时间，Default = 0 {@link HttpClient.Config}
      *
-     * @param callTimeOut 写入超时时间
+     * @param callTimeOut 请求超时时间(包含建立链接到读到response body)
      */
     public void setCallTimeOut(long callTimeOut) {
         this.callTimeOut = callTimeOut;
@@ -160,6 +160,11 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
         return writeTimeOut > 0 ? writeTimeOut : HttpClient.Config.DEFAULT_WRITE_TIMEOUT;
     }
 
+    /**
+     * 获取请求超时时间，Default = 0  {@link HttpClient.Config}
+     *
+     * @return 获取请求超时时间
+     */
     public long getCallTimeOut() {
         return callTimeOut > 0 ? callTimeOut : HttpClient.Config.DEFAULT_CALL_TIMEOUT;
     }
