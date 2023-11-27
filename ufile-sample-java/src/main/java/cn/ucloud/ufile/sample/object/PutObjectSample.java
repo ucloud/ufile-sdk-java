@@ -45,6 +45,7 @@ public class PutObjectSample {
              * 上传回调策略
              * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
              * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
+             * 可以通过putObject.setCallTimeOut(MillSeconds)设置请求超时时间
              */
             PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
                     .addCallbackBody(new PolicyParam("key", "value"))
