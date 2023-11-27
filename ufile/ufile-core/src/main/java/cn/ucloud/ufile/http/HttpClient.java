@@ -35,6 +35,8 @@ public class HttpClient {
         public static final long DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
         public static final long DEFAULT_WRITE_TIMEOUT = 30 * 1000;
         public static final long DEFAULT_READ_TIMEOUT = 30 * 1000;
+
+        public static final long DEFAULT_CALL_TIMEOUT = 0;
         /**
          * 默认okhttp最大空闲连接数（5）
          */
@@ -48,6 +50,7 @@ public class HttpClient {
          */
         public static final TimeUnit DEFAULT_KEEP_ALIVE_DURATION_TIME_UNIT = TimeUnit.MINUTES;
 
+        private long timeoutCall;
         private long timeoutConnect;
         private long timeoutRead;
         private long timeoutWrite;
@@ -125,10 +128,11 @@ public class HttpClient {
             return this;
         }
 
-        public Config setTimeout(long timeoutConnect, long timeoutRead, long timeoutWrite) {
+        public Config setTimeout(long timeoutConnect, long timeoutRead, long timeoutWrite, long timeoutCall) {
             this.timeoutConnect = timeoutConnect;
             this.timeoutRead = timeoutRead;
             this.timeoutWrite = timeoutWrite;
+            this.timeoutCall = timeoutCall;
             return this;
         }
 
@@ -142,6 +146,9 @@ public class HttpClient {
 
         public long getTimeoutWrite() {
             return timeoutWrite;
+        }
+        public long getTimeoutCall() {
+            return timeoutCall;
         }
 
         public ExecutorService getExecutorService() {
@@ -188,6 +195,7 @@ public class HttpClient {
         this.config = config;
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .callTimeout(config.timeoutCall, TimeUnit.MILLISECONDS)
                 .connectTimeout(config.timeoutConnect, TimeUnit.MILLISECONDS)
                 .writeTimeout(config.timeoutWrite, TimeUnit.MILLISECONDS)
                 .readTimeout(config.timeoutRead, TimeUnit.MILLISECONDS)
@@ -231,6 +239,7 @@ public class HttpClient {
         this.config = config;
 
         OkHttpClient.Builder builder = mOkHttpClient.newBuilder()
+                .callTimeout(config.timeoutCall, TimeUnit.MILLISECONDS)
                 .connectTimeout(config.timeoutConnect, TimeUnit.MILLISECONDS)
                 .writeTimeout(config.timeoutWrite, TimeUnit.MILLISECONDS)
                 .readTimeout(config.timeoutRead, TimeUnit.MILLISECONDS)

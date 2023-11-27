@@ -67,6 +67,7 @@ public abstract class UfileBucketApi<T> extends UfileApi<T> {
 
             call = new GetRequestBuilder()
                     .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
+                    .setCallTimeOut(callTimeOut)
                     .baseUrl(host)
                     .addHeader("Content-Type", contentType)
                     .addHeader("Accpet", "*/*")
