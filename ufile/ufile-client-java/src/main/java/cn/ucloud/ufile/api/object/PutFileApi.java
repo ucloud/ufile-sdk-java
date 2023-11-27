@@ -272,7 +272,7 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
             url = String.format("%s?%s", url, iopCmd);
         PutFileRequestBuilder builder = (PutFileRequestBuilder) new PutFileRequestBuilder(onProgressListener)
                 .setBufferSize(bufferSize)
-                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
+                .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut).setCallTimeOut(callTimeOut)
                 .baseUrl(url)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")

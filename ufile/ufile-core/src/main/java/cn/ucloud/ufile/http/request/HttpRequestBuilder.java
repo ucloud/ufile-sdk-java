@@ -54,7 +54,7 @@ public abstract class HttpRequestBuilder<T> {
     protected long readTimeOut;
     protected long writeTimeOut;
     protected long connTimeOut;
-
+    protected long callTimeOut;
     public HttpRequestBuilder() {
     }
 
@@ -106,6 +106,10 @@ public abstract class HttpRequestBuilder<T> {
         return this;
     }
 
+    public HttpRequestBuilder<T> setCallTimeOut(long callTimeOut) {
+        this.callTimeOut = callTimeOut;
+        return this;
+    }
     public String getBaseUrl() {
         return baseUrl;
     }
@@ -222,15 +226,17 @@ public abstract class HttpRequestBuilder<T> {
         if (httpClient == null)
             return null;
 
-        if (readTimeOut > 0 || writeTimeOut > 0 || connTimeOut > 0) {
+        if (readTimeOut > 0 || writeTimeOut > 0 || connTimeOut > 0 || callTimeOut > 0) {
             readTimeOut = readTimeOut > 0 ? readTimeOut : HttpClient.Config.DEFAULT_READ_TIMEOUT;
             writeTimeOut = writeTimeOut > 0 ? writeTimeOut : HttpClient.Config.DEFAULT_WRITE_TIMEOUT;
             connTimeOut = connTimeOut > 0 ? connTimeOut : HttpClient.Config.DEFAULT_CONNECT_TIMEOUT;
+            callTimeOut = callTimeOut > 0 ? callTimeOut : HttpClient.Config.DEFAULT_CALL_TIMEOUT;
 
             return httpClient.newBuilder()
                     .readTimeout(readTimeOut, TimeUnit.MILLISECONDS)
                     .writeTimeout(writeTimeOut, TimeUnit.MILLISECONDS)
                     .connectTimeout(connTimeOut, TimeUnit.MILLISECONDS)
+                    .callTimeout(callTimeOut, TimeUnit.MILLISECONDS)
                     .build();
         }
 
