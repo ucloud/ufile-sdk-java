@@ -19,7 +19,7 @@ public class ObjectContentBean implements Serializable {
     private String key;
     @SerializedName("MimeType")
     private String mimeType;
-    @SerializedName("Etag")
+    @SerializedName("ETag")
     private String eTag;
     @SerializedName("Size")
     private String size;
