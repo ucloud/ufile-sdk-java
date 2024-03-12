@@ -3,6 +3,7 @@ package cn.ucloud.ufile.api.object;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.bean.DownloadFileBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
+import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileIOException;
 import cn.ucloud.ufile.exception.UfileParamException;
 import cn.ucloud.ufile.exception.UfileRequiredParamNotFoundException;
@@ -62,6 +63,11 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
      * 流读取的buffer大小，Default = 256 KB
      */
     private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    /**
+     * Optional
+     * referer in header
+     */
+    private String referer;
 
     /**
      * 构造方法
@@ -136,6 +142,17 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         return this;
     }
 
+    /**
+     * set referer in header
+     * 
+     * @param referer referer
+     * @return {@link GetFileApi}
+     */
+    public GetFileApi setReferer(String referer) {
+        this.referer = referer;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileParamException {
         parameterValidat();
@@ -145,6 +162,7 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(host)
                 .addHeader("Range", String.format("bytes=%d-%s", rangeStart, rangeEnd == 0 ? "" : rangeEnd))
+                .addHeader("Referer", referer)
                 .build(httpClient.getOkHttpClient());
     }
 

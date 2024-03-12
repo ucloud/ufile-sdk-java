@@ -114,6 +114,11 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      * 流读取的buffer大小，Default = 256 KB
      */
     private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    /**
+     * Optional
+     * referer in header
+     */
+    private String referer;
 
     /**
      * 构造方法
@@ -220,6 +225,17 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         return this;
     }
 
+    /**
+     * set referer in header
+     * 
+     * @param referer referer
+     * @return {@link DownloadFileApi}
+     */
+    public DownloadFileApi setReferer(String referer) {
+        this.referer = referer;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileClientException {
         parameterValidat();
@@ -292,7 +308,8 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             long end = Math.min(rangeEnd, (start + UfileConstants.MULTIPART_SIZE));
             GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                     .baseUrl(host)
-                    .addHeader("Range", String.format("bytes=%d-%d", start, end));
+                    .addHeader("Range", String.format("bytes=%d-%d", start, end))
+                    .addHeader("Referer", referer);
             builder.setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut);
             callList.add(new DownloadCallable(builder.build(httpClient.getOkHttpClient()), i));
         }
