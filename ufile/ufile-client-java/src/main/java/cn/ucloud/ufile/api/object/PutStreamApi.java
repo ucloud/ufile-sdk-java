@@ -136,6 +136,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         this.mimeType = mimeType;
         this.mediaType = MediaType.parse(mimeType);
         return this;
+
     }
 
     /**
@@ -168,6 +169,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
      * @return {@link PutStreamApi}
      */
     public PutStreamApi withVerifyMd5(boolean isVerifyMd5, String contentMD5) {
+
         this.isVerifyMd5 = isVerifyMd5;
         this.contentMD5 = contentMD5;
         return this;
@@ -279,6 +281,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
                     .setBufferSize(bufferSize)
                     .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut).setCallTimeOut(callTimeOut)
                     .baseUrl(url)
+                    .header(headers)
                     .addHeader("Content-Type", contentType)
                     .addHeader("Accpet", "*/*")
                     .addHeader("Date", date)

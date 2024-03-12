@@ -118,6 +118,7 @@ public class UploadFileHitApi extends UfileObjectApi<BaseObjectResponseBean> {
 
         call = builder.baseUrl(builder.generateGetUrl(url, query))
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
+                .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)

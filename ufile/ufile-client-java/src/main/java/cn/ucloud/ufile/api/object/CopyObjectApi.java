@@ -175,6 +175,7 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
         PutJsonRequestBuilder builder = (PutJsonRequestBuilder) new PutJsonRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(generateFinalHost(dstBucketName, dstKeyName))
+                .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("X-Ufile-Copy-Source", xUfileCopySource)

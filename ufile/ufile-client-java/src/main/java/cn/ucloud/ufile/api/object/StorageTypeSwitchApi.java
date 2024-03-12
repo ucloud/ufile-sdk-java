@@ -112,7 +112,8 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseObjectResponseBean>
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT,
                 bucketName, keyName, contentType, "", date).setOptional(authOptionalData));
 
-        builder.addHeader("authorization", authorization);
+
+        builder.header(headers).addHeader("authorization", authorization);
 
         call = builder.build(httpClient.getOkHttpClient());
     }

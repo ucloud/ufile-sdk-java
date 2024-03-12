@@ -92,9 +92,11 @@ public class ObjectRestoreApi extends UfileObjectApi<BaseObjectResponseBean> {
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, bucketName, keyName_tmp,
                 contentType, "", date).setOptional(authOptionalData));
 
+
         call = new PutJsonRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(generateFinalHost(bucketName, keyName_tmp) + "?restore")
+                .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)

@@ -22,6 +22,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Ufile API请求基类
@@ -85,6 +86,8 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
 
     protected long callTimeOut;
 
+    protected Map<String,String> headers;
+
     /**
      * 构造方法
      *
@@ -95,6 +98,26 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
         this.httpClient = httpClient;
         this.host = host;
         this.okHttpClient = httpClient.getOkHttpClient();
+    }
+
+    /**
+     * 设置http http header
+     *
+     * @param headers http header
+     *
+     */
+    public  void SetHttpHeaders(Map<String, String> headers) throws UfileClientException {
+        this.headers = headers;
+    }
+
+    /**
+     * 获取http http header
+     *
+     * @return headers
+     *
+     */
+    public  Map<String, String> GetHttpHeaders() throws UfileClientException {
+        return this.headers;
     }
 
     /**

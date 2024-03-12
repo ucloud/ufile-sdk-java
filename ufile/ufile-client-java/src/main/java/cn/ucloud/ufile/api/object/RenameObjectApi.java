@@ -123,6 +123,7 @@ public class RenameObjectApi extends UfileObjectApi<BaseObjectResponseBean> {
         params.add(new Parameter<>("force", String.valueOf(isForce)));
 
         builder.baseUrl(builder.generateGetUrl(generateFinalHost(bucketName, keyName), params))
+                .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date);

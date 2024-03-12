@@ -11,6 +11,9 @@ import okhttp3.ResponseBody;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Ufile 对象存储相关API基类
@@ -22,6 +25,7 @@ import java.net.URLEncoder;
 public abstract class UfileObjectApi<T> extends UfileApi<T> {
     protected ObjectAuthorizer authorizer;
     protected ObjectConfig objectConfig;
+
 
     /**
      * 构造方法
@@ -65,6 +69,7 @@ public abstract class UfileObjectApi<T> extends UfileApi<T> {
 
         return host;
     }
+
 
     protected String readResponseBody(Response response) {
         if (response == null)

@@ -6,6 +6,8 @@ import cn.ucloud.ufile.auth.sign.UfileSigner;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.JLog;
 
+import java.util.Objects;
+
 /**
  * Ufile默认的本地签名生成器
  *
@@ -78,6 +80,9 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
 
         JLog.D("TEST", "[signData]:" + signData.toString());
 
+        if (Objects.equals(privateKey, "") || Objects.equals(publicKey, "")){
+            return "";
+        }
         String signature = signer.signature(privateKey, signData.toString());
 
         return "UCloud " + publicKey + ":" + signature

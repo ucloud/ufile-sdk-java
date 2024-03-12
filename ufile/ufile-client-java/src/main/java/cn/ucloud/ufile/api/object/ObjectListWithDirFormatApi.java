@@ -157,6 +157,7 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
         GetRequestBuilder builder = new GetRequestBuilder();
         call = builder.baseUrl(generateFinalHost(bucketName, "") + "?listobjects&" + builder.generateUrlQuery(query))
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
+                .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
