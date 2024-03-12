@@ -106,7 +106,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      * @param headers http header
      *
      */
-    public  void SetHttpHeaders(Map<String, String> headers) throws UfileClientException {
+    public  void SetHttpHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
@@ -116,7 +116,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      * @return headers
      *
      */
-    public  Map<String, String> GetHttpHeaders() throws UfileClientException {
+    public  Map<String, String> GetHttpHeaders() {
         return this.headers;
     }
 

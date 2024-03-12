@@ -44,6 +44,10 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
         if (param == null)
             throw new UfileAuthorizationException("Param can not be null!");
 
+        if (privateKey.isEmpty() || publicKey.isEmpty()){
+            return "";
+        }
+
         HttpMethod method = param.getMethod();
         String bucket = param.getBucket();
         String keyName = param.getKeyName();
@@ -80,9 +84,6 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
 
         JLog.D("TEST", "[signData]:" + signData.toString());
 
-        if (Objects.equals(privateKey, "") || Objects.equals(publicKey, "")){
-            return "";
-        }
         String signature = signer.signature(privateKey, signData.toString());
 
         return "UCloud " + publicKey + ":" + signature

@@ -26,7 +26,6 @@ public abstract class UfileObjectApi<T> extends UfileApi<T> {
     protected ObjectAuthorizer authorizer;
     protected ObjectConfig objectConfig;
 
-
     /**
      * 构造方法
      *
@@ -69,7 +68,6 @@ public abstract class UfileObjectApi<T> extends UfileApi<T> {
 
         return host;
     }
-
 
     protected String readResponseBody(Response response) {
         if (response == null)

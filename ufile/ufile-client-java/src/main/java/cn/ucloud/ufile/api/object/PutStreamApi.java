@@ -136,7 +136,6 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         this.mimeType = mimeType;
         this.mediaType = MediaType.parse(mimeType);
         return this;
-
     }
 
     /**
@@ -265,7 +264,6 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         this.storageType = storageType;
         return this;
     }
-
     @Override
     protected void prepareData() throws UfileClientException {
         try {
