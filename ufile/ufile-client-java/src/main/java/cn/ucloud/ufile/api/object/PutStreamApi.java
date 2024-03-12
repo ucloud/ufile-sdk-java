@@ -168,7 +168,6 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
      * @return {@link PutStreamApi}
      */
     public PutStreamApi withVerifyMd5(boolean isVerifyMd5, String contentMD5) {
-
         this.isVerifyMd5 = isVerifyMd5;
         this.contentMD5 = contentMD5;
         return this;
@@ -264,6 +263,7 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         this.storageType = storageType;
         return this;
     }
+
     @Override
     protected void prepareData() throws UfileClientException {
         try {
