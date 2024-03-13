@@ -292,6 +292,7 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
             long end = Math.min(rangeEnd, (start + UfileConstants.MULTIPART_SIZE));
             GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                     .baseUrl(host)
+                    .header(headers)
                     .addHeader("Range", String.format("bytes=%d-%d", start, end));
             builder.setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut);
             callList.add(new DownloadCallable(builder.build(httpClient.getOkHttpClient()), i));

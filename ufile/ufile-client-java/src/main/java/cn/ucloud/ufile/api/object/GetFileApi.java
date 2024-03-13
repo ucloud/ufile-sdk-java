@@ -144,6 +144,7 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         call = new GetRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(host)
+                .header(headers)
                 .addHeader("Range", String.format("bytes=%d-%s", rangeStart, rangeEnd == 0 ? "" : rangeEnd))
                 .build(httpClient.getOkHttpClient());
     }

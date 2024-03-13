@@ -274,6 +274,7 @@ public class PutFileApi extends UfileObjectApi<PutObjectResultBean> {
                 .setBufferSize(bufferSize)
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut).setCallTimeOut(callTimeOut)
                 .baseUrl(url)
+                .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Content-Length", String.valueOf(file.length()))

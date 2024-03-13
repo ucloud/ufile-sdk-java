@@ -96,6 +96,7 @@ public class DeleteObjectApi extends UfileObjectApi<BaseObjectResponseBean> {
         call = new DeleteRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(generateFinalHost(bucketName, keyName))
+                .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)

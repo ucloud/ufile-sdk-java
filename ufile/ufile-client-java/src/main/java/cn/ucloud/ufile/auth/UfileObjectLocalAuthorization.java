@@ -6,6 +6,8 @@ import cn.ucloud.ufile.auth.sign.UfileSigner;
 import cn.ucloud.ufile.util.HttpMethod;
 import cn.ucloud.ufile.util.JLog;
 
+import java.util.Objects;
+
 /**
  * Ufile默认的本地签名生成器
  *
@@ -41,6 +43,10 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
     public String authorization(ObjectOptAuthParam param) throws UfileAuthorizationException, UfileSignatureException {
         if (param == null)
             throw new UfileAuthorizationException("Param can not be null!");
+
+        if (privateKey.isEmpty() || publicKey.isEmpty()){
+            return "";
+        }
 
         HttpMethod method = param.getMethod();
         String bucket = param.getBucket();

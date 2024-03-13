@@ -173,6 +173,7 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
         builder.setBufferSize(bufferSize);
         builder.baseUrl(generateFinalHost(bucketName, keyName_tmp))
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
+                .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
