@@ -220,7 +220,12 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
 
             return parseHttpResponse(response);
         } catch (IOException e) {
-            response.close();
+            // 确保关闭资源
+            if (call != null) {
+                try {
+                    call.cancel();
+                } catch (Exception ignored) {}
+            }
             throw new UfileIOException("Occur IOException while sending http request. " +
                     "The reason may be network timeout, " +
                     "or the file which you want to upload/download is changed or inexistent", e);
