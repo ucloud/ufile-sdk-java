@@ -50,10 +50,15 @@ public class MultiUploadSample {
 
     public static MultiUploadInfo initMultiUpload(File file, String keyName, String bucketName) {
         try {
+            String securityToken = Constants.SECURITY_TOKEN;
             // MimeTypeUtil可能支持的type类型不全，用户可以按需自行填写
             String mimeType = MimeTypeUtil.getMimeType(file);
             return UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .initMultiUpload(keyName, mimeType, bucketName)
+                    /**
+                     * 使用安全令牌
+                     */
+                    .withSecurityToken(securityToken)
                     /**
                      * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
                      */
@@ -81,6 +86,7 @@ public class MultiUploadSample {
 
     public static List<MultiUploadPartState> multiUpload(File file, MultiUploadInfo state) {
         List<MultiUploadPartState> partStates = null;
+        String securityToken = Constants.SECURITY_TOKEN;
         byte[] buffer = new byte[state.getBlkSize()];
         InputStream is = null;
         try {
@@ -100,6 +106,10 @@ public class MultiUploadSample {
                     try {
                         MultiUploadPartState partState = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                                 .multiUploadPart(state, sendData, index)
+                                /**
+                                 * 使用安全令牌
+                                 */
+                                .withSecurityToken(securityToken)
                                 /**
                                  * 指定progress callback的间隔
                                  */
@@ -151,8 +161,13 @@ public class MultiUploadSample {
 
     public static void abortMultiUpload(MultiUploadInfo info) {
         try {
+            String securityToken = Constants.SECURITY_TOKEN;
             BaseObjectResponseBean abortRes = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .abortMultiUpload(info)
+                    /**
+                     * 使用安全令牌
+                     */
+                    .withSecurityToken(securityToken)
                     .execute();
             JLog.D(TAG, "abort->" + abortRes.toString());
         } catch (UfileClientException e) {
@@ -164,6 +179,7 @@ public class MultiUploadSample {
 
     public static MultiUploadResponse finishMultiUpload(MultiUploadInfo state, List<MultiUploadPartState> partStates) {
         try {
+            String securityToken = Constants.SECURITY_TOKEN;
             /**
              * 上传回调策略
              * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode。
@@ -174,6 +190,10 @@ public class MultiUploadSample {
                     .build();
             MultiUploadResponse res = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .finishMultiUpload(state, partStates)
+                    /**
+                     * 使用安全令牌
+                     */
+                    .withSecurityToken(securityToken)
                     /**
                      * 配置上传回调策略
                      */

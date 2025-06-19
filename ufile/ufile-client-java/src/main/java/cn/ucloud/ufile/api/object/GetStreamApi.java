@@ -50,6 +50,11 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
      * 流读取的buffer大小，Default = 256 KB
      */
     private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -88,6 +93,17 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         progressConfig = config == null ? this.progressConfig : config;
         return this;
     }
+    
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link GetStreamApi}
+     */
+    public GetStreamApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     /**
      * 重定向流
@@ -122,12 +138,18 @@ public class GetStreamApi extends UfileObjectApi<DownloadStreamBean> {
         bytesWritten = new AtomicLong(0);
         bytesWrittenCache = new AtomicLong(0);
 
-        call = new GetRequestBuilder()
+        GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(host)
                 .header(headers)
-                .addHeader("Range", String.format("bytes=%d-%s", rangeStart, rangeEnd == 0 ? "" : rangeEnd))
-                .build(httpClient.getOkHttpClient());
+                .addHeader("Range", String.format("bytes=%d-%s", rangeStart, rangeEnd == 0 ? "" : rangeEnd));
+                
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+                
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

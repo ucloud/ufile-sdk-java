@@ -76,10 +76,12 @@ public class ObjectListWithDirFormatSample {
             String nextMarker = "";
             List<CommonPrefix> directories = new ArrayList<>();
             String prefix = "";
+            String securityToken = Constants.SECURITY_TOKEN;
             do {
                 ObjectListWithDirFormatBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                         .objectListWithDirFormat(bucketName)
                         .withMarker(nextMarker)
+                        .withSecurityToken(securityToken)
                         .dataLimit(100)
                         .withPrefix(prefix)
                         /**

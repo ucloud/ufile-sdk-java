@@ -41,10 +41,14 @@ public class DownloadFileSample {
             JLog.D(TAG, String.format("[res] = %s", (profile == null ? "null" : profile.toString())));
             if (profile == null)
                 return;
-
+            String securityToken = Constants.SECURITY_TOKEN;
             DownloadFileBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .downloadFile(profile)
                     .saveAt(localDir, saveName)
+                    /**
+                     * 使用安全令牌
+                     */
+              .withSecurityToken(securityToken)
                     /**
                      * 选择要下载的对象的范围，Default = [0, whole size]
                      */
@@ -93,9 +97,14 @@ public class DownloadFileSample {
                         if (profile == null)
                             return;
 
+                        String securityToken = Constants.SECURITY_TOKEN;
                         UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                                 .downloadFile(profile)
                                 .saveAt(localDir, saveName)
+                                /**
+                                 * 使用安全令牌
+                                 */
+                                .withSecurityToken(securityToken)
                                 /**
                                  * 选择要下载的对象的范围，Default = (0, whole size)
                                  */

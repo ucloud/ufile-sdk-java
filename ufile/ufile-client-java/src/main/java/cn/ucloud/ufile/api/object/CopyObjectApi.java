@@ -58,6 +58,11 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
      * 用户自定义元数据设置方式
      */
     protected String metadataDirective;
+    
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -93,6 +98,17 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
     public CopyObjectApi copyTo(String dstBucketName, String dstKeyName) {
         this.dstBucketName = dstBucketName;
         this.dstKeyName = dstKeyName;
+        return this;
+    }
+    
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link CopyObjectApi}
+     */
+    public CopyObjectApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
         return this;
     }
 
@@ -195,6 +211,11 @@ public class CopyObjectApi extends UfileObjectApi<CopyObjectResultBean> {
                     builder.addHeader(new StringBuilder("X-Ufile-Meta-").append(key).toString(), value == null ? "" : value);
                 }
             }
+        }
+        
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
         }
 
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT,

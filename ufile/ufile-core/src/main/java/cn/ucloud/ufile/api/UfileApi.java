@@ -69,6 +69,11 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      */
     protected JsonElement authOptionalData;
 
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    protected String securityToken;
+
     protected OkHttpClient okHttpClient;
 
     /**
@@ -118,6 +123,25 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      */
     public  Map<String, String> GetHttpHeaders() {
         return this.headers;
+    }
+
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     */
+    public UfileApi<T> withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
+
+    /**
+     * 获取安全令牌（STS临时凭证）
+     *
+     * @return 安全令牌
+     */
+    public String getSecurityToken() {
+        return this.securityToken;
     }
 
     /**

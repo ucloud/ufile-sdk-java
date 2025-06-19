@@ -17,6 +17,7 @@ import cn.ucloud.ufile.http.HttpClient;
 public class UfileClient {
     private static volatile UfileClient mInstance;
     private HttpClient httpClient;
+    private String securityToken;
 
     private Config config;
 
@@ -60,6 +61,21 @@ public class UfileClient {
         return httpClient;
     }
 
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return UfileClient实例{@link UfileClient}
+     */
+    public synchronized static UfileClient withSecurityToken(String securityToken) {
+        UfileClient client = createClient();
+        client.securityToken = securityToken;
+        return client;
+    }
+
+    /**
+     * 配置类，为静态内部类，可以在外部类构造函数中引用
+     */
     public static class Config {
         private HttpClient.Config httpClientConfig;
 
@@ -108,7 +124,9 @@ public class UfileClient {
      * @return Bucket相关API构造器 {@link BucketApiBuilder}
      */
     public synchronized static BucketApiBuilder bucket(BucketAuthorizer authorizer) {
-        return new BucketApiBuilder(createClient(), authorizer);
+        UfileClient client = createClient();
+        BucketApiBuilder builder = new BucketApiBuilder(client, authorizer);
+        return builder;
     }
 
     /**
@@ -119,6 +137,14 @@ public class UfileClient {
      * @return Object相关API构造器 {@link ObjectApiBuilder}
      */
     public synchronized static ObjectApiBuilder object(ObjectAuthorizer authorizer, ObjectConfig config) {
-        return new ObjectApiBuilder(createClient(), authorizer, config);
+        UfileClient client = createClient();
+        ObjectApiBuilder builder = new ObjectApiBuilder(client, authorizer, config);
+        
+        
+        if (client.securityToken != null && !client.securityToken.isEmpty()) {
+            builder.withSecurityToken(client.securityToken);
+        }
+        
+        return builder;
     }
 }

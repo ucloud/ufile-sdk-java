@@ -154,12 +154,18 @@ public class GetObjectSample {
             OutputStream os = null;
             os = new FileOutputStream(new File(localDir, saveName));
 
+            String securityToken = Constants.SECURITY_TOKEN;
             DownloadStreamBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .getStream(url)
                     /**
                      * 选择要下载的对象的范围，Default = [0, whole size]
                      */
 //                  .withinRange(0, 0)
+                    /**
+                     * 使用安全令牌
+                     */
+                    .withSecurityToken(securityToken)
+
                     /**
                      * 重定向流
                      *

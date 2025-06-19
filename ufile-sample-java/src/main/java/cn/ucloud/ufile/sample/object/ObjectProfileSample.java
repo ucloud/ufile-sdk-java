@@ -30,14 +30,14 @@ public class ObjectProfileSample {
         String keyName = "";
         String bucketName = "";
 
-//        execute(keyName, bucketName);
+        execute(keyName, bucketName);
         List<Info> infos = new ArrayList<>();
         infos.add(new Info(bucketName).setKeyName(""));
         infos.add(new Info(bucketName).setKeyName(""));
         infos.add(new Info(bucketName).setKeyName(""));
         infos.add(new Info(bucketName).setKeyName(""));
         infos.add(new Info(bucketName).setKeyName(""));
-        batch(infos);
+//        batch(infos);
     }
 
     private static class Info {
@@ -121,9 +121,11 @@ public class ObjectProfileSample {
     }
 
     public static void execute(String keyName, String bucketName) {
+        String securityToken = Constants.SECURITY_TOKEN;
         try {
             ObjectProfile objectProfile = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .objectProfile(keyName, bucketName)
+                    .withSecurityToken(securityToken)
                     .execute();
             JLog.D(TAG, String.format("[res]: %s", (objectProfile == null ? "null" : objectProfile.toString())));
             Map<String, String> headers = objectProfile.getHeaders();

@@ -132,7 +132,12 @@
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>${plugin.maven.gpg.version}</version>
                 <configuration>
-                    <skip>false</skip>
+                    <gpgArguments>
+                        <arg>--batch</arg>
+                        <arg>--yes</arg>
+                        <arg>--passphrase</arg>
+                        <arg>${gpg.passphrase}</arg>
+                    </gpgArguments>
                 </configuration>
                 <executions>
                     <execution>

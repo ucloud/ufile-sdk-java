@@ -4,6 +4,7 @@ import cn.ucloud.ufile.UfileConstants;
 import cn.ucloud.ufile.api.object.policy.PutPolicy;
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.bean.PutObjectResultBean;
 import cn.ucloud.ufile.bean.UfileErrorBean;
 import cn.ucloud.ufile.exception.*;
@@ -98,6 +99,10 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
      */
     protected String iopCmd;
 
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -264,6 +269,17 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
         return this;
     }
 
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link PutStreamApi}
+     */
+    public PutStreamApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
+
     @Override
     protected void prepareData() throws UfileClientException {
         try {
@@ -289,6 +305,11 @@ public class PutStreamApi extends UfileObjectApi<PutObjectResultBean> {
 
             if (storageType != null)
                 builder.addHeader("X-Ufile-Storage-Class", storageType);
+
+
+            if (securityToken != null && !securityToken.isEmpty()) {
+                builder.addHeader("SecurityToken", securityToken);
+            }
 
             if (metadatas != null && !metadatas.isEmpty()) {
                 Set<String> keys = metadatas.keySet();

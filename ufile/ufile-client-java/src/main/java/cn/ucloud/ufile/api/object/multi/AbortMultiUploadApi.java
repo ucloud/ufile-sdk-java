@@ -31,6 +31,11 @@ public class AbortMultiUploadApi extends UfileObjectApi<BaseObjectResponseBean> 
      * 分片上传初始化状态
      */
     private MultiUploadInfo info;
+    
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -51,6 +56,17 @@ public class AbortMultiUploadApi extends UfileObjectApi<BaseObjectResponseBean> 
      */
     public AbortMultiUploadApi which(MultiUploadInfo info) {
         this.info = info;
+        return this;
+    }
+
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link AbortMultiUploadApi}
+     */
+    public AbortMultiUploadApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
         return this;
     }
 
@@ -80,12 +96,18 @@ public class AbortMultiUploadApi extends UfileObjectApi<BaseObjectResponseBean> 
         List<Parameter<String>> query = new ArrayList<>();
         query.add(new Parameter<>("uploadId", info.getUploadId()));
 
-        call = builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
+        builder.baseUrl(builder.generateGetUrl(generateFinalHost(info.getBucket(), info.getKeyName()), query))
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
-                .addHeader("authorization", authorization)
-                .build(httpClient.getOkHttpClient());
+                .addHeader("authorization", authorization);
+                
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

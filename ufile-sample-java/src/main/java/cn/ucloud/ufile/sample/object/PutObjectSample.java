@@ -29,7 +29,7 @@ public class PutObjectSample {
     private static final String TAG = "PutObjectSample";
     private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws FileNotFoundException, UfileClientException {
         InputStream is = new ByteArrayInputStream(new byte[]{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
         // 如果上传File，则文件的MimeType可以使用MimeTypeUtil.getMimeType(File)来获取，MimeTypeUtil可能支持的type类型不全，用户可以按需自行填写
         File file = new File("");
@@ -47,6 +47,7 @@ public class PutObjectSample {
              * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
              * 可以通过putObject.setCallTimeOut(MillSeconds)设置请求超时时间
              */
+            String securityToken = Constants.SECURITY_TOKEN;
             PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
                     .addCallbackBody(new PolicyParam("key", "value"))
                     .build();
@@ -54,6 +55,10 @@ public class PutObjectSample {
                     .putObject(file, mimeType)
                     .nameAs(nameAs)
                     .toBucket(toBucket)
+                    /**
+                     * 使用安全令牌
+                     */
+                    .withSecurityToken(securityToken)
                     /**
                      * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
                      */
@@ -114,6 +119,7 @@ public class PutObjectSample {
          * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
          * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
          */
+        String securityToken = Constants.SECURITY_TOKEN;
         PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
                 .addCallbackBody(new PolicyParam("key", "value"))
                 .build();
@@ -121,6 +127,10 @@ public class PutObjectSample {
                 .putObject(file, mimeType)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
+                /**
+                 * 使用安全令牌
+                 */
+                    .withSecurityToken(securityToken)
                 /**
                  * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
                  */
@@ -177,13 +187,14 @@ public class PutObjectSample {
                 });
     }
 
-    public static void putStream(InputStream stream, long contentLength, String mimeType, String nameAs, String toBucket) {
+    public static void putStream(InputStream stream, long contentLength, String mimeType, String nameAs, String toBucket) throws UfileClientException {
         try {
             /**
              * 上传回调策略
              * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
              * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
              */
+            String securityToken = Constants.SECURITY_TOKEN;
             PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
                     .addCallbackBody(new PolicyParam("key", "value"))
                     .build();
@@ -191,6 +202,12 @@ public class PutObjectSample {
                     .putObject(stream, contentLength, mimeType)
                     .nameAs(nameAs)
                     .toBucket(toBucket)
+
+                    /**
+                     * 使用安全令牌
+                     */
+                    .withSecurityToken(securityToken)
+
                     /**
                      * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
                      */
@@ -251,6 +268,7 @@ public class PutObjectSample {
          * 必须填写回调接口url(目前仅支持http，不支持https)，可选填回调参数，回调参数请自行决定是否需要urlencode
          * 若配置上传回调，则上传接口的回调将会透传回调接口的response，包括httpCode
          */
+        String securityToken = Constants.SECURITY_TOKEN;
         PutPolicy putPolicy = new PutPolicyForCallback.Builder("http://xxx.xxx.xxx.xxx[:port][/path]")
                 .addCallbackBody(new PolicyParam("key", "value"))
                 .build();
@@ -258,6 +276,10 @@ public class PutObjectSample {
                 .putObject(stream, contentLength, mimeType)
                 .nameAs(nameAs)
                 .toBucket(toBucket)
+                /**
+                 * 使用安全令牌
+                 */
+                .withSecurityToken(securityToken)
                 /**
                  * 配置文件存储类型，分别是标准、低频、冷存，对应有效值：STANDARD | IA | ARCHIVE
                  */

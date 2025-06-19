@@ -30,8 +30,10 @@ public class DeleteObjectSample {
 
     public static void execute(String keyName, String bucketName) {
         try {
+            String securityToken = Constants.SECURITY_TOKEN;
             BaseObjectResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .deleteObject(keyName, bucketName)
+                    .withSecurityToken(securityToken)
                     .execute();
             JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
         } catch (UfileClientException e) {

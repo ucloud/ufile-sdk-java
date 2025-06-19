@@ -42,6 +42,11 @@ public class HttpClient {
          */
         public static final int DEFAULT_MAX_IDLE_CONNECTIONS = 5;
         /**
+         * 默认okhttp总连接数
+         */
+//        public static final int DEFAULT_MAX_TOTAL_CONNECTIONS = 1;  // 设置最大总连接数
+
+        /**
          * 默认okhttp活动链接存货时间（5分钟）
          */
         public static final long DEFAULT_KEEP_ALIVE_DURATION_MINUTES = 5;
@@ -201,6 +206,13 @@ public class HttpClient {
                 .readTimeout(config.timeoutRead, TimeUnit.MILLISECONDS)
                 .connectionPool(new ConnectionPool(config.maxIdleConnections, config.keepAliveDuration,
                         config.keepAliveTimeUnit));
+
+//        Dispatcher dispatcher = new Dispatcher();
+//        dispatcher.setMaxRequests(Config.DEFAULT_MAX_TOTAL_CONNECTIONS);
+//        builder.dispatcher(dispatcher);
+
+
+
 
         if (config.interceptors != null) {
             for (Interceptor interceptor : config.interceptors) {

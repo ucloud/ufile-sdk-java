@@ -15,6 +15,7 @@ import cn.ucloud.ufile.util.Etag;
 
 import java.io.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Object相关API构造器
@@ -27,6 +28,8 @@ public class ObjectApiBuilder {
     protected UfileClient client;
     protected ObjectAuthorizer authorizer;
     protected ObjectConfig objectConfig;
+    protected Map<String, String> headers;
+    protected String securityToken;
 
     public ObjectApiBuilder(UfileClient client, ObjectAuthorizer authorizer, ObjectConfig objectConfig) {
         this.client = client;
@@ -34,6 +37,30 @@ public class ObjectApiBuilder {
         if (authorizer instanceof ObjectRemoteAuthorization)
             ((ObjectRemoteAuthorization) authorizer).setHttpClient(client.getHttpClient());
         this.objectConfig = objectConfig;
+    }
+
+    /**
+     * 设置 HTTP 头
+     *
+     * @param headers HTTP 头
+     * @return {@link ObjectApiBuilder}
+     */
+    public ObjectApiBuilder withHeaders(Map<String, String> headers) {
+        if (headers != null && !headers.isEmpty()) {
+            this.headers = headers;
+        }
+        return this;
+    }
+
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link ObjectApiBuilder}
+     */
+    public ObjectApiBuilder withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
     }
 
     /**
@@ -71,7 +98,19 @@ public class ObjectApiBuilder {
      * @return {@link GetFileApi}
      */
     public GetFileApi getFile(String downloadUrl) {
-        return new GetFileApi(authorizer, new ObjectConfig(downloadUrl), client.getHttpClient());
+        GetFileApi getFileApi = new GetFileApi(authorizer, new ObjectConfig(downloadUrl), client.getHttpClient());
+        
+        // 将 headers 传递给 GetFileApi
+        if (headers != null && !headers.isEmpty()) {
+            getFileApi.SetHttpHeaders(headers);
+        }
+        
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            getFileApi.withSecurityToken(securityToken);
+        }
+        
+        return getFileApi;
     }
 
     /**
@@ -82,7 +121,19 @@ public class ObjectApiBuilder {
      * @return {@link GetStreamApi}
      */
     public GetStreamApi getStream(String downloadUrl) {
-        return new GetStreamApi(authorizer, new ObjectConfig(downloadUrl), client.getHttpClient());
+        GetStreamApi getStreamApi = new GetStreamApi(authorizer, new ObjectConfig(downloadUrl), client.getHttpClient());
+        
+        // 将 headers 传递给 GetStreamApi
+        if (headers != null && !headers.isEmpty()) {
+            getStreamApi.SetHttpHeaders(headers);
+        }
+        
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            getStreamApi.withSecurityToken(securityToken);
+        }
+        
+        return getStreamApi;
     }
 
     /**
@@ -93,8 +144,20 @@ public class ObjectApiBuilder {
      * @return {@link PutFileApi}
      */
     public PutFileApi putObject(File file, String mimeType) {
-        return new PutFileApi(authorizer, objectConfig, client.getHttpClient())
+        PutFileApi putFileApi = new PutFileApi(authorizer, objectConfig, client.getHttpClient())
                 .from(file, mimeType);
+        
+        // 将 headers 传递给 PutFileApi
+        if (headers != null && !headers.isEmpty()) {
+            putFileApi.SetHttpHeaders(headers);
+        }
+        
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            putFileApi.withSecurityToken(securityToken);
+        }
+        
+        return putFileApi;
     }
 
     /**
@@ -106,8 +169,20 @@ public class ObjectApiBuilder {
      * @return {@link PutStreamApi}
      */
     public PutStreamApi putObject(InputStream inputStream, long contentLength, String mimeType) {
-        return new PutStreamApi(authorizer, objectConfig, client.getHttpClient())
+        PutStreamApi putStreamApi = new PutStreamApi(authorizer, objectConfig, client.getHttpClient())
                 .from(inputStream, contentLength, mimeType);
+        
+        // 将 headers 传递给 PutStreamApi
+        if (headers != null && !headers.isEmpty()) {
+            putStreamApi.SetHttpHeaders(headers);
+        }
+        
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            putStreamApi.withSecurityToken(securityToken);
+        }
+        
+        return putStreamApi;
     }
 
     /**
@@ -118,8 +193,15 @@ public class ObjectApiBuilder {
      * @return
      */
     public AppendObjectApi appendObject(byte[] appendData, String mimeType) {
-        return new AppendObjectApi(authorizer, objectConfig, client.getHttpClient())
+        AppendObjectApi appendObjectApi = new AppendObjectApi(authorizer, objectConfig, client.getHttpClient())
                 .from(appendData, mimeType);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            appendObjectApi.withSecurityToken(securityToken);
+        }
+        
+        return appendObjectApi;
     }
 
     /**
@@ -130,9 +212,16 @@ public class ObjectApiBuilder {
      * @return {@link DeleteObjectApi}
      */
     public DeleteObjectApi deleteObject(String keyName, String bucketName) {
-        return new DeleteObjectApi(authorizer, objectConfig, client.getHttpClient())
+        DeleteObjectApi deleteObjectApi = new DeleteObjectApi(authorizer, objectConfig, client.getHttpClient())
                 .keyName(keyName)
                 .atBucket(bucketName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            deleteObjectApi.withSecurityToken(securityToken);
+        }
+        
+        return deleteObjectApi;
     }
 
     /**
@@ -143,9 +232,16 @@ public class ObjectApiBuilder {
      * @return {@link ObjectProfileApi}
      */
     public ObjectProfileApi objectProfile(String keyName, String bucketName) {
-        return new ObjectProfileApi(authorizer, objectConfig, client.getHttpClient())
+        ObjectProfileApi objectProfileApi = new ObjectProfileApi(authorizer, objectConfig, client.getHttpClient())
                 .which(keyName)
                 .atBucket(bucketName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            objectProfileApi.withSecurityToken(securityToken);
+        }
+        
+        return objectProfileApi;
     }
 
 
@@ -156,8 +252,15 @@ public class ObjectApiBuilder {
      * @return {@link ObjectListApi}
      */
     public MultiUploadListPartsInfoApi multiUploadListPartsInfo(String uploadId, String bucketName) {
-        return new MultiUploadListPartsInfoApi(authorizer, objectConfig, client.getHttpClient()).setUploadId(uploadId)
+        MultiUploadListPartsInfoApi api = new MultiUploadListPartsInfoApi(authorizer, objectConfig, client.getHttpClient()).setUploadId(uploadId)
                 .atBucket(bucketName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
@@ -167,8 +270,15 @@ public class ObjectApiBuilder {
      * @return {@link ObjectListApi}
      */
     public ObjectListApi objectList(String bucketName) {
-        return new ObjectListApi(authorizer, objectConfig, client.getHttpClient())
+        ObjectListApi api = new ObjectListApi(authorizer, objectConfig, client.getHttpClient())
                 .atBucket(bucketName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
@@ -178,44 +288,64 @@ public class ObjectApiBuilder {
      * @return {@link ObjectListWithDirFormatApi}
      */
     public ObjectListWithDirFormatApi objectListWithDirFormat(String bucketName) {
-        return new ObjectListWithDirFormatApi(authorizer, objectConfig, client.getHttpClient())
+        ObjectListWithDirFormatApi api = new ObjectListWithDirFormatApi(authorizer, objectConfig, client.getHttpClient())
                 .atBucket(bucketName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 分片上传-初始化
+     * 初始化分片上传
      *
      * @param keyName    目标对象名
      * @param mimeType   mime类型
      * @param bucketName 空间名
      * @return {@link InitMultiUploadApi}
-     * @apiNote 分片上传必须首先执行本API，后续上传API均需要本API的返回{@link MultiUploadInfo}
      */
     public InitMultiUploadApi initMultiUpload(String keyName, String mimeType, String bucketName) {
-        return new InitMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
+        InitMultiUploadApi api = new InitMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
                 .nameAs(keyName)
                 .withMimeType(mimeType)
                 .toBucket(bucketName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 分片上传-上传分片
+     * 上传分片
      *
-     * @param state     initMultiUpload 返回的response
+     * @param state     分片上传状态
      * @param part      分片数据
      * @param partIndex 分片序号
      * @return {@link MultiUploadPartApi}
      */
     public MultiUploadPartApi multiUploadPart(MultiUploadInfo state, byte[] part, int partIndex) {
-        return new MultiUploadPartApi(authorizer, objectConfig, client.getHttpClient())
+        MultiUploadPartApi api = new MultiUploadPartApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state)
                 .from(part, partIndex);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 分片上传-上传分片
+     * 上传分片
      *
-     * @param state     initMultiUpload 返回的response
+     * @param state     分片上传状态
      * @param part      分片数据
      * @param offset    分片数据偏移量
      * @param length    分片数据长度
@@ -223,100 +353,153 @@ public class ObjectApiBuilder {
      * @return {@link MultiUploadPartApi}
      */
     public MultiUploadPartApi multiUploadPart(MultiUploadInfo state, byte[] part, int offset, int length, int partIndex) {
-        return new MultiUploadPartApi(authorizer, objectConfig, client.getHttpClient())
+        MultiUploadPartApi api = new MultiUploadPartApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state)
                 .from(part, offset, length, partIndex);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 分片上传-上传拷贝
+     * 拷贝分片
      *
-     * @param state            initMultiUpload 返回的response
-     * @param partIndex        分片序号(从0开始)
-     * @param sourceBucketName 文件源BucketName
-     * @param sourceObjectName 文件源ObjectName
-     * @param rangeStart       Range开始的Index
-     * @param rangeEnd         Range结束的Index
-     * @return {@link MultiUploadPartApi}
+     * @param state           分片上传状态
+     * @param partIndex       分片序号
+     * @param sourceBucketName 源bucket名称
+     * @param sourceObjectName 源object名称
+     * @param rangeStart      源object起始位置
+     * @param rangeEnd        源object结束位置
+     * @return {@link UploadCopyPartApi}
      */
     public UploadCopyPartApi multiUploadCopyPart(MultiUploadInfo state, int partIndex, String sourceBucketName, String sourceObjectName, long rangeStart, long rangeEnd) {
-        return new UploadCopyPartApi(authorizer, objectConfig, client.getHttpClient())
+        UploadCopyPartApi api = new UploadCopyPartApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state)
                 .from(partIndex, sourceBucketName, sourceObjectName, rangeStart, rangeEnd);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 分片上传-中断上传
+     * 终止分片上传
      *
-     * @param state initMultiUpload 返回的response
+     * @param state 分片上传状态
      * @return {@link AbortMultiUploadApi}
-     * @apiNote 分片上传初始化成功后，若上传分片时，任一分片上传失败，须调用本API进行中断处理
      */
     public AbortMultiUploadApi abortMultiUpload(MultiUploadInfo state) {
-        return new AbortMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
+        AbortMultiUploadApi api = new AbortMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 分片上传-上传完成
+     * 完成分片上传
      *
-     * @param state      initMultiUpload 返回的response
-     * @param partStates 所有分片调用multiUploadPart 返回的response 集合，{@link MultiUploadPartState}
+     * @param state      分片上传状态
+     * @param partStates 分片上传结果集合
      * @return {@link FinishMultiUploadApi}
-     * @apiNote 分片上传初始化成功后，若上传分片时，任一分片上传失败，须调用本API进行中断处理
      */
     public FinishMultiUploadApi finishMultiUpload(MultiUploadInfo state, List<MultiUploadPartState> partStates) {
-        return new FinishMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
+        FinishMultiUploadApi api = new FinishMultiUploadApi(authorizer, objectConfig, client.getHttpClient())
                 .which(state, partStates);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 下载文件
+     * 文件下载
      *
-     * @param profile 执行objectProfile 返回的response，包含了Ufile云上指定的文件信息，{@link ObjectProfile}
+     * @param profile 云端对象信息
      * @return {@link DownloadFileApi}
      */
     public DownloadFileApi downloadFile(ObjectProfile profile) {
-        return new DownloadFileApi(authorizer, objectConfig, client.getHttpClient()).which(profile);
+        DownloadFileApi api = new DownloadFileApi(authorizer, objectConfig, client.getHttpClient())
+                .which(profile);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 归档存储的文件
-     * 先进行 Restore 的解冻，才能进行下载
+     * 解冻归档类型的云端对象
      *
-     * @param keyName    云端文件名
+     * @param keyName    目标对象名
      * @param bucketName 空间名
      * @return {@link ObjectRestoreApi}
      */
     public ObjectRestoreApi objectRestore(String keyName, String bucketName) {
-        return new ObjectRestoreApi(authorizer, objectConfig, client.getHttpClient())
+        ObjectRestoreApi api = new ObjectRestoreApi(authorizer, objectConfig, client.getHttpClient())
                 .which(keyName)
                 .atBucket(bucketName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
-
     /**
-     * 复制云端对象文件
+     * 拷贝文件
      *
-     * @param srcBucket  源bucket
-     * @param srcKeyName 源文件名
+     * @param srcBucket  源bucket名称
+     * @param srcKeyName 源key名称
      * @return {@link CopyObjectApi}
      */
     public CopyObjectApi copyObject(String srcBucket, String srcKeyName) {
-        return new CopyObjectApi(authorizer, objectConfig, client.getHttpClient())
+        CopyObjectApi api = new CopyObjectApi(authorizer, objectConfig, client.getHttpClient())
                 .from(srcBucket, srcKeyName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
-     * 换存云端对象文件的转储类型
+     * 修改对象存储类型
      *
-     * @param bucketName 需要转换的对象所在bucket
-     * @param keyName    需要转换的对象所在bucket
+     * @param bucketName 空间名
+     * @param keyName    目标对象名
      * @return {@link StorageTypeSwitchApi}
      */
     public StorageTypeSwitchApi switchStorageType(String bucketName, String keyName) {
-        return new StorageTypeSwitchApi(authorizer, objectConfig, client.getHttpClient())
+        StorageTypeSwitchApi api = new StorageTypeSwitchApi(authorizer, objectConfig, client.getHttpClient())
                 .which(bucketName, keyName);
+                
+        
+        if (securityToken != null && !securityToken.isEmpty()) {
+            api.withSecurityToken(securityToken);
+        }
+        
+        return api;
     }
 
     /**
