@@ -44,6 +44,13 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
      * 是否覆盖本地已有文件，Default = true
      */
     private boolean isCover = true;
+    
+    /**
+     * Optional
+     * STS 临时授权 SecurityToken
+     */
+    private String securityToken;
+    
     private ProgressConfig progressConfig;
     private AtomicLong bytesWritten;
     private AtomicLong bytesWrittenCache;
@@ -124,6 +131,17 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         progressConfig = config == null ? this.progressConfig : config;
         return this;
     }
+    
+    /**
+     * 使用STS密钥签名
+     *
+     * @param securityToken STS token
+     * @return {@link GetFileApi}
+     */
+    public GetFileApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     /**
      * 设置流读写的Buffer大小，默认 256 KB
@@ -141,12 +159,18 @@ public class GetFileApi extends UfileObjectApi<DownloadFileBean> {
         parameterValidat();
         bytesWritten = new AtomicLong(0);
         bytesWrittenCache = new AtomicLong(0);
-        call = new GetRequestBuilder()
+        GetRequestBuilder builder = (GetRequestBuilder) new GetRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(host)
                 .header(headers)
-                .addHeader("Range", String.format("bytes=%d-%s", rangeStart, rangeEnd == 0 ? "" : rangeEnd))
-                .build(httpClient.getOkHttpClient());
+                .addHeader("Range", String.format("bytes=%d-%s", rangeStart, rangeEnd == 0 ? "" : rangeEnd));
+        
+        // Add security token if provided
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+        
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

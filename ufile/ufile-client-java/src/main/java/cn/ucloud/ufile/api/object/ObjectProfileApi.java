@@ -37,6 +37,12 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
      * Bucket空间名称
      */
     private String bucketName;
+    
+    /**
+     * Optional
+     * STS 临时授权 SecurityToken
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -81,6 +87,17 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
         this.authOptionalData = authOptionalData;
         return this;
     }
+    
+    /**
+     * 使用STS密钥签名
+     *
+     * @param securityToken STS token
+     * @return {@link ObjectProfileApi}
+     */
+    public ObjectProfileApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     @Override
     protected void prepareData() throws UfileClientException {
@@ -91,15 +108,21 @@ public class ObjectProfileApi extends UfileObjectApi<ObjectProfile> {
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.HEAD, bucketName, keyName,
                 contentType, "", date).setOptional(authOptionalData));
 
-        call = new HeadRequestBuilder()
+        HeadRequestBuilder builder = (HeadRequestBuilder) new HeadRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(generateFinalHost(bucketName, keyName))
                 .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
-                .addHeader("authorization", authorization)
-                .build(httpClient.getOkHttpClient());
+                .addHeader("authorization", authorization);
+                
+        // Add security token if provided
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+        
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

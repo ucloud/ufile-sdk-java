@@ -33,10 +33,12 @@ public class SwitchStorageTypeSample {
     }
 
     public static void switchStorageType(String bucketName, String keyName, String storageType) {
+        String securityToken = Constants.SECURITY_TOKEN;
         try {
             BaseObjectResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .switchStorageType(bucketName, keyName)
                     .turnTypeTo(storageType)
+                    .withSecurityToken(securityToken)
                     .execute();
             JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
         } catch (UfileClientException e) {

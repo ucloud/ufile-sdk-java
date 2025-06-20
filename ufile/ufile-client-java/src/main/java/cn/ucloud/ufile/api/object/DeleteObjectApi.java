@@ -38,6 +38,11 @@ public class DeleteObjectApi extends UfileObjectApi<BaseObjectResponseBean> {
      * Bucket空间名称
      */
     private String bucketName;
+    
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -72,6 +77,17 @@ public class DeleteObjectApi extends UfileObjectApi<BaseObjectResponseBean> {
         this.bucketName = bucketName;
         return this;
     }
+    
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link DeleteObjectApi}
+     */
+    public DeleteObjectApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     /**
      * 配置签名可选参数
@@ -93,15 +109,22 @@ public class DeleteObjectApi extends UfileObjectApi<BaseObjectResponseBean> {
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.DELETE, bucketName, keyName,
                 contentType, "", date).setOptional(authOptionalData));
 
-        call = new DeleteRequestBuilder()
+        // 创建构建器
+        DeleteRequestBuilder builder = (DeleteRequestBuilder) new DeleteRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(generateFinalHost(bucketName, keyName))
                 .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
-                .addHeader("authorization", authorization)
-                .build(httpClient.getOkHttpClient());
+                .addHeader("authorization", authorization);
+                
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+        
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

@@ -81,6 +81,12 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
      * 是否覆盖本地已有文件，Default = true
      */
     private boolean isCover = true;
+    
+    /**
+     * Optional
+     * STS 临时授权 SecurityToken
+     */
+    private String securityToken;
 
     /**
      * 下载文件的总大小
@@ -208,6 +214,17 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
         this.authOptionalData = authOptionalData;
         return this;
     }
+    
+    /**
+     * 使用STS密钥签名
+     *
+     * @param securityToken STS token
+     * @return {@link DownloadFileApi}
+     */
+    public DownloadFileApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     /**
      * 设置流读写的Buffer大小，默认 256 KB
@@ -294,6 +311,12 @@ public class DownloadFileApi extends UfileObjectApi<DownloadFileBean> {
                     .baseUrl(host)
                     .header(headers)
                     .addHeader("Range", String.format("bytes=%d-%d", start, end));
+            
+            // Add security token if provided
+            if (securityToken != null && !securityToken.isEmpty()) {
+                builder.addHeader("SecurityToken", securityToken);
+            }
+            
             builder.setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut);
             callList.add(new DownloadCallable(builder.build(httpClient.getOkHttpClient()), i));
         }

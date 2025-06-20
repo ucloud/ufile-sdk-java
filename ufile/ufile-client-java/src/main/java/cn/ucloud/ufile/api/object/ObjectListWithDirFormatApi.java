@@ -57,6 +57,12 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
      * 目录分隔符，默认为'/'，当前只支持是'/'
      */
     private String delimiter;
+    
+    /**
+     * Optional
+     * STS 临时授权 SecurityToken
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -123,6 +129,17 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
         this.delimiter = delimiter;
         return this;
     }
+    
+    /**
+     * 使用STS密钥签名
+     *
+     * @param securityToken STS token
+     * @return {@link ObjectListWithDirFormatApi}
+     */
+    public ObjectListWithDirFormatApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     /**
      * 配置签名可选参数
@@ -155,14 +172,20 @@ public class ObjectListWithDirFormatApi extends UfileObjectApi<ObjectListWithDir
                 contentType, "", date).setOptional(authOptionalData));
 
         GetRequestBuilder builder = new GetRequestBuilder();
-        call = builder.baseUrl(generateFinalHost(bucketName, "") + "?listobjects&" + builder.generateUrlQuery(query))
+        builder.baseUrl(generateFinalHost(bucketName, "") + "?listobjects&" + builder.generateUrlQuery(query))
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
-                .addHeader("authorization", authorization)
-                .build(httpClient.getOkHttpClient());
+                .addHeader("authorization", authorization);
+                
+        // Add security token if provided
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+        
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

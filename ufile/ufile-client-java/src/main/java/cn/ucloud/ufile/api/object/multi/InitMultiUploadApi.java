@@ -62,6 +62,11 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
     protected String storageType;
 
     /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
+
+    /**
      * 构造方法
      *
      * @param authorizer   Object授权器
@@ -154,6 +159,17 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
     }
 
     /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link InitMultiUploadApi}
+     */
+    public InitMultiUploadApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
+
+    /**
      * 配置签名可选参数
      *
      * @param authOptionalData 签名可选参数
@@ -182,6 +198,11 @@ public class InitMultiUploadApi extends UfileObjectApi<MultiUploadInfo> {
 
         if (storageType != null)
             builder.addHeader("X-Ufile-Storage-Class", storageType);
+            
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
 
         if (metadatas != null && !metadatas.isEmpty()) {
             Set<String> keys = metadatas.keySet();

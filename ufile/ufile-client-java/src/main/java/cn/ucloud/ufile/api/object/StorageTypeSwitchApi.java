@@ -44,6 +44,10 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseObjectResponseBean>
      * 要修改的存储类型 {@link StorageType}
      */
     protected String storageType;
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -54,6 +58,17 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseObjectResponseBean>
      */
     protected StorageTypeSwitchApi(ObjectAuthorizer authorizer, ObjectConfig objectConfig, HttpClient httpClient) {
         super(authorizer, objectConfig, httpClient);
+    }
+
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link PutStreamApi}
+     */
+    public StorageTypeSwitchApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
     }
 
     /**
@@ -109,11 +124,15 @@ public class StorageTypeSwitchApi extends UfileObjectApi<BaseObjectResponseBean>
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date);
 
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT,
                 bucketName, keyName, contentType, "", date).setOptional(authOptionalData));
 
-
-        builder.header(headers).addHeader("authorization", authorization);
+        builder.addHeader("authorization", authorization);
 
         call = builder.build(httpClient.getOkHttpClient());
     }

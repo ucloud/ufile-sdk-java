@@ -62,6 +62,11 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
     protected String metadataDirective;
 
     /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
+
+    /**
      * 构造方法
      *
      * @param authorizer   Object授权器
@@ -93,6 +98,17 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
      */
     public FinishMultiUploadApi renameAs(String newKeyName) {
         this.newKeyName = newKeyName;
+        return this;
+    }
+
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link FinishMultiUploadApi}
+     */
+    public FinishMultiUploadApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
         return this;
     }
 
@@ -205,8 +221,7 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
                 .addHeader("Content-Length", String.valueOf(bodyBuffer.length()))
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
-                .addHeader("authorization", authorization)
-                .params(bodyBuffer.toString());
+                .addHeader("authorization", authorization);
 
         if (metadataDirective != null)
             builder.addHeader("X-Ufile-Metadata-Directive", metadataDirective);
@@ -223,7 +238,13 @@ public class FinishMultiUploadApi extends UfileObjectApi<MultiUploadResponse> {
                 }
             }
         }
+        
 
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+
+        builder.params(bodyBuffer.toString());
         call = builder.build(httpClient.getOkHttpClient());
     }
 

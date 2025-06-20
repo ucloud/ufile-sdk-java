@@ -26,7 +26,7 @@ public class Constants {
          */
         UfileClient.configure(new UfileClient.Config(
                 new HttpClient.Config(10, 5, TimeUnit.MINUTES)
-                        .setTimeout(10 * 1000, 30 * 1000, 30 * 1000)
+                        .setTimeout(10 * 1000, 30 * 1000, 30 * 1000, 30 * 1000)
                         .setExecutorService(Executors.newSingleThreadExecutor())));
     }
 
@@ -45,6 +45,13 @@ public class Constants {
     public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
             "UcloudPublicKey",
             "UcloudPrivateKey");
+
+
+    /**
+     * STS临时授权的安全令牌
+     * 使用STS临时授权时需要配置此令牌
+     */
+    public static final String SECURITY_TOKEN = "";
 
     /**
      * 远程Object相关API的签名器

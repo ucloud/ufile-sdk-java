@@ -71,6 +71,11 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
      * 进度回调配置
      */
     private ProgressConfig progressConfig;
+    
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -157,6 +162,17 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
     }
 
     /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link MultiUploadPartApi}
+     */
+    public MultiUploadPartApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
+
+    /**
      * 配置签名可选参数
      *
      * @param authOptionalData 签名可选参数
@@ -187,6 +203,11 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
                 .addHeader("Date", date)
                 .mediaType(MediaType.parse(info.getMimeType()));
 
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+
         if (isVerifyMd5) {
             try {
                 contentMD5 = HexFormatter.formatByteArray2HexString(Encoder.md5(buffer), false);
@@ -198,9 +219,11 @@ public class MultiUploadPartApi extends UfileObjectApi<MultiUploadPartState> {
 
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, info.getBucket(), info.getKeyName(),
                 contentType, contentMD5, date).setOptional(authOptionalData));
+
         builder.addHeader("authorization", authorization);
 
-        builder.params(new ByteArrayInputStream(buffer, offset, length));
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(buffer, offset, length);
+        builder.params(inputStream);
         builder.setProgressConfig(progressConfig);
 
         call = builder.build(httpClient.getOkHttpClient());

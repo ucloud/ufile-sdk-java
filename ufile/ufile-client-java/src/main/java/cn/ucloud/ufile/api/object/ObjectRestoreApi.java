@@ -38,6 +38,12 @@ public class ObjectRestoreApi extends UfileObjectApi<BaseObjectResponseBean> {
      * Bucket空间名称
      */
     private String bucketName;
+    
+    /**
+     * Optional
+     * STS 临时授权 SecurityToken
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -82,6 +88,17 @@ public class ObjectRestoreApi extends UfileObjectApi<BaseObjectResponseBean> {
         this.authOptionalData = authOptionalData;
         return this;
     }
+    
+    /**
+     * 使用STS密钥签名
+     *
+     * @param securityToken STS token
+     * @return {@link ObjectRestoreApi}
+     */
+    public ObjectRestoreApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     @Override
     protected void prepareData() throws UfileClientException {
@@ -93,15 +110,21 @@ public class ObjectRestoreApi extends UfileObjectApi<BaseObjectResponseBean> {
                 contentType, "", date).setOptional(authOptionalData));
 
 
-        call = new PutJsonRequestBuilder()
+        PutJsonRequestBuilder builder = (PutJsonRequestBuilder) new PutJsonRequestBuilder()
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .baseUrl(generateFinalHost(bucketName, keyName_tmp) + "?restore")
                 .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
-                .addHeader("authorization", authorization)
-                .build(httpClient.getOkHttpClient());
+                .addHeader("authorization", authorization);
+                
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+        
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

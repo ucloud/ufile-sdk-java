@@ -70,6 +70,11 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
      * 流写入的buffer大小，Default = 256 KB
      */
     private int bufferSize = UfileConstants.DEFAULT_BUFFER_SIZE;
+    
+    /**
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -109,6 +114,17 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
         this.bucketName = bucketName;
         this.keyName = keyName;
         this.position = position;
+        return this;
+    }
+
+    /**
+     * 设置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link AppendObjectApi}
+     */
+    public AppendObjectApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
         return this;
     }
 
@@ -188,6 +204,10 @@ public class AppendObjectApi extends UfileObjectApi<AppendObjectResultBean> {
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
+        }
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
         }
 
         String authorization = authorizer.authorization((ObjectOptAuthParam) new ObjectOptAuthParam(HttpMethod.PUT, bucketName, keyName_tmp,

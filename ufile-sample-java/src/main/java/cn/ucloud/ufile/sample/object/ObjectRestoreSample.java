@@ -15,12 +15,15 @@ public class ObjectRestoreSample {
     private static final String TAG = "ObjectRestoreSample";
     private static ObjectConfig config = new ObjectConfig("cn-sh2", "ufileos.com");
 
+
     public static void main(String[] args) {
         String keyName = "";
         String bucketName = "";
+        String securityToken = Constants.SECURITY_TOKEN;
         try {
             BaseObjectResponseBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                     .objectRestore(keyName, bucketName)
+                    .withSecurityToken(securityToken)
                     .execute();    //同步调用，如果要用异步调用，请用 executeAsync(...)
             JLog.D(TAG, String.format("[res] = %s", (response == null ? "null" : response.toString())));
         } catch (Exception e) {

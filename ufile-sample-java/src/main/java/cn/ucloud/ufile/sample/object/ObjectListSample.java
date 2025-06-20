@@ -70,10 +70,12 @@ public class ObjectListSample {
     public static void execute_list_all(String bucketName) {
         try {
             String nextMarker = "";
+            String securityToken = Constants.SECURITY_TOKEN;
             do {
                 ObjectListBean response = UfileClient.object(Constants.OBJECT_AUTHORIZER, config)
                         .objectList(bucketName)
                         .withMarker(nextMarker)
+                        .withSecurityToken(securityToken)
                         .dataLimit(100)
                         .execute();
                 //遍历结果

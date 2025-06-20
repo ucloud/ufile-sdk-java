@@ -2,6 +2,7 @@ package cn.ucloud.ufile.api.object;
 
 import cn.ucloud.ufile.auth.ObjectAuthorizer;
 import cn.ucloud.ufile.auth.ObjectOptAuthParam;
+import cn.ucloud.ufile.auth.UfileAuthorizationException;
 import cn.ucloud.ufile.bean.ObjectListBean;
 import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileParamException;
@@ -40,12 +41,24 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
      * 分页数据上限，Default = 20
      */
     private Integer limit;
+    
+    /**
+     * Optional
+     * 目录分隔符
+     */
+    private String delimiter;
 
     /**
      * Required
      * Bucket空间名称
      */
     private String bucketName;
+
+    /**
+     * Optional
+     * 安全令牌（STS临时凭证）
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -101,6 +114,28 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
         this.limit = limit;
         return this;
     }
+    
+    /**
+     * 配置目录分隔符
+     *
+     * @param delimiter 目录分隔符
+     * @return {@link ObjectListApi}
+     */
+    public ObjectListApi withDelimiter(String delimiter) {
+        this.delimiter = delimiter;
+        return this;
+    }
+
+    /**
+     * 配置安全令牌（STS临时凭证）
+     *
+     * @param securityToken 安全令牌
+     * @return {@link ObjectListApi}
+     */
+    public ObjectListApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     /**
      * 配置签名可选参数
@@ -123,6 +158,8 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
             query.add(new Parameter<>("marker", marker));
         if (limit != null)
             query.add(new Parameter<>("limit", String.valueOf(limit.intValue())));
+        if (delimiter != null)
+            query.add(new Parameter<>("delimiter", delimiter));
 
         contentType = "application/json; charset=utf-8";
         String date = dateFormat.format(new Date(System.currentTimeMillis()));
@@ -131,14 +168,20 @@ public class ObjectListApi extends UfileObjectApi<ObjectListBean> {
                 contentType, "", date).setOptional(authOptionalData));
 
         GetRequestBuilder builder = new GetRequestBuilder();
-        call = builder.baseUrl(generateFinalHost(bucketName, "") + "?list&" + builder.generateUrlQuery(query))
+        builder.baseUrl(generateFinalHost(bucketName, "") + "?list&" + builder.generateUrlQuery(query))
                 .setConnTimeOut(connTimeOut).setReadTimeOut(readTimeOut).setWriteTimeOut(writeTimeOut)
                 .header(headers)
                 .addHeader("Content-Type", contentType)
                 .addHeader("Accpet", "*/*")
                 .addHeader("Date", date)
-                .addHeader("authorization", authorization)
-                .build(httpClient.getOkHttpClient());
+                .addHeader("authorization", authorization);
+                
+
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addHeader("SecurityToken", securityToken);
+        }
+                
+        call = builder.build(httpClient.getOkHttpClient());
     }
 
     @Override

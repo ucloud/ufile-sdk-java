@@ -59,6 +59,12 @@ public class GenerateObjectPrivateUrlApi {
      * 图片处理服务
      */
     protected String iopCmd;
+    
+    /**
+     * Optional
+     * STS 临时授权 SecurityToken
+     */
+    private String securityToken;
 
     /**
      * 构造方法
@@ -121,6 +127,17 @@ public class GenerateObjectPrivateUrlApi {
         this.authOptionalData = authOptionalData;
         return this;
     }
+    
+    /**
+     * 使用STS密钥签名
+     *
+     * @param securityToken STS token
+     * @return {@link GenerateObjectPrivateUrlApi}
+     */
+    public GenerateObjectPrivateUrlApi withSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
+        return this;
+    }
 
     /**
      * 生成下载URL
@@ -144,6 +161,11 @@ public class GenerateObjectPrivateUrlApi {
         builder.addParam(new Parameter("UCloudPublicKey", authorizer.getPublicKey()))
                 .addParam(new Parameter("Signature", signature))
                 .addParam(new Parameter("Expires", String.valueOf(expiresTime)));
+                
+        // Add security token if provided
+        if (securityToken != null && !securityToken.isEmpty()) {
+            builder.addParam(new Parameter("SecurityToken", securityToken));
+        }
 
         if (attachmentFileName != null && !attachmentFileName.isEmpty()) {
             try {
