@@ -41,6 +41,11 @@ public class Constants {
     /**
      * 本地Object相关API的签名器
      * 请修改下面的公私钥
+     *
+     * 使用方式：
+     * 1. 普通授权：填写 UCloud 账号的 API 公私钥
+     * 2. STS临时授权：填写 STS 返回的临时 AccessKeyId 和 AccessKeySecret，
+     *    并同时配置下方的 SECURITY_TOKEN
      */
     public static final ObjectAuthorization OBJECT_AUTHORIZER = new UfileObjectLocalAuthorization(
             "UcloudPublicKey",

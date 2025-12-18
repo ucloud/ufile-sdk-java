@@ -49,13 +49,15 @@ public abstract class UfileObjectApi<T> extends UfileApi<T> {
 
         try {
             if (objectConfig.isCustomDomain()) {
-                keyName = Encoder.urlEncode(keyName, "UTF-8");
+                // Encode object key for URL path, but keep '/' separators.
+                keyName = Encoder.urlEncodePath(keyName, "UTF-8");
                 host = String.format("%s/%s", objectConfig.getCustomHost(), keyName);
             } else {
                 bucketName = Encoder.urlEncode(bucketName, "UTF-8");
                 String region = Encoder.urlEncode(objectConfig.getRegion(), "UTF-8");
                 String proxySuffix = Encoder.urlEncode(objectConfig.getProxySuffix(), "UTF-8");
-                keyName = Encoder.urlEncode(keyName, "UTF-8");
+                // Encode object key for URL path, but keep '/' separators.
+                keyName = Encoder.urlEncodePath(keyName, "UTF-8");
                 host = new StringBuilder(objectConfig.getProtocol().getValue())
                         .append(String.format("%s.%s.%s/%s", bucketName, region, proxySuffix, keyName)).toString();
             }

@@ -14,6 +14,16 @@ public class ObjectDownloadAuthParam extends ObjectBaseAuthParam {
      */
     private long expires;
 
+    /**
+     * Optional: for presigned PUT/POST, some server implementations include Content-Type in signature.
+     */
+    private String contentType;
+
+    /**
+     * Optional: for presigned PUT/POST, some server implementations include Content-MD5 in signature.
+     */
+    private String contentMD5;
+
     public ObjectDownloadAuthParam(HttpMethod method, String bucket, String keyName) {
         this(method, bucket, keyName, -1);
     }
@@ -29,6 +39,24 @@ public class ObjectDownloadAuthParam extends ObjectBaseAuthParam {
 
     public ObjectDownloadAuthParam setExpires(long expires) {
         this.expires = expires;
+        return this;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public ObjectDownloadAuthParam setContentType(String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
+
+    public String getContentMD5() {
+        return contentMD5;
+    }
+
+    public ObjectDownloadAuthParam setContentMD5(String contentMD5) {
+        this.contentMD5 = contentMD5;
         return this;
     }
 }

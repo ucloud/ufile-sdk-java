@@ -110,8 +110,10 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
         if (expires <= 0)
             throw new UfileAuthorizationException("Param 'expires' must be > 0!");
 
-        String contentMD5 = "";
-        String contentType = "";
+        String contentMD5 = param.getContentMD5();
+        String contentType = param.getContentType();
+        contentMD5 = contentMD5 == null ? "" : contentMD5;
+        contentType = contentType == null ? "" : contentType;
 
         StringBuffer signData = new StringBuffer();
         signData.append(method.getName() + "\n");
@@ -121,8 +123,8 @@ public final class UfileObjectLocalAuthorization extends ObjectLocalAuthorizatio
         signData.append("/" + bucket);
         signData.append("/" + keyName);
 
-        JLog.D("TEST", "[signData]:" + signData.toString());
+        String signature = signer.signature(privateKey, signData.toString());
 
-        return signer.signature(privateKey, signData.toString());
+        return signature;
     }
 }

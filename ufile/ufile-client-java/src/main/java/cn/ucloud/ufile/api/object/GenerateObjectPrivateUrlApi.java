@@ -59,7 +59,7 @@ public class GenerateObjectPrivateUrlApi {
      * 图片处理服务
      */
     protected String iopCmd;
-    
+
     /**
      * Optional
      * STS 临时授权 SecurityToken
@@ -225,14 +225,20 @@ public class GenerateObjectPrivateUrlApi {
         if (objectConfig == null)
             return null;
 
-        if (objectConfig.isCustomDomain())
+        if (objectConfig.isCustomDomain()) {
+            try {
+                keyName = Encoder.urlEncodePath(keyName, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new UfileClientException("Occur error during URLEncode keyName", e);
+            }
             return String.format("%s/%s", objectConfig.getCustomHost(), keyName);
+        }
 
         try {
             bucketName = Encoder.urlEncode(bucketName, "UTF-8");
             String region = Encoder.urlEncode(objectConfig.getRegion(), "UTF-8");
             String proxySuffix = Encoder.urlEncode(objectConfig.getProxySuffix(), "UTF-8");
-            keyName = Encoder.urlEncode(keyName, "UTF-8");
+            keyName = Encoder.urlEncodePath(keyName, "UTF-8");
             return new StringBuilder(objectConfig.getProtocol().getValue())
                     .append(String.format("%s.%s.%s/%s", bucketName, region, proxySuffix, keyName)).toString();
         } catch (UnsupportedEncodingException e) {

@@ -77,4 +77,30 @@ public class Encoder {
 
         return URLEncoder.encode(src, enc).replace("+", "%20");
     }
+
+    /**
+     * URL-encode a path while preserving '/' separators.
+     *
+     * <p>Note: {@link URLEncoder} is designed for query-string encoding and will encode '/' as "%2F".
+     * For object keys that use '/' as a virtual directory separator, we must keep '/' unescaped in the
+     * request URL path; otherwise signature verification may fail (presigned URL) and some gateways
+     * may reject encoded slashes.</p>
+     */
+    public static String urlEncodePath(String path, String enc) throws UnsupportedEncodingException {
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+
+        // Keep empty segments (split with -1) to preserve leading/trailing '/' if present.
+        String[] parts = path.split("/", -1);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) sb.append('/');
+            String part = parts[i];
+            if (part != null && !part.isEmpty()) {
+                sb.append(urlEncode(part, enc));
+            }
+        }
+        return sb.toString();
+    }
 }
