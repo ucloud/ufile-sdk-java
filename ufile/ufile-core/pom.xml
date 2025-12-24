@@ -6,11 +6,12 @@
     <parent>
         <groupId>cn.ucloud.ufile</groupId>
         <artifactId>ufile</artifactId>
-        <version>2.7.2</version>
+        <version>2.7.5</version>
     </parent>
 
     <artifactId>ufile-core</artifactId>
-    <version>2.7.2</version>
+    <version>2.7.5</version>
+    <name>ufile-core</name>
 
     <dependencies>
         <dependency>

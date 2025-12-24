@@ -91,6 +91,21 @@ public class ObjectApiBuilder {
     }
 
     /**
+     * 生成私有空间对象的上传预签名URL
+     *
+     * @param keyName         目标对象名（上传后的文件名）
+     * @param bucketName      空间名
+     * @param expiresDuration 有效时限 (当前时间开始计算的一个有效时间段, 单位：秒。 eg: 3600 = 1小时有效)
+     * @return {@link GenerateObjectPrivateUploadUrlApi}
+     * @throws UfileSignatureException
+     * @throws UfileRequiredParamNotFoundException
+     * @throws UfileAuthorizationException
+     */
+    public GenerateObjectPrivateUploadUrlApi getUploadUrlToPrivateBucket(String keyName, String bucketName, int expiresDuration) {
+        return new GenerateObjectPrivateUploadUrlApi(authorizer, objectConfig, keyName, bucketName, expiresDuration);
+    }
+
+    /**
      * Get下载文件
      *
      * @param downloadUrl 下载地址

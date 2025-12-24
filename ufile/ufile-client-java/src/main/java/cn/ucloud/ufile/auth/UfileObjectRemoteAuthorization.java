@@ -70,6 +70,10 @@ public final class UfileObjectRemoteAuthorization extends ObjectRemoteAuthorizat
         json.addProperty("bucket", param.getBucket());
         json.addProperty("key", param.getKeyName());
         json.addProperty("expires", param.getExpires());
+        if (param.getContentType() != null)
+            json.addProperty("content_type", param.getContentType());
+        if (param.getContentMD5() != null)
+            json.addProperty("content_md5", param.getContentMD5());
         if (param.getOptional() != null)
             json.addProperty("optional", param.getOptional().toString());
 

@@ -16,10 +16,15 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import javax.net.ssl.SSLHandshakeException;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLPeerUnverifiedException;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.net.SocketTimeoutException;
+import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Map;
@@ -129,6 +134,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
      * 设置安全令牌（STS临时凭证）
      *
      * @param securityToken 安全令牌
+     * @return 返回当前类的实例
      */
     public UfileApi<T> withSecurityToken(String securityToken) {
         this.securityToken = securityToken;
@@ -250,9 +256,7 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
                     call.cancel();
                 } catch (Exception ignored) {}
             }
-            throw new UfileIOException("Occur IOException while sending http request. " +
-                    "The reason may be network timeout, " +
-                    "or the file which you want to upload/download is changed or inexistent", e);
+            throw new UfileIOException(buildIoExceptionMessage(e), e);
         }
     }
 
@@ -281,7 +285,9 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
     @Override
     public void onFailure(Call call, IOException e) {
         if (httpCallback != null)
-            httpCallback.onError(call.request(), new ApiError(ApiError.ErrorType.ERROR_NETWORK_ERROR, e), null);
+            httpCallback.onError(call.request(),
+                    new ApiError(ApiError.ErrorType.ERROR_NETWORK_ERROR, buildIoExceptionMessage(e), e),
+                    null);
     }
 
     @Override
@@ -378,5 +384,79 @@ public abstract class UfileApi<T> implements Callback, ResponseParser<T, UfileEr
         } finally {
             response.body().close();
         }
+    }
+
+    private String buildIoExceptionMessage(IOException e) {
+        String prefix = "Occur IOException while sending http request";
+
+        if (e instanceof SocketTimeoutException) {
+            return prefix + ": network timeout. " + formatRootCause(e);
+        }
+
+        if (isTlsOrCertificateProblem(e)) {
+            return prefix + ": TLS/SSL certificate verification failed " +
+                    "(possible causes: invalid/expired/untrusted certificate, hostname mismatch, " +
+                    "or client truststore/keystore misconfiguration). " + formatRootCause(e);
+        }
+
+        return prefix + ". " + formatRootCause(e);
+    }
+
+    private boolean isTlsOrCertificateProblem(IOException e) {
+        return e instanceof SSLHandshakeException
+                || e instanceof SSLPeerUnverifiedException
+                || e instanceof SSLException
+                || hasCertificateCause(e)
+                || hasTlsCause(e);
+    }
+
+    private boolean hasCertificateCause(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof CertificateException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private boolean hasTlsCause(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (current instanceof SSLHandshakeException
+                    || current instanceof SSLPeerUnverifiedException
+                    || current instanceof SSLException) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private String formatRootCause(Throwable throwable) {
+        StringBuilder sb = new StringBuilder();
+        
+        // 打印原始异常
+        sb.append(throwable.getClass().getName())
+          .append(": ")
+          .append(throwable.getMessage() != null ? throwable.getMessage() : "(no message)");
+        
+        // 如果有 cause 链，也打印 root cause
+        Throwable root = throwable;
+        while (root.getCause() != null && root.getCause() != root) {
+            root = root.getCause();
+        }
+        
+        // 只有当 root cause 和原始异常不同时才额外打印
+        if (root != throwable) {
+            sb.append(" [Root cause: ")
+              .append(root.getClass().getName())
+              .append(": ")
+              .append(root.getMessage() != null ? root.getMessage() : "(no message)")
+              .append("]");
+        }
+        
+        return sb.toString();
     }
 }
